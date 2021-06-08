@@ -75,11 +75,12 @@ q = length(freqs);
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
 
 % eig(full(Sys.A))
+%%
 
 % A Low-Gain 'Minimal' Robust Controller
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+dimX = size(Sys.A,1);
+Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
 % Pvals = cell(1,length(freqs));
 % for ind = 1:length(freqs)
@@ -106,22 +107,22 @@ L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
 
 % ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
 % ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement',1);
-ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
 % ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'poleplacement',1);
 
 % A reduced order observer-based robust controller
 % Choose alpha1,alpha2 >= 0, ... add these
-% alpha1 = 0;
-% alpha2 = 0.95;
-% Q0 = ; G1: koko
-% Q1 = ; A: koko
-% Q2 = ; A:koko
-% R1 = eye(2);
-% R2 = eye(2);
-% ROMorder = 12;
-% ContrSys = ConstrContrObsBasedROM(freqs,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+alpha1 = 1;
+alpha2 = 0.5;
+Q0 = eye(IMdim(freqs,size(Sys.C,1))); %G1: koko = 
+Q1 = eye(size(Sys.A,1)); %A: koko
+Q2 = eye(size(Sys.A,1)); %A:koko
+R1 = eye(2);
+R2 = eye(2);
+ROMorder = 3;
+ContrSys = ConstrContrObsBasedROM(freqsReal,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
-%% Closed-loop simulation
+% % Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
