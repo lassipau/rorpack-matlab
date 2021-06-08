@@ -3,7 +3,7 @@
 % Approximation with a Finite differences scheme 
 
 % Case 1: Neumann boundary control at x=0, regulated output y(t) and a 
-% Neumann boundary disturbance at x=1
+% Dirichlet boundary condition at x=1
 % Unstable system, stabilization by stabilizing the only unstable
 % eigenvalue =0
 
@@ -14,8 +14,8 @@ N = 50;
 % Initial state of the plant
 %x0fun = @(x) zeros(size(x));
 x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
-% x0fun = @(x) 3*(1-x)+x;
-% x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
+%x0fun = @(x) 3*(1-x)+x;
+%x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x) 1*(1-x).^2.*(3-2*(1-x))-1;
@@ -24,7 +24,6 @@ x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x) .2*x.^2.*(3-2*x)-.5;
 
 [x0,Sys,spgrid,BCtype] = Constr1DHeatCase2(1,x0fun,N);
-
 
 
 % Model = ss(Sys.A,Sys.B,Sys.C,Sys.D);
@@ -44,9 +43,9 @@ x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %wdist = @(t) zeros(size(t));
 
 % Case 1:
-yref = @(t) sin(2*t);%+.2*cos(3*t);
+yref = @(t) sin(2*t) + .5*cos(3*t);
 wdist = @(t) zeros(size(t));
-wdist = @(t) sin(6*t);
+% wdist = @(t) sin(6*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -58,7 +57,7 @@ wdist = @(t) sin(6*t);
 
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqsReal = [1 2 3 6];
+freqsReal = [0 1 2 3 6];
 freqs = 1i*freqsReal;
 
 
@@ -91,18 +90,20 @@ K = 7*[1, zeros(1,N-1)];
 % PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
 
 L = -7*[2*N;zeros(N-1,1)];
-%  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR');
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement');
-
+ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR',0.5);
+% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement',0.5);
+% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'LQR',0.5);
+% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'poleplacement',0.5);
 
 %% Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
-PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
+figure(1)
+PlotEigs(CLSys.Ae,[-20 .3 -6 6])
 %%
 
 
@@ -115,34 +116,28 @@ tgrid = linspace(0,Tend,300);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
-figure(1)
-subplot(2,1,1)
-hold off
-cla
-hold on
-plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
-plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
-title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
-set(gca,'xgrid','off','tickdir','out','box','off')
-subplot(2,1,2)
-plot(tgrid,CLsim.error,'Linewidth',2);
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-title('Regulation error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
-set(gcf,'color',1/255*[252 247 255])
+% Choose whther or not to print titles of the figures
+PrintFigureTitles = true;
 
-
+figure(2)
+subplot(3,1,1)
+plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+subplot(3,1,2)
+plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
 %%
 
 
-figure(2)
+figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
 %%
-figure(3)
+% figure(4)
 % No movie recording
-[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
@@ -152,9 +147,10 @@ figure(3)
 %%
 
 
-figure(4)
-tt = linspace(0,16,500)
+figure(5)
+tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
+title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
 
@@ -168,9 +164,9 @@ set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
 % AnimExport = VideoWriter('Case1-animation.avi','Uncompressed AVI');
 % AnimExport = VideoWriter('Case2-animation.avi','Uncompressed AVI');
-AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
+% AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
 
-AnimExport.FrameRate = 15;
-open(AnimExport);
-writeVideo(AnimExport,MovAnim);
-close(AnimExport);
+% AnimExport.FrameRate = 15;
+% open(AnimExport);
+% writeVideo(AnimExport,MovAnim);
+% close(AnimExport);

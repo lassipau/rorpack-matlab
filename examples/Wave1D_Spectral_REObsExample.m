@@ -19,12 +19,12 @@ wd0fun = @(x) zeros(size(x));
 %x0fun = @(x,y) .5*(1-x).^2.*(3-2*(1-x))-.5;
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
-
+tic
 % The example uses the same constructor as another Wave example, but now
 % with only one output (we only use the velocity measurement, for simplicity)
 [x0,Sys,phin] = Constr1DWave2(w0fun,wd0fun,N);
 A = Sys.A;
-
+toc
 % % Debugging
 % B = Sys.B;
 % C = Sys.C;
@@ -113,8 +113,8 @@ yref = @(t) 3*sin(1*t)+4*cos(2*t);
 % yref = @(t) sin(pi/4*t)-cos(pi/4*t);
 % yref = @(t) zeros(size(t));
 wdist = @(t) zeros(size(t));
-wdist = @(t) 3*sin(4*t);
-wdist = @(t) .5*cos(7*t)+.5*cos(8*t);
+% wdist = @(t) 3*sin(4*t);
+% wdist = @(t) .5*cos(7*t)+.5*cos(8*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -183,13 +183,13 @@ PlotEigs(Sys.A+L*Sys.C,[-.4, .01, NaN, NaN])
 
 %%
 
-gammafun = @(w) -(kappa+ell)*cos(w) + 1i*(-sin(w)*(kappa*ell+1));
+%gammafun = @(w) -(kappa+ell)*cos(w) + 1i*(-sin(w)*(kappa*ell+1));
 gammafun = @(w) (cos(w).*(-(ell+kappa).*w.^2+k_m*ell)-k_m*ell)./w.^2 + 1i*sin(w).*(k_m-(ell*kappa+1).*w.^2)./w.^2;
 
-
+tic
 [ContrSys,K_S] = ConstrContrREObsReal(freqsReal,Sys,K_S,L,gammafun);
 % [ContrSys,K_S] = ConstrContrREObsReal(freqsReal,Sys,K_S,L); % gammafun obtained using the numerical approximation
-
+toc
 %
 % eig(full(ContrSys.G1))
 
@@ -197,9 +197,9 @@ gammafun = @(w) (cos(w).*(-(ell+kappa).*w.^2+k_m*ell)-k_m*ell)./w.^2 + 1i*sin(w)
 
 % Sys.C = [Sys.C;Sys.Cm];
 % Sys.D = [Sys.D;Sys.Dm];
-
+tic
 CLSys = ConstrCLSys(Sys,ContrSys);
-
+toc
 stabmarg = CLStabMargin(CLSys)
 
 %%
@@ -209,25 +209,13 @@ Tend = 28;
 tgrid = linspace(0,Tend,300);
 
 
-
+tic
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
-
+toc
 
 
 figure(1)
-subplot(2,1,1)
-hold off
-cla
-hold on
-plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
-plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
-title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
-set(gca,'xgrid','off','tickdir','out','box','off')
-subplot(2,1,2)
-plot(tgrid,CLsim.error,'Linewidth',2);
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-title('Tracking  error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
-%set(gcf,'color',1/255*[252 247 255])
+plotBasics(tgrid,yref,CLsim)
 
 % figure(2)
 % q = length(freqs);
@@ -262,10 +250,10 @@ set(gca,'ztick',-8:4:8);
 %%
 
 
-figure(2)
-colormap jet
+% figure(2)
+% colormap jet
 % No movie recording
-[~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
@@ -274,11 +262,11 @@ colormap jet
 
 figure(3)
 colormap jet
-%PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-PlotHeat2DSurf(x0,spgrid,zlims)
+PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
+%PlotHeat2DSurf(x0,spgrid,zlims)
 
 figure(4)
-tt = linspace(0,16,500)
+tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
@@ -293,28 +281,28 @@ set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
 % AnimExport = VideoWriter('Case1-animation.avi','Uncompressed AVI');
 % AnimExport = VideoWriter('Case2-animation.avi','Uncompressed AVI');
-AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
+% AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
 
-AnimExport.FrameRate = 15;
-open(AnimExport);
-writeVideo(AnimExport,MovAnim);
-close(AnimExport);
+% AnimExport.FrameRate = 15;
+% open(AnimExport);
+% writeVideo(AnimExport,MovAnim);
+% close(AnimExport);
 
 
 %%
 
 % K21=K21(:);
-phinvals = phin(spgrid,(0:(N-1)).'); 
+% phinvals = phin(spgrid,(0:(N-1)).'); 
 % K21(1:2:end)*phinvals;
-plot(spgrid,K21(2:2:end)*phinvals);
+% plot(spgrid,K21(2:2:end)*phinvals);
 
 
-A = Sys.A;
-B = Sys.B;
-C = Sys.C;
-C2 = Sys.C2;
+% A = Sys.A;
+% B = Sys.B;
+% C = Sys.C;
+% C2 = Sys.C2;
 
-max(max(real(eig(full(A+B*K21)))))
-max(max(real(eig(full(A-0.75*B*(C2+C))))))
-max(max(real(eig(full(A-75*B*C)))))
+% max(max(real(eig(full(A+B*K21)))))
+% max(max(real(eig(full(A-0.75*B*(C2+C))))))
+% max(max(real(eig(full(A-75*B*C)))))
 

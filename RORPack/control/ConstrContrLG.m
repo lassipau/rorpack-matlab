@@ -24,8 +24,8 @@ for ind = 1:q
 
   ContrSys.G1(indran,indran) = freqs(ind)*eye(dimY);
   
-%  ContrSys.K(:,indran) = pinv(Pvals{ind});
-  ContrSys.K(:,indran) = negsqrt(Pvals{ind}); % experimental: "optimal" choice of K_0?
+  ContrSys.K(:,indran) = pinv(Pvals{ind});
+  % ContrSys.K(:,indran) = negsqrt(Pvals{ind}); % experimental: "optimal" choice of K_0?
 end
 
 

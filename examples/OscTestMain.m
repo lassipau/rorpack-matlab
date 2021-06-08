@@ -18,8 +18,8 @@ Sys.Bd = [1;0];
 
 % Case 1:
 yref = @(t) sin(2*t)+.2*cos(3*t);
-wdist = @(t) zeros(size(t));
- wdist = @(t) 1*sin(6*t);
+%wdist = @(t) zeros(size(t));
+wdist = @(t) 1*sin(6*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -69,27 +69,15 @@ tgrid = linspace(0,Tend,300);
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
 figure(1)
-subplot(2,1,1)
-hold off
-cla
-hold on
-plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
-plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
-title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
-set(gca,'xgrid','off','tickdir','out','box','off')
-subplot(2,1,2)
-plot(tgrid,CLsim.error,'Linewidth',2);
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-title('Regulation error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
-set(gcf,'color',1/255*[252 247 255])
+plotBasics(tgrid,yref,CLsim)
 
 %%
 
 
-% figure(2)
-% colormap jet
+figure(2)
+colormap jet
 % % No movie recording
-% % [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+[~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
 % 
 % % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);

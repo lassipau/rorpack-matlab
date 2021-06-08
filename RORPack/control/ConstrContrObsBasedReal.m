@@ -26,7 +26,7 @@ dimY = size(C,1);
 dimU = size(B,2);
 
 if dimY ~= dimU
-  error('The has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
+  error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
 end
 
 q = length(freqs);
@@ -34,11 +34,11 @@ q = length(freqs);
 
 if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
 
-B1 = zeros(dimZ,dimY);
-if freqs(1)==0
-  offset = 1;
-  B1(1:dimY,:) = PKvals;
-end
+%B1 = zeros(dimZ,dimY);
+%if freqs(1)==0
+%  offset = 1;
+%  B1(1:dimY,:) = PKvals;
+%end
 
 
 PKappr = @(s) (C+D*K21)*((s*eye(dimX)-(A+B*K21))\B)+D;

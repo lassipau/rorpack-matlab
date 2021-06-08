@@ -34,7 +34,7 @@ A(1,2) = cval*2/h^2;
 
 
 % Neumann boundary input at x=0, sign is based on the _outwards_ normal derivative
-B = sparse([2/h;zeros(N-1,1)]); 
+B = sparse([-2/h;zeros(N-1,1)]); 
 
 Bd = B; % Neumann boundary disturbance at x=0
 

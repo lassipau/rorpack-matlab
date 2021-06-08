@@ -210,12 +210,12 @@ record = 0;
 
 % AnimExport = VideoWriter('Case1-animation.avi','Uncompressed AVI');
 % AnimExport = VideoWriter('Case2-animation.avi','Uncompressed AVI');
-AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
+% AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
 
-AnimExport.FrameRate = 15;
-open(AnimExport);
-writeVideo(AnimExport,MovAnim);
-close(AnimExport);
+% AnimExport.FrameRate = 15;
+% open(AnimExport);
+% writeVideo(AnimExport,MovAnim);
+% close(AnimExport);
 
 
 %%

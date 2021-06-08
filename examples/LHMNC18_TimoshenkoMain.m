@@ -129,7 +129,7 @@ set(gca,'ztick',-8:4:8);
 figure(2)
 colormap jet
 % No movie recording
-% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+[~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
@@ -142,7 +142,7 @@ colormap jet
 PlotHeat2DSurf(x0,spgrid,zlims)
 
 figure(4)
-tt = linspace(0,16,500)
+tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
@@ -157,9 +157,9 @@ set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
 % AnimExport = VideoWriter('Case1-animation.avi','Uncompressed AVI');
 % AnimExport = VideoWriter('Case2-animation.avi','Uncompressed AVI');
-AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
+% AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
 
-AnimExport.FrameRate = 15;
-open(AnimExport);
-writeVideo(AnimExport,MovAnim);
-close(AnimExport);
+% AnimExport.FrameRate = 15;
+% open(AnimExport);
+% writeVideo(AnimExport,MovAnim);
+% close(AnimExport);

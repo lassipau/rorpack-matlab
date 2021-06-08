@@ -11,7 +11,7 @@ N = 60;
 
 % Initial state of the plant
 w0fun = @(x) zeros(size(x));
-w0fun = @(x) 1+cos(3*pi*x)+cos(6*x);
+%w0fun = @(x) 1+cos(3*pi*x)+cos(6*x);
 wd0fun = @(x) zeros(size(x));
 %x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
 % x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
@@ -30,14 +30,24 @@ wd0fun = @(x) zeros(size(x));
 
 %wdist = @(t) ones(size(t));
 %wdist = @(t) sin(t);
-%wdist = @(t) zeros(size(t));
+wdist = @(t) zeros(size(t));
+
+% Case from Python RORPack:
+% Begin by defining the function on a single period 0<t<2
+% A nonsmooth triangle signal
+yref1per = @(t) (2.*t-1).*(t>=0).*(t<=1)+(3-2.*t).*(t>1).*(t<2);
+% The constant part of the signal cannot be tracked due to the second order
+% zero of the plant at zero.
+% We therefore normalize yref(t) to have average zero on [0,2]
+yr_ave = integral(yref1per,0,2);
+yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
 
 % Case 1:
-yref = @(t) .5*sin(2*t)+.5*cos(3*t);
-yref = @(t) sin(pi/2*t)-2*cos(pi/2*t);
+% yref = @(t) .5*sin(2*t)+.5*cos(3*t);
+%yref = @(t) sin(pi/2*t)-2*cos(pi/2*t);
 % yref = @(t) zeros(size(t));
-wdist = @(t) zeros(size(t));
-wdist = @(t) sin(2*pi*t);
+%wdist = @(t) zeros(size(t));
+%wdist = @(t) sin(2*pi*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -50,7 +60,7 @@ wdist = @(t) sin(2*pi*t);
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
 
-freqsReal = [1 2 3 4];
+%freqsReal = [1 2 3 4];
 freqsReal = [pi/2,pi,2*pi,3*pi,4*pi];
 freqs = 1i*freqsReal;
 
@@ -95,10 +105,8 @@ ell = .8;
 % K_S = -kappa*(Sys.B)'+K0;
 % K_S = -kappa*Kinf+K0;
 K_S = -kappa*Kinf;
-PlotEigs(Sys.A+Sys.B*K_S,[-1.5, 0.1, NaN, NaN])
+% PlotEigs(Sys.A+Sys.B*K_S,[-1.5, 0.1, NaN, NaN])
  
-
-
 
 % L = [zeros(dimX,1),-ell*(Sys.Cm)'+L0];
 % L = [L0,-ell*(Sys.Cm)'];
@@ -113,10 +121,9 @@ L = -ell*Linf;
 
 
 % [ContrSys,K21] = ConstrContrObsBasedReal(freqsReal,Sys,K_S,L,'poleplacement',3);
-[ContrSys,K21] = ConstrContrObsBasedReal(freqsReal,Sys,K_S,L,'LQR',1);
-
-% epsgain
-
+[ContrSys,K21] = ConstrContrObsBasedReal(freqsReal,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = ConstrContrDualObsBasedReal(freqsReal,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = ConstrContrDualObsBasedReal(freqsReal,Sys,K_S,L,'poleplacement',3);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
@@ -125,7 +132,7 @@ stabmarg = CLStabMargin(CLSys)
 
 %%
 
-w0fun = @(x) zeros(size(x));
+% w0fun = @(x) zeros(size(x));
 % w0fun = @(x) 1+cos(3*pi*x)+cos(6*x);
 % w0fun = @(x) -cos(2*pi*x);
 w0fun = @(x) 30*x.^2.*(1-x).^2-1;
@@ -150,20 +157,14 @@ tgrid = linspace(0,Tend,200);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+% Choose whther or not to print titles of the figures
+PrintFigureTitles = true;
+
 figure(1)
 subplot(2,1,1)
-hold off
-cla
-hold on
-plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
-plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
-title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
-set(gca,'xgrid','off','tickdir','out','box','off')
+plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(2,1,2)
-plot(tgrid,CLsim.error,'Linewidth',2);
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-title('Tracking  error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
-%set(gcf,'color',1/255*[252 247 255])
+plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 
 figure(2)
 q = length(freqs);
@@ -180,8 +181,7 @@ plot(tgrid,obserror,'Linewidth',2);
 figure(3)
 colormap jet
 %PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-spgrid = linspace(0,1,100);
-
+spgrid = linspace(0,1,N);
 Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 % Plot1DWaveSurf(CLsim.xesol(1:2*N,:)-CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-9 9])
 % Plot1DWaveSurf(CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-4 4])
@@ -196,17 +196,17 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 %% Animation
 
 
-figure(2)
-colormap jet
+% figure(4)
+% colormap jet
 % No movie recording
-% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+% [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
 
-Tpause = 0.05;
-record = 0;
-[MovAnim,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,Tpause,record)
+% Tpause = 0.05;
+% record = 0;
+% [MovAnim,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,Tpause,record)
 
 %movie(MovAnim)
 
@@ -231,28 +231,28 @@ record = 0;
 
 % AnimExport = VideoWriter('Case1-animation.avi','Uncompressed AVI');
 % AnimExport = VideoWriter('Case2-animation.avi','Uncompressed AVI');
-AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
+% AnimExport = VideoWriter('Case3-animation.avi','Uncompressed AVI');
 
-AnimExport.FrameRate = 15;
-open(AnimExport);
-writeVideo(AnimExport,MovAnim);
-close(AnimExport);
+% AnimExport.FrameRate = 15;
+% open(AnimExport);
+% writeVideo(AnimExport,MovAnim);
+% close(AnimExport);
 
 
 %%
 
 % K21=K21(:);
-phinvals = phin(spgrid,(0:(N-1)).'); 
+% phinvals = phin(spgrid,(0:(N-1)).'); 
 % K21(1:2:end)*phinvals;
-plot(spgrid,K21(2:2:end)*phinvals);
+% plot(spgrid,K21(2:2:end)*phinvals);
 
 
-A = Sys.A;
-B = Sys.B;
-C = Sys.C;
-C2 = Sys.C2;
+% A = Sys.A;
+% B = Sys.B;
+% C = Sys.C;
+% C2 = Sys.C2;
 
-max(max(real(eig(full(A+B*K21)))))
-max(max(real(eig(full(A-0.75*B*(C2+C))))))
-max(max(real(eig(full(A-75*B*C)))))
+% max(max(real(eig(full(A+B*K21)))))
+% max(max(real(eig(full(A-0.75*B*(C2+C))))))
+% max(max(real(eig(full(A-75*B*C)))))
 

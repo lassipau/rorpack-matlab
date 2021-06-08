@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase2(cval,x0fun,N)
+function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase4(cval,x0fun,N)
 % [x0,Sys,spgrid] = Constr1DHeatCase2(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
