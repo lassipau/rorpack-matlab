@@ -5,3 +5,6 @@ function stabmarg = CLStabMargin(CLSys)
 % Negative stability margin means the CL system is unstable
 
 stabmarg = -max(real(eig(full(CLSys.Ae))));
+if stabmarg < 0
+    warning("Stability margin < 0 indicates the system is unstable.")
+end
