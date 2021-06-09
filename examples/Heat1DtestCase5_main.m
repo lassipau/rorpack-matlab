@@ -107,18 +107,25 @@ Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',1);
 
 % A reduced order observer-based robust controller
-% Choose alpha1,alpha2 >= 0, ... add these
+% DISCLAIMER: This is not directly supported by the theoretical results in
+% Paunonen-Phan 2020 due to the control at the boundaries!
+%
+% The construction of the controller uses a lower-dimensional approximation
+% of the heat system:
+Nlo = 50;
+[~,Sys_Nlo,~,~] = Constr1DHeatCase5(x0fun,Nlo);
 alpha1 = 1;
 alpha2 = 0.5;
-Q0 = eye(IMdim(freqs,size(Sys.C,1)));
-Q1 = eye(size(Sys.A,1));
-Q2 = eye(size(Sys.A,1));
-R1 = eye(2);
-R2 = eye(2);
+Q0 = eye(IMdim(freqs,size(Sys_Nlo.C,1))); % Size = dimension of the IM 
+Q1 = eye(size(Sys_Nlo.A,1)); % Size = dim(X)
+Q2 = eye(size(Sys_Nlo.A,1)); % Size = dim(X)
+R1 = eye(size(Sys_Nlo.C,1)); % Size = dim(Y)
+R2 = eye(size(Sys_Nlo.B,2)); % Size = dim(U)
 ROMorder = 3;
-ContrSys = ConstrContrObsBasedROM(freqs,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
-% % Closed-loop simulation
+ContrSys = ConstrContrObsBasedROM(freqs,Sys_Nlo,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+
+%% Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
@@ -156,9 +163,9 @@ colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
 %%
-% figure(4)
+figure(4)
 % No movie recording
-% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);

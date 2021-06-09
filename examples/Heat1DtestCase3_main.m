@@ -104,6 +104,23 @@ L = -10*Sys.C';
 ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',1);
 % ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',1);
 
+% A reduced order observer-based robust controller
+%
+% The construction of the controller uses a lower-dimensional approximation
+% of the heat system:
+Nlo = 50;
+[~,Sys_Nlo,~,~] = Constr1DHeatCase3(1,x0fun,Nlo,IB1,IB2,IC1,IC2);
+alpha1 = 1;
+alpha2 = 0.5;
+Q0 = eye(IMdim(freqs,size(Sys_Nlo.C,1))); % Size = dimension of the IM 
+Q1 = eye(size(Sys_Nlo.A,1)); % Size = dim(X)
+Q2 = eye(size(Sys_Nlo.A,1)); % Size = dim(X)
+R1 = eye(size(Sys_Nlo.C,1)); % Size = dim(Y)
+R2 = eye(size(Sys_Nlo.B,2)); % Size = dim(U)
+ROMorder = 3;
+
+ContrSys = ConstrContrObsBasedROM(freqs,Sys_Nlo,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+
 
 %% Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);
@@ -142,9 +159,9 @@ colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
 %%
-% figure(4)
+figure(4)
 % No movie recording
-% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
