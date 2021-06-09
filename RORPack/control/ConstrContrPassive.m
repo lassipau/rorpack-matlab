@@ -1,4 +1,4 @@
-function [ContrSys,epsgain] = ConstrContrPassiveReal(freqs,Pvals,epsgain,Sys)
+function [ContrSys,epsgain] = ConstrContrPassive(freqs,Pvals,epsgain,Sys)
 % ContrSys = ConstrContrLGReal(freqs,dimY,Pvals)
 %
 % Construct a passive simple controller for stable systems, in real form
@@ -18,7 +18,7 @@ dimY = size(Pvals{1},1);
 dimU = size(Pvals{1},2);
 q = length(freqs);
 
-if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
+dimZ = IMdim(freqs,dimY);
   
   
 ContrSys.G1 = zeros(dimZ);
@@ -30,7 +30,7 @@ ContrSys.K = zeros(dimU,dimZ);
 
 if freqs(1)==0
   zoffset = dimY; 
-%   ContrSys.K(:,1:dimY) = eye(dimY);
+  ContrSys.K(:,1:dimY) = eye(dimY);
 %   ContrSys.K(:,1:dimY) = negsqrt(Pvals{1}); % experimental: "optimal" choice of K_0?
   nzfreqs = freqs(2:end);
 else

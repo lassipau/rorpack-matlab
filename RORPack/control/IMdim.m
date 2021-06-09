@@ -14,4 +14,3 @@ if freqs(1) == 0
 else
     dimZ0 = 2*length(freqs)*p;
 end
-    

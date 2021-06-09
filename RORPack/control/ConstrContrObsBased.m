@@ -1,4 +1,4 @@
-function [ContrSys,K21] = ConstrContrObsBasedReal(freqs,Sys,K21,L,IMstabtype,IMstabmarg)
+function [ContrSys,K21] = ConstrContrObsBased(freqs,Sys,K21,L,IMstabtype,IMstabmarg)
 % ContrSys = ConstrContrObsBasedReal(freqs,Pvals,Sys)
 %
 % Construct an observer-based robust controller for systems with the same number of 
@@ -32,7 +32,7 @@ end
 q = length(freqs);
 
 
-if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
+%if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
 
 %B1 = zeros(dimZ,dimY);
 %if freqs(1)==0
@@ -50,7 +50,7 @@ end
 
 
 % Construct the internal model
-[G1,G2] = ConstrIMReal(freqs,dimY);
+[G1,G2] = ConstrIM(freqs,dimY);
 
 dimZ = size(G1,1);
 

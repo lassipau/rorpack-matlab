@@ -22,7 +22,7 @@ wd0fun = @(x) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[x0,Sys,phin,Kinf,Linf] = Constr1DWave(w0fun,wd0fun,N);
+[~,Sys,phin,Kinf,Linf] = Constr1DWave(w0fun,wd0fun,N);
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -32,7 +32,7 @@ wd0fun = @(x) zeros(size(x));
 %wdist = @(t) sin(t);
 wdist = @(t) zeros(size(t));
 
-% Case from Python RORPack:
+% Triangle signal case
 % Begin by defining the function on a single period 0<t<2
 % A nonsmooth triangle signal
 yref1per = @(t) (2.*t-1).*(t>=0).*(t<=1)+(3-2.*t).*(t>1).*(t<2);
@@ -60,9 +60,8 @@ yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
 
-%freqsReal = [1 2 3 4];
-freqsReal = [pi/2,pi,2*pi,3*pi,4*pi];
-freqs = 1i*freqsReal;
+% freqs = [1 2 3 4];
+freqs = [pi/2,pi,2*pi,3*pi,4*pi];
 
 % dimX = size(Sys.A,1);
 % Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
@@ -82,7 +81,7 @@ freqs = 1i*freqsReal;
 % epsgainrange = [10,50];
 % epsgain = 13;
 % [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
-%[ContrSys,epsgain] = ConstrContrPassiveReal(freqsReal,Pvals,epsgainrange,Sys);
+%[ContrSys,epsgain] = ConstrContrPassive(freqs,Pvals,epsgainrange,Sys);
 
 % % Step 1: Compute stabilizing operators K2 and L so that A+B*K2 and A+L*C
 % % are exponentially stable
@@ -114,16 +113,16 @@ L = -ell*Linf;
 % L = L0;
 
 % PlotEigs(Sys.A+L*[Sys.C;Sys.Cm],[-1 0 -10 10])
-%  PlotEigs(Sys.A+L*[Sys.C;Sys.Cm])
+% PlotEigs(Sys.A+L*[Sys.C;Sys.Cm])
 % PlotEigs(Sys.A+L*Sys.C,[-1.5, .01, NaN, NaN])
-%   PlotEigs(Sys.A+L*Sys.C)
+% PlotEigs(Sys.A+L*Sys.C)
 
 
 
-% [ContrSys,K21] = ConstrContrObsBasedReal(freqsReal,Sys,K_S,L,'poleplacement',3);
-[ContrSys,K21] = ConstrContrObsBasedReal(freqsReal,Sys,K_S,L,'LQR',3);
-% [ContrSys,K21] = ConstrContrDualObsBasedReal(freqsReal,Sys,K_S,L,'LQR',3);
-% [ContrSys,K21] = ConstrContrDualObsBasedReal(freqsReal,Sys,K_S,L,'poleplacement',3);
+% [ContrSys,K21] = ConstrContrObsBased(freqs,Sys,K_S,L,'poleplacement',3);
+[ContrSys,K21] = ConstrContrObsBased(freqs,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = ConstrContrDualObsBased(freqs,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = ConstrContrDualObsBased(freqs,Sys,K_S,L,'poleplacement',3);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
@@ -166,7 +165,6 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(2,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 
-figure(2)
 q = length(freqs);
 if freqs(1)==0,dimZ = 2*q-1; else dimZ=2*q;end
 dimX = size(Sys.A,1);
@@ -174,11 +172,13 @@ dimU = size(ContrSys.K,1);
 
 K1full = [ContrSys.K(:,1:dimZ), zeros(dimU,dimX)];
 K2full = [zeros(dimU,dimZ) ContrSys.K(:,(dimZ+1):end)];
+figure(2)
 plot(tgrid,[ContrSys.K*CLsim.xesol((2*N+1):end,:);K1full*CLsim.xesol((2*N+1):end,:);K2full*CLsim.xesol((2*N+1):end,:)],'Linewidth',2);
 obserror = sum((CLsim.xesol(1:2:(2*N),:)-CLsim.xesol(dimX+dimZ+(1:2:(2*N)),:)).^2,1);
+figure(3)
 plot(tgrid,obserror,'Linewidth',2);
 
-figure(3)
+figure(4)
 colormap jet
 %PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
 spgrid = linspace(0,1,N);
@@ -188,7 +188,7 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 % set(gca,'ztick',-8:4:8);
 %colormap jet
 
-% figure(4)
+% figure(5)
 % tt = linspace(0,16,500)
 % plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 % set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')

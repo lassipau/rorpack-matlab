@@ -65,9 +65,7 @@ wdist = @(t) sin(6*t);
 
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqsReal = [1 2 3 6];
-freqs = 1i*freqsReal;
-
+freqs = [1 2 3 6];
 
 % Sys.A = Sys.A-Sys.B*Sys.B';
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
@@ -86,7 +84,7 @@ freqs = 1i*freqsReal;
 % 
 % epsgainrange = [0.01,6];
 % % epsgain = .1;
-% [ContrSys,epsgain] = ConstrContrLGReal(freqsReal,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
 % epsgain
 
 % An observer-based robust controller
@@ -101,10 +99,10 @@ K = -Sys.B';
 L = -10*Sys.C';
 %  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement',1);
-ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'poleplacement',1);
+% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR',1);
+% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',1);
+ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',1);
+% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',1);
 
 
 %% Closed-loop simulation

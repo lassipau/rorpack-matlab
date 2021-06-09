@@ -59,9 +59,7 @@ wdist = @(t) zeros(size(t));
 
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqsReal = [0 1 2 3 6];
-freqs = 1i*freqsReal;
-
+freqs = [0 1 2 3 6];
 
 % Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
@@ -82,9 +80,6 @@ freqs = 1i*freqsReal;
 % epsgain = .1;
 %[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
 
-% [ContrSys,epsgain] = ConstrContrLGReal(freqsReal,Pvals,epsgainrange,Sys);
-% epsgain
-
 % An observer-based robust controller
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. The plant is already stable,
@@ -98,10 +93,10 @@ L = -20*[zeros(N-1,1);2*(N-1)];
 % L = zeros(N,1);
 % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR',4);
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement',4);
-% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'LQR',4);
-ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'poleplacement',4);
+% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR',4);
+% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',4);
+% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',4);
+ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',4);
 
 %% Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);

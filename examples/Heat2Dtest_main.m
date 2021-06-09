@@ -44,16 +44,13 @@ wdist = @(t) sin(2*t);
 % wdist = @(t) sin(t);
 
 
-freqs = [-3i -2i -1i 0 1i 2i 3i];
-
 if max(abs(real(freqs)))>0 && max(abs(imag(freqs)))>0
   error('nonzero real parts in frequencies!')
 elseif max(abs(imag(freqs)))>0
   freqsReal = unique(abs(freqs));
 end
 
-freqsReal = [0 1 2 3 6];
-freqs = 1i*freqsReal;
+freqs = [0 1 2 3 6];
 
 dimX = size(Sys.A,1);
 Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
@@ -64,10 +61,8 @@ for ind = 1:length(freqs)
 end
 
 epsgainrange = [0.01,4];
-% epsgain = .1;
-%[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
 
-[ContrSys,epsgain] = ConstrContrLGReal(freqsReal,Pvals,epsgainrange,Sys);
+[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
 epsgain
 
 % ContrSys = ConstrContrObsBasedReal(freqsReal,Sys);

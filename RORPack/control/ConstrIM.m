@@ -1,4 +1,4 @@
-function [G1,G2] = ConstrIMReal(freqsReal,dimY)
+function [G1,G2] = ConstrIM(freqsReal,dimY)
 % G1 = ConstrIMReal(freqs,dimY)
 %
 % Construct a real block-diagonal internal model

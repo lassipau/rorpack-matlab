@@ -56,7 +56,7 @@ end
 
 
 % Construct the internal model
-[G1,G2] = ConstrIMReal(freqs,dimY);
+[G1,G2] = ConstrIM(freqs,dimY);
 
 dimZ = size(G1,1);
 

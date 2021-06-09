@@ -1,4 +1,4 @@
-function [ContrSys,K_S] = ConstrContrREObsReal(freqs,Sys,K_S,L1,gammafun)
+function [ContrSys,K_S] = ConstrContrREObs(freqs,Sys,K_S,L1,gammafun)
 % ContrSys = ConstrContrObsBasedReal(freqs,Sys)
 %
 % Construct a robust controller based on solving the regulator equations for SISO systems
@@ -33,17 +33,13 @@ dimU = size(B,2);
 %   L1 = L1(:,1:dimY);
 % end
 
-
-
-
 if dimY ~= 1 || dimU ~= 1
   error('The system is not SISO, controller design cannot be completed.')
 end
 
 q = length(freqs);
 
-
-if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
+dimZ = IMdim(freqs,dimY);
 
 % Step 1: Compute stabilizing operators K_S and L1 so that A+B*K_S and A+L1*C
 % are exponentially stable. These may also be given explicitly.
@@ -74,7 +70,7 @@ end
 
 
 % Construct the internal model
-G1 = ConstrIMReal(freqs,dimY);
+G1 = ConstrIM(freqs,dimY);
 
 if freqs(1)==0
   F0 = [eye(dimY),repmat([eye(dimY),zeros(dimY)],1,q-1)];

@@ -41,9 +41,6 @@ IC2 = [.8, .9];
 % % plot(tt,(xx(:,2)-xx(:,1))*(N-1))
 
 
-
-%
-
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
 %yref = @(t) ones(size(t));
@@ -67,8 +64,7 @@ wdist = @(t) zeros(size(t));
 
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqsReal = [1 2 3 6];
-freqs = 1i*freqsReal;
+freqs = [1 2 3 6];
 q = length(freqs);
 
 % Sys.A = Sys.A-Sys.B*Sys.B';
@@ -89,7 +85,7 @@ Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
 % epsgainrange = [0.01,6];
 % % epsgain = .1;
-% [ContrSys,epsgain] = ConstrContrLGReal(freqsReal,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
 % epsgain
 
 % An observer-based robust controller
@@ -97,30 +93,30 @@ Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
 % K = -10*Sys.B';
-K = -lqr(Sys.A,Sys.B,0.1*eye(N),10*eye(2));
+% K = -lqr(Sys.A,Sys.B,0.1*eye(N),10*eye(2));
 % K = zeros(2,N);
 % PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
 
 % L = -10*Sys.C';
-L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
+% L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
 % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement',1);
-% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ConstrContrDualObsBasedReal(freqsReal,Sys,K,L,'poleplacement',1);
+% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR',1);
+% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',1);
+% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',1);
+% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',1);
 
 % A reduced order observer-based robust controller
 % Choose alpha1,alpha2 >= 0, ... add these
 alpha1 = 1;
 alpha2 = 0.5;
-Q0 = eye(IMdim(freqs,size(Sys.C,1))); %G1: koko = 
-Q1 = eye(size(Sys.A,1)); %A: koko
-Q2 = eye(size(Sys.A,1)); %A:koko
+Q0 = eye(IMdim(freqs,size(Sys.C,1)));
+Q1 = eye(size(Sys.A,1));
+Q2 = eye(size(Sys.A,1));
 R1 = eye(2);
 R2 = eye(2);
 ROMorder = 3;
-ContrSys = ConstrContrObsBasedROM(freqsReal,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ConstrContrObsBasedROM(freqs,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 % % Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);

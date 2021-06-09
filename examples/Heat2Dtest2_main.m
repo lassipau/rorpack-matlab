@@ -47,8 +47,7 @@ wdist = @(t) zeros(size(t));
 %   freqsReal = unique(abs(freqs));
 % end
 
-freqsReal = [0 pi];
-freqs = 1i*freqsReal;
+freqs = [0 pi];
 
 dimX = size(Sys.A,1);
 Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
@@ -62,7 +61,7 @@ epsgainrange = [0.01,4];
 % epsgainrange = .5;
 %[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
 
-[ContrSys,epsgain] = ConstrContrLGReal(freqsReal,Pvals,epsgainrange,Sys);
+[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
 epsgain
 
 % ContrSys = ConstrContrObsBasedReal(freqsReal,Sys);
@@ -101,10 +100,10 @@ plotControl(tgrid,CLsim,ContrSys,N*N,PrintFigureTitles)
 %%
 
 
-figure(3)
-colormap jet
+% figure(3)
+% colormap jet
 % No movie recording
-[~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
