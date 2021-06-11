@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase4(cval,x0fun,N)
+function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase4(cfun,x0fun,N)
 % [x0,Sys,spgrid] = Constr1DHeatCase2(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
@@ -28,13 +28,10 @@ function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase4(cval,x0fun,N)
 % variable
 spgrid = linspace(0,1,N+1);
 h = 1/N;
+% Case 4 has a Neumann boundary condition at x=0 and a Dirichlet condition at x=1
+BCtype = 'ND';
 
-ee = ones(N,1);
-
-A = cval*1/h^2*spdiags([ee -2*ee ee],-1:1,N,N);
-A(1,2) = cval*2/h^2;
-
-
+[A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Dirichlet boundary input at x=1
 % B = sparse([-2/h;zeros(N-1,1)]); 
@@ -45,10 +42,6 @@ Bd = sparse([-2/h;zeros(N-1,1)]);
 
 C = sparse([1,zeros(1,N-1)]); % Measured temperature at x=0
 
-
-% Case 2 has a Neumann boundary condition at x=0 and a Dirichlet condition at x=1
-BCtype = 'ND';
-
 x0 = x0fun(spgrid(1:N)).';
 
 
@@ -58,7 +51,3 @@ Sys.Bd = Bd;
 Sys.C = C;
 Sys.D = 0;
 Sys.Dd = 0;
-
-
-
-

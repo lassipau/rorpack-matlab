@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(cval,x0fun,N,IB1,IB2,IC1,IC2)
+function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2)
 % [x0,Sys,spgrid] = Constr1DHeatCase3(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
@@ -40,16 +40,14 @@ elseif IB1(2)<=IB1(1) || IB2(2)<=IB2(1) || IC1(2)<=IC1(1) || IC2(2)<=IC2(1)
   error('All intervals IB1, IB2, IC1, and IC2 need to be of positive lengths.')
 end
 
-  % The point x=1 has a Dirichlet boundary condition, and is not chosen as a
+% The point x=1 has a Dirichlet boundary condition, and is not chosen as a
 % variable
-
 spgrid = linspace(0,1,N+1);
 h = 1/N;
+% Case 3 has a Neumann boundary condition at x=0 and a Dirichlet condition at x=1
+BCtype = 'ND';
 
-ee = ones(N,1);
-
-A = cval*1/h^2*spdiags([ee -2*ee ee],-1:1,N,N);
-A(1,2) = cval*2/h^2;
+[A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Two distributed inputs on the intervals IB1 and IB2
 B1 = 1/(IB1(2)-IB1(1))*(spgrid(1:N)>=IB1(1) & spgrid(1:N)<=IB1(2));
@@ -64,12 +62,7 @@ Bd = sparse([-2/h;zeros(N-1,1)]);
 C1 = h/(IC1(2)-IC1(1))*(spgrid(1:N)>=IC1(1) & spgrid(1:N)<=IC1(2));
 C2 = h/(IC2(2)-IC2(1))*(spgrid(1:N)>=IC2(1) & spgrid(1:N)<=IC2(2));
 
-
-% Case 3 has a Neumann boundary condition at x=0 and a Dirichlet condition at x=1
-BCtype = 'ND';
-
 x0 = x0fun(spgrid(1:N)).';
-
 
 Sys.A = A;
 Sys.B = [B1,B2];
@@ -77,8 +70,3 @@ Sys.Bd = Bd;
 Sys.C = [C1;C2];
 Sys.D = zeros(2,2);
 Sys.Dd = zeros(2,1);
-
-
-
-
-

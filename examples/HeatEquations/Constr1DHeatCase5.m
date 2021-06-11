@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase5(x0fun,N)
+function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase5(cfun,x0fun,N)
 % [x0,Sys,spgrid] = Constr1DHeatCase5(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
@@ -22,17 +22,15 @@ function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase5(x0fun,N)
 
 spgrid = linspace(0,1,N);
 h = 1/(N-1);
+% Case 5 has Neumann boundary conditions at both x=0 and x=1
+BCtype = 'NN';
 
-ee = ones(N,1);
+[A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Petteri's parameters: cval = 1, gamma = pi^2+1
-cval = 1;
 gamma = pi^2+1;
 
-A = cval*1/h^2*spdiags([ee -2*ee ee],-1:1,N,N);
-A(1,2) = cval*2/h^2;
-A(N,N-1) = cval*2/h^2;
-A = A + gamma*spdiags(ee,0,N,N);
+A = A + gamma*spdiags(ones(N,1),0,N,N);
 
 
 % Neumann boundary input at x=0 (input u_1(t)) and x=1 (input u_2(t)) 
@@ -48,10 +46,7 @@ weights = [1/2,ones(1,N-2),1/2];
 C1 = h/(IC1(2)-IC1(1))*(spgrid>=IC1(1) & spgrid<=IC1(2)).*weights;
 C2 = h/(IC2(2)-IC2(1))*(spgrid>=IC2(1) & spgrid<=IC2(2)).*weights;
 
-C = [C1;C2]; 
-
-% Case 5 has Neumann boundary conditions at both x=0 and x=1
-BCtype = 'NN';
+C = [C1;C2];
 
 x0 = x0fun(spgrid).';
 
