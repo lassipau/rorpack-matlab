@@ -18,12 +18,18 @@ x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x) 1*(1-x).^2.*(3-2*(1-x))-1;
-%x0fun = @(x) .5*(1-x).^2.*(3-2*(1-x))-.5;
+%x0fun = @(x) 0.5*(1-x).^2.*(3-2*(1-x))-0.5;
 %x0fun = @(x) 1/4*(x.^3-1.5*x.^2)-1/4;
-%x0fun = @(x) .2*x.^2.*(3-2*x)-.5;
+%x0fun = @(x) 0.2*x.^2.*(3-2*x)-0.5;
 
-[x0,Sys,spgrid,BCtype] = Constr1DHeatCase1(1,x0fun,N);
+% The spatially varying thermal diffusivity of the material
+cfun = @(t) ones(size(t));
+% cfun = @(t) 1+t;
+% cfun = @(t) 1-2*t.*(1-2*t);
+% cfun = @(t) 1+0.5*cos(5/2*pi*t);
+% cfun = @(t) 0.3-0.6*t.*(1-t);
 
+[x0,Sys,spgrid,BCtype] = Constr1DHeatCase1(cfun,x0fun,N);
 
 % Model = ss(Sys.A,Sys.B,Sys.Cm,Sys.D);
 % tt=linspace(0,4);
@@ -88,9 +94,9 @@ K = 7*[1, zeros(1,N-1)];
 L = -7*[zeros(N-1,1);2*(N-1)];
 PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3]);
 
-% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR', 0.45);
+ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR', 0.45);
 % ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',0.45);
-ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',0.45);
+% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',0.45);
 % ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',0.45);
 
 %% Closed-loop simulation

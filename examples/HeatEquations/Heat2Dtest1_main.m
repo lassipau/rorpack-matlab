@@ -20,6 +20,13 @@ x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
+% The spatially varying thermal diffusivity of the material
+% cfun = @(t) ones(size(t));
+% cfun = @(t) 1+t;
+cfun = @(t) 1-2*t.*(1-2*t);
+% cfun = @(t) 1+0.5*cos(5/2*pi*t);
+% cfun = @(t) 0.3-0.6*t.*(1-t);
+
 [x0,spgrid,Sys] = ConstrHeat2Dtest1(1,x0fun,N);
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
@@ -43,14 +50,13 @@ wdist = @(t) sin(2*t);
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
+freqs = [0 1 2 3 6];
 
 if max(abs(real(freqs)))>0 && max(abs(imag(freqs)))>0
   error('nonzero real parts in frequencies!')
 elseif max(abs(imag(freqs)))>0
   freqsReal = unique(abs(freqs));
 end
-
-freqs = [0 1 2 3 6];
 
 dimX = size(Sys.A,1);
 Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;

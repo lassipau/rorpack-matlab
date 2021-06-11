@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase1(cval,x0fun,N)
+function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase1(cfun,x0fun,N)
 % [x0,Sys,spgrid] = Constr1DHeatCase1(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
@@ -22,24 +22,17 @@ function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase1(cval,x0fun,N)
 
 spgrid = linspace(0,1,N);
 h = 1/(N-1);
+% Case 1 has Neumann boundary conditions at both x=0 and x=1
+BCtype = 'NN';
 
-ee = ones(N,1);
-
-A = cval*1/h^2*spdiags([ee -2*ee ee],-1:1,N,N);
-A(1,2) = cval*2/h^2;
-A(N,N-1) = cval*2/h^2;
-
+[A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Neumann boundary input at x=0, sign is based on the _outwards_ normal derivative
 B = sparse([-2/h;zeros(N-1,1)]); 
 
-
 Bd = sparse([zeros(N-1,1);2/h]); % Neumann boundary disturbance at x=1
 C = sparse([zeros(1,N-1), 1]); % Measured temperature at x=1
 Cm = sparse([1, zeros(1,N-1)]); % Additional output, measured temperature at x=0
-
-% Case 1 has Neumann boundary conditions at both x=0 and x=1
-BCtype = 'NN';
 
 x0 = x0fun(spgrid).';
 
@@ -52,7 +45,3 @@ Sys.Cm = Cm;
 Sys.D = 0;
 Sys.Dd = 0;
 Sys.Dm = 0;
-
-
-
-
