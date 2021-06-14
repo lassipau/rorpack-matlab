@@ -23,10 +23,10 @@ x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x) 0.2*x.^2.*(3-2*x)-0.5;
 
 % The spatially varying thermal diffusivity of the material
-cfun = @(t) ones(size(t));
+% cfun = @(t) ones(size(t));
 % cfun = @(t) 1+t;
 % cfun = @(t) 1-2*t.*(1-2*t);
-% cfun = @(t) 1+0.5*cos(5/2*pi*t);
+cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % cfun = @(t) 0.3-0.6*t.*(1-t);
 
 [x0,Sys,spgrid,BCtype] = Constr1DHeatCase1(cfun,x0fun,N);
@@ -138,9 +138,9 @@ Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 %%
 
 
-figure(3)
+% figure(3)
 % No movie recording
-[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);

@@ -6,7 +6,7 @@ function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase2(cfun,x0fun,N)
 % with Neumann boundary input (at x=0) and
 % disturbance and measured temperature output (at x=1)
 % Usage: Can also use solely for defining the initial state x0
-% cval = thermal diffusivity of the material (assumed constant)
+% cfun = spatially variying thermal diffusivity of the material
 % x0fun = initial heat profile, function handle
 % Sys = system parameters, (sys.A,sys.B,sys.Bd,sys.C,sys.D)
 % N = dimension of the approximated system (does not include point x=1)

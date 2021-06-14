@@ -100,10 +100,10 @@ plotControl(tgrid,CLsim,ContrSys,N*N,PrintFigureTitles)
 %%
 
 
-% figure(3)
-% colormap jet
+figure(3)
+colormap jet
 % No movie recording
-% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+[~,zlims] = AnimHeat2Dtest2(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);

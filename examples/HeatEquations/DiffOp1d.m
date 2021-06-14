@@ -19,7 +19,7 @@ function [Dop,spgrid] = DiffOp1d(cfun,spgrid,BCtype)
 % 
 %     Returns
 %     ---------
-%     Dop :
+%     Dop : sparse matrix
 %         The square matrix representing the diffusion operator.
 %     spgrid :
 %         An adjusted spatial grid:
