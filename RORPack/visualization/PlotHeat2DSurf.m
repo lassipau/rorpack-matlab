@@ -11,8 +11,9 @@ yy = spgrid.yy;
 
 % size of the state space X_N is N^2, here the grid has is N x N
 N = size(xx,1);
+M = size(yy,2);
 
-zz = state(1:N^2);
+zz = state(1:N*M);
 
 if max(max(abs(imag(zz)))) > 1e-8
   warning('Solution may contain imaginary parts that are ignored in the animation.')
@@ -26,7 +27,7 @@ if nargin <= 2
 end
 axlims = [xx(1,1) xx(1,end) yy(1,1) yy(end,1) zlims];
     
-h = surf(xx,yy,reshape(zz,N,N));
+h = surf(xx,yy,reshape(zz,N,M));
 % set(h,'linewidth',0.5,'edgecolor',0.5*[1 1 1])
 axis(axlims)
 caxis(zlims)
