@@ -35,19 +35,19 @@ wdist = @(t) zeros(size(t));
 % Triangle signal case
 % Begin by defining the function on a single period 0<t<2
 % A nonsmooth triangle signal
-yref1per = @(t) (2.*t-1).*(t>=0).*(t<=1)+(3-2.*t).*(t>1).*(t<2);
+% yref1per = @(t) (2.*t-1).*(t>=0).*(t<=1)+(3-2.*t).*(t>1).*(t<2);
 % The constant part of the signal cannot be tracked due to the second order
 % zero of the plant at zero.
 % We therefore normalize yref(t) to have average zero on [0,2]
-yr_ave = integral(yref1per,0,2);
-yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
+% yr_ave = integral(yref1per,0,2);
+% yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
 
 % Case 1:
 % yref = @(t) .5*sin(2*t)+.5*cos(3*t);
-%yref = @(t) sin(pi/2*t)-2*cos(pi/2*t);
+yref = @(t) sin(pi/2*t)-2*cos(pi/2*t);
 % yref = @(t) zeros(size(t));
 %wdist = @(t) zeros(size(t));
-%wdist = @(t) sin(2*pi*t);
+wdist = @(t) sin(2*pi*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -60,8 +60,8 @@ yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
 
-% freqs = [1 2 3 4];
-freqs = [pi/2,pi,2*pi,3*pi,4*pi];
+freqs = [1 2 3 4];
+% freqs = [pi/2,pi,2*pi,3*pi,4*pi];
 
 % dimX = size(Sys.A,1);
 % Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
