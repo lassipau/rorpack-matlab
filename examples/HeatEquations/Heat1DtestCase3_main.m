@@ -86,7 +86,7 @@ freqs = [1 2 3 6];
 % 
 % epsgainrange = [0.01,6];
 % % epsgain = .1;
-% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
 % epsgain
 
 % An observer-based robust controller
@@ -101,10 +101,10 @@ K = -Sys.B';
 L = -10*Sys.C';
 %  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR',1);
-% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',1);
-% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',1);
-% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',1);
+% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',1);
+% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',1);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',1);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',1);
 
 % A reduced order observer-based robust controller
 %
@@ -128,7 +128,7 @@ R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
 R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 ROMorder = 3;
 
-ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 
 %% Closed-loop simulation

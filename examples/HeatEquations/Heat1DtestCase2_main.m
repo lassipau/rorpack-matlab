@@ -82,7 +82,7 @@ freqs = [0 1 2 3 6];
 % 
 % epsgainrange = [0.01,3];
 % % epsgain = .1;
-% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
 % epsgain
 
 % An observer-based robust controller
@@ -98,10 +98,10 @@ K = 1/(N-1)*[0.5, ones(1,N-2), 0.5];
 L = -ones(N,1);
 % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR',0.5);
-% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',0.5);
-% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',0.5);
-% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',0.5);
+ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',0.5);
+% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.5);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.5);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.5);
 
 %% Closed-loop simulation
 

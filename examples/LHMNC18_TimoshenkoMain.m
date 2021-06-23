@@ -58,9 +58,9 @@ freqs = 1i*freqsReal;
 % 
 % epsgainrange = [10,50];
 % epsgain = 13;
-%[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
-% [ContrSys,epsgain] = ConstrContrPassiveReal(freqsReal,Pvals,epsgainrange,Sys);
-% [ContrSys,epsgain] = ConstrContrPassiveReal(freqsReal,Pvals,epsgain,Sys);
+%[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
+% [ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgain,Sys);
 
 % epsgain
 
@@ -75,8 +75,8 @@ K = -.5*Sys.B';
 L = -.5*Sys.C';
 % PlotEigs(full(Sys.A+L*Sys.C))
 
-ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'poleplacement');
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys,K,L,'LQR');
+ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement');
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR');
 
 
 CLSys = ConstrCLSys(Sys,ContrSys);

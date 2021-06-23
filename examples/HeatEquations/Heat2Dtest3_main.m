@@ -69,7 +69,7 @@ freqs = [0 1 2 3 6];
 % 
 % epsgainrange = [0.01,4];
 % 
-% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
 % epsgain
 
 % Observer-based robust controller
@@ -86,7 +86,7 @@ K21(1, M:N:end) = K21(1, M:N:end) / 2;
 L = K21' * 10;
 IMstabmarg = 0.5;
 IMstabtype = 'LQR';
-ContrSys = ConstrContrObsBased(freqs,Sys,K21,L,IMstabtype,IMstabmarg);
+ContrSys = ObserverBasedRC(freqs,Sys,K21,L,IMstabtype,IMstabmarg);
 
 
 CLSys = ConstrCLSys(Sys,ContrSys);

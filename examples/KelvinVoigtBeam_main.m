@@ -147,7 +147,7 @@ anim_pause = 0.02;
 
 
 % Construct the Internal Model Based Reduced Order Controller
-ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 
 
@@ -164,7 +164,7 @@ ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,R
 % end
 % epsgain = 0.076;
 % % epsgain = [0.01,0.2]; % The algorithm can optimize CL stability margin
-% [ContrSys,epsgain] = ConstrContrLGReal(freqs,Pvals,epsgain,Sys_Nlo);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys_Nlo);
 
 
 %% Closed-loop simulation

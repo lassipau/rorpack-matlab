@@ -1,7 +1,7 @@
-function [ContrSys,epsgain] = ConstrContrPassive(freqs,Pvals,epsgain,Sys)
-% ContrSys = ConstrContrLGReal(freqs,dimY,Pvals)
+function [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys)
+% ContrSys = LowGainRC(freqs,Pvals)
 %
-% Construct a passive simple controller for stable systems, in real form
+% Construct a low-gain simple controller for stable systems, in real form
 % freqs = Frequencies to be included in the controller, only real nonnegative
 % frequencies, if zero frequency is included, it's the first element in the
 % vector
@@ -9,9 +9,9 @@ function [ContrSys,epsgain] = ConstrContrPassive(freqs,Pvals,epsgain,Sys)
 % function of the system on the frequencies 'freqs'
 % ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
 
-%if max(real(eig(full(Sys.A))))>=0
-%  error('The system is unstable, the low-gain controller design cannot be completed.')
-%end
+if max(real(eig(full(Sys.A))))>=0
+  error('The system is unstable, the low-gain controller design cannot be completed.')
+end
 
 
 dimY = size(Pvals{1},1);
@@ -20,18 +20,14 @@ q = length(freqs);
 
 dimZ = IMdim(freqs,dimY);
   
-  
 ContrSys.G1 = zeros(dimZ);
 ContrSys.K = zeros(dimU,dimZ);
 
-% To add: weights for the components in B_c, based on values of the
-% transfer function at the frequencies
-
-
 if freqs(1)==0
   zoffset = dimY; 
-  ContrSys.K(:,1:dimY) = eye(dimY);
-%   ContrSys.K(:,1:dimY) = negsqrt(Pvals{1}); % experimental: "optimal" choice of K_0?
+  ContrSys.K(:,1:dimY) = pinv(Pvals{1});
+%  ContrSys.K(:,1:dimY) = negsqrt(Pvals{1}); % experimental: "optimal" choice of K_0?
+%  ContrSys.K(:,1:dimY) = Pvals{1}'*inv(sqrtm(Pvals{1}*Pvals{1}')); % experimental: "optimal" choice of K_0?
   nzfreqs = freqs(2:end);
 else
   zoffset = 0;
@@ -43,9 +39,10 @@ for ind = 1:length(nzfreqs)
 
   ContrSys.G1(indran,indran) = nzfreqs(ind)*[zeros(dimY) eye(dimY);-eye(dimY) zeros(dimY)];
   
-%   Ppi = pinv(Pvals{ind});
-%   Ppi = negsqrt(Pvals{ind}); % experimental: "optimal" choice of K_0?
-%   ContrSys.K(:,indran) = [real(Ppi) imag(Ppi)];
+  Ppi = pinv(Pvals{ind});
+%  Ppi = negsqrt(Pvals{ind}); % experimental: "optimal" choice of K_0?
+%  Ppi = Pvals{ind}'*inv(sqrtm(Pvals{ind}*Pvals{ind}'));
+  ContrSys.K(:,indran) = [real(Ppi), imag(Ppi)];
 end
 
 if freqs(1)==0
@@ -54,7 +51,7 @@ else
   ContrSys.G2 = repmat([-eye(dimY);zeros(dimY)],q,1);
 end
 
-ContrSys.K = -(ContrSys.G2).';
+
 
 if length(epsgain) == 1
   
@@ -68,7 +65,7 @@ else
 end
 
 % A very crude optimization for the parameter eps>0!
-stab_margin_old = 0;
+stab_margin_old = -1;
 marg_tol = 5e-4;
 
 allmargs = zeros(size(ee_cand));
@@ -101,5 +98,12 @@ function Amsq = negsqrt(A)
 % Compute "A^{-1/2}" for a matrix A
 
 [U,S,V] = svd(A);
-Amsq = V*diag(1./sqrt(diag(S)))*U';
+if size(A,1)==1
+  Amsq = V(:,1)*1./sqrt(S(1,1))*U';
+else
+  [m,n] = size(A);
+  Ssq = [diag(1./sqrt(diag(S))),zeros(min(m,n),m-n);zeros(n-m,min(m,n)),zeros(n-m,m-n)];
+  Amsq = V*Ssq*U';
+%   Amsq = V(:,size(A,1))*diag(1./sqrt(diag(S)))*U';
+end
 

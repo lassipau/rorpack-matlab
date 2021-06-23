@@ -30,7 +30,7 @@ wd0fun = @(x) zeros(size(x));
 
 %wdist = @(t) ones(size(t));
 %wdist = @(t) sin(t);
-wdist = @(t) zeros(size(t));
+%wdist = @(t) zeros(size(t));
 
 % Triangle signal case
 % Begin by defining the function on a single period 0<t<2
@@ -80,8 +80,8 @@ freqs = [1 2 3 4];
 
 % epsgainrange = [10,50];
 % epsgain = 13;
-% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
-%[ContrSys,epsgain] = ConstrContrPassive(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] =LowGainRC(freqs,Pvals,epsgain,Sys);
+%[ContrSys,epsgain] = PassiveRC(freqs,Pvals,epsgainrange,Sys);
 
 % % Step 1: Compute stabilizing operators K2 and L so that A+B*K2 and A+L*C
 % % are exponentially stable
@@ -119,10 +119,10 @@ L = -ell*Linf;
 
 
 
-% [ContrSys,K21] = ConstrContrObsBased(freqs,Sys,K_S,L,'poleplacement',3);
-[ContrSys,K21] = ConstrContrObsBased(freqs,Sys,K_S,L,'LQR',3);
-% [ContrSys,K21] = ConstrContrDualObsBased(freqs,Sys,K_S,L,'LQR',3);
-% [ContrSys,K21] = ConstrContrDualObsBased(freqs,Sys,K_S,L,'poleplacement',3);
+% [ContrSys,K21] = ObserverBasedRC(freqs,Sys,K_S,L,'poleplacement',3);
+[ContrSys,K21] = ObserverBasedRC(freqs,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = DualObserverBasedRC(freqs,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = DualObserverBasedRC(freqs,Sys,K_S,L,'poleplacement',3);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 

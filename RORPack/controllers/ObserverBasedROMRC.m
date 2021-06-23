@@ -1,5 +1,5 @@
-function ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
-% ContrSys = ConstrContrObsBasedReal(freqs,Pvals,Sys)
+function ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
+% ContrSys = ObserverBasedROMRC(freqs,Pvals,Sys)
 %
 % Construct an observer-based robust controller for systems with the same number of 
 % inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal 

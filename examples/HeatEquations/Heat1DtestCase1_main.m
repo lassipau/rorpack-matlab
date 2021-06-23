@@ -82,7 +82,7 @@ freqs = [1 2 3 6];
 % 
 % epsgainrange = [0.01,3];
 % epsgain = .1;
-% [ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 
 % An observer-based robust controller
 % Stabilizing state feedback and output injection operators K and L
@@ -94,10 +94,10 @@ K = 7*[1, zeros(1,N-1)];
 L = -7*[zeros(N-1,1);2*(N-1)];
 PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3]);
 
-ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR', 0.45);
-% ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'poleplacement',0.45);
-% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',0.45);
-% ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',0.45);
+ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR', 0.45);
+% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.45);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
 
 %% Closed-loop simulation
 

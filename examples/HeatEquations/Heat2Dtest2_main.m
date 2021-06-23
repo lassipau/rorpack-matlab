@@ -59,12 +59,12 @@ end
 
 epsgainrange = [0.01,4];
 % epsgainrange = .5;
-%[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
+%[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 
-[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgainrange,Sys);
+[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
 epsgain
 
-% ContrSys = ConstrContrObsBasedReal(freqsReal,Sys);
+% ContrSys = ObserverBasedRC(freqsReal,Sys);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 

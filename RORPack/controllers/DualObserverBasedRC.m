@@ -1,7 +1,7 @@
-function [ContrSys,K21] = ConstrContrObsBased(freqs,Sys,K21,L,IMstabtype,IMstabmarg)
-% ContrSys = ConstrContrObsBasedReal(freqs,Pvals,Sys)
+function [ContrSys,K21] = DualObserverBasedRC(freqs,Sys,K21,L,IMstabtype,IMstabmarg)
+% ContrSys = DualObserverBasedRC(freqs,Pvals,Sys)
 %
-% Construct an observer-based robust controller for systems with the same number of 
+% Construct a dual observer-based robust controller for systems with the same number of 
 % inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal 
 % model is in real form
 % freqs = Frequencies to be included in the controller, only real nonnegative
@@ -40,28 +40,30 @@ q = length(freqs);
 %  B1(1:dimY,:) = PKvals;
 %end
 
-
-PKappr = @(s) (C+D*K21)*((s*eye(dimX)-(A+B*K21))\B)+D;
+PLappr = @(s) C*((s*eye(dimX)-(A+L*C))\(B+L*D))+D;
 for ind = 1:q
-  if cond(PKappr(1i*freqs(ind)))>1e6
-    warning(['The matrix P_K(iw_k) for k=' num2str(ind) ' is nearly singular!'])
+  if cond(PLappr(1i*freqs(ind)))>1e6
+    warning(['The matrix P_L(iw_k) for l=' num2str(ind) ' is nearly singular!'])
   end
 end
 
 
 % Construct the internal model
 [G1,G2] = ConstrIM(freqs,dimY);
+K = G2.';
 
 dimZ = size(G1,1);
 
 % Find H as the solution of G1*H=H*(A+B*K21)+G2*(C+D*K21) and define B1
-H = sylvester(G1,-(A+B*K21),G2*(C+D*K21));
-B1 = H*B+G2*D;
+% H = sylvester(G1,-(A+B*K21),G2*(C+D*K21));
+% B1 = H*B+G2*D;
+H = sylvester(-(A+L*C),G1,(B+L*D)*K);
+C1 = C*H+D*K;
 
 % Stabilization of the internal model, choose K1 so that G1+B1*K1 is
 % exponentially stable
 if isequal(IMstabtype,'LQR')
-  K1 = -lqr(G1+IMstabmarg*eye(dimZ),B1,100*eye(dimZ),0.001*eye(dimU),zeros(dimZ,dimU));
+  G2 = conj(-lqr(conj(G1).'+IMstabmarg*eye(dimZ),conj(C1).',100*eye(dimZ),0.001*eye(dimU),zeros(dimZ,dimU))).';
 elseif isequal(IMstabtype,'poleplacement')
   if freqs(1)==0
     target_eigs = ones(2*length(freqs)-1,1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
@@ -69,20 +71,20 @@ elseif isequal(IMstabtype,'poleplacement')
 %     target_eigs
 %     target_eigs = [linspace(-7,-5,length(freqs)*dimY),linspace(-4.9,-3,length(nzfreqs)*dimY)];
     target_eigs = target_eigs(:);
-    K1 = -place(G1,B1,target_eigs);
+    G2 = conj(-place(conj(G1).',conj(C1).',target_eigs)).';
   else
     target_eigs = ones(2*length(freqs),1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
                     +1i*reshape([freqs(end:-1:1),-freqs],2*length(freqs),1)*ones(1,dimY);
 %     target_eigs = [linspace(-5,-4,length(freqs)*dimY),linspace(-3.9,-3,length(freqs)*dimY)];
     target_eigs = target_eigs(:);
-    K1 = -place(G1,B1,target_eigs);
+    G2 = conj(-place(conj(G1).',conj(C1).',target_eigs)).';
   end
 else
   error('Unknown stabilization type for the Internal Model')
 end
 % Add: scaling to K1 or G2 through an additional gain parameter!
 
-K2 = K21+K1*H;
+L = L+H*G2;
 
 
 % Alternative, choose [K1 K2] to stabilize ([A 0;G2*C G1],[B;G2*D])
@@ -93,10 +95,12 @@ K2 = K21+K1*H;
 % max(real(eig([G1 G2*C;zeros(dimX,dimZ) A]+[G2*D;B]*Kfull)))
 
 
-ContrSys.G1 = [G1 zeros(dimZ,dimX); (B+L*D)*K1 A+B*K2+L*(C+D*K2)];
-ContrSys.G2 = [G2;-L];
-ContrSys.K = [K1, K2];
-
+% ContrSys.G1 = [G1 zeros(dimZ,dimX); (B+L*D)*G2 A+B*K2+L*(C+D*K2)];
+% ContrSys.G2 = [G2;-L];
+% ContrSys.K = [G2, K2];
+ContrSys.G1 = [G1 G2*(C+D*K21); zeros(dimX,dimZ) A+B*K21+L*(C+D*K21)];
+ContrSys.G2 = [G2;L];
+ContrSys.K = [K, -K21];
 
 if issparse(A)
   ContrSys.G1 = sparse(ContrSys.G1);
