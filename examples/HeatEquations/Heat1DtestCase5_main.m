@@ -112,24 +112,33 @@ ContrSys = ConstrContrObsBased(freqs,Sys,K,L,'LQR',1);
 % ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'LQR',1);
 % ContrSys = ConstrContrDualObsBased(freqs,Sys,K,L,'poleplacement',1);
 
-% A reduced order observer-based robust controller
-% DISCLAIMER: This is not directly supported by the theoretical results in
-% Paunonen-Phan 2020 due to the control at the boundaries!
-%
-% The construction of the controller uses a lower-dimensional approximation
-% of the heat system:
-% Nlo = 50;
-% [~,Sys_Nlo,~,~] = Constr1DHeatCase5(x0fun,Nlo);
+
+% % A reduced order observer-based robust controller
+% % DISCLAIMER: This is not directly supported by the theoretical results in
+% % Paunonen-Phan 2020 due to the control at the boundaries!
+% %
+% % The construction of the controller uses a Galerkin approximation
+% % of the heat system: The Galerkin arpproximation used in the controller
+% % design is a lower dimensional numerical approximation of the PDE model.
+% Nlow = 50;
+% [~,Sys_Nlow,~,~] = Constr1DHeatCase5(cfun,x0fun,Nlow);
+% 
+% % Store the Galerkin approximation in "SysApprox".
+% SysApprox.AN = Sys_Nlow.A;
+% SysApprox.BN = Sys_Nlow.B;
+% SysApprox.CN = Sys_Nlow.C;
+% SysApprox.D = Sys_Nlow.D;
 % alpha1 = 1;
 % alpha2 = 0.5;
-% Q0 = eye(IMdim(freqs,size(Sys_Nlo.C,1))); % Size = dimension of the IM 
-% Q1 = eye(size(Sys_Nlo.A,1)); % Size = dim(X)
-% Q2 = eye(size(Sys_Nlo.A,1)); % Size = dim(X)
-% R1 = eye(size(Sys_Nlo.C,1)); % Size = dim(Y)
-% R2 = eye(size(Sys_Nlo.B,2)); % Size = dim(U)
+% Q0 = eye(IMdim(freqs,size(SysApprox.CN,1))); % Size = dimension of the IM 
+% Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+% Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+% R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
+% R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 % ROMorder = 3;
 % 
-% ContrSys = ConstrContrObsBasedROM(freqs,Sys_Nlo,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+% ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+
 
 %% Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);
@@ -138,7 +147,6 @@ stabmarg = CLStabMargin(CLSys)
 
 figure(1)
 PlotEigs(CLSys.Ae,[-30 .3 -6 6])
-%%
 
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];

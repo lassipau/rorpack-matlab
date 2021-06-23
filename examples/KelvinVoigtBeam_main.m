@@ -41,11 +41,24 @@ xi2 = 0.3;
 bd1 = @(r) (r+1).^2.*(1-r).^2;
 dimUd = 1; % number of disturbance signals
 
+% The initial profile (v0) and velocity (v0dot)
+% v0fun = @(r) (r+1)^2.*(1-r).^3;
+% v0fun = @(r) (r+1)^2.*(1-r).^2;
+v0 = @(r) zeros(size(r));
+v0dot = @(r) zeros(size(r));
+
+
 
 % Size of the higher order approximation - used for simulation, representing the original PDE
 Nhi = 70; 
 % Size of the lower order approximation - used for controller design
-Nlo = 40;
+Nlow = 40;
+
+
+
+% Construct the system (the higher-dimensional Galerkin approximation)
+[x0,Sys,Q_coeff] = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0dot,Nhi);
+
 
 
 % Definition of the reference signal y_{ref}(t) and the disturbance signal
@@ -66,19 +79,32 @@ q=10;
 
 
 % % Parameters of the controller
+% Galerkin approximation for the controller design
+
+[~,Sys_Nlow,~] = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0dot,Nlow);
+
+% Store the Galerkin approximation in "SysApprox".
+SysApprox.AN = Sys_Nlow.A;
+SysApprox.BN = Sys_Nlow.B;
+SysApprox.CN = Sys_Nlow.C;
+SysApprox.D = Sys_Nlow.D;
+
 % Target stability margin of the closed-loop system (for LQR/LQG)
 % CLstabmarg = 1;
 alpha1 = 2;
 alpha2 = 0.8;
 
-Q0 = eye(2*(2*q+1));
-Q1 = eye(2*(Nlo-1));
-Q2 = eye(2*(Nlo-1));
-R1 = eye(2);
-R2 = eye(2);
+Q0 = eye(IMdim(freqs,size(SysApprox.CN,1))); % Size = dimension of the IM 
+Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
+R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 
 % Order of the reduced order observer in the controller
 ROMorder = 4;
+
+
+%%
 
 % Parameters of the simulation
 tspan = [0,16]; % time-interval of the simulation
@@ -86,12 +112,6 @@ tspan = [0,16]; % time-interval of the simulation
 
 % Initial deflection profile (v_0) and the initial velocity (\dot{v}_0) 
 % Initial state of the controller is by default zero
-
-% v0fun = @(r) (r+1)^2.*(1-r).^3;
-% v0fun = @(r) (r+1)^2.*(1-r).^2;
-v0 = @(r) zeros(size(r));
-
-v0dot = @(r) zeros(size(r));
 
 
 % Parameters of the visualisation of the results
@@ -107,9 +127,6 @@ spgrid_anim = linspace(-1,1,130);
 tt_anim = linspace(tspan(1),tspan(2),401);
 anim_pause = 0.02;
 
-
-% Choose whther or not to print titles of the figures
-PrintFigureTitles = true;
 
 
 % %% Plot the norm of the inverse \|P(is)^{-1}\| of the transfer function on iR 
@@ -128,16 +145,10 @@ PrintFigureTitles = true;
 
 %% Construct the controller using a Galerkin approximation with size 'Nlo'
 
-% Galerkin approximation for the controller design
-
-Sys_Nlo = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,Nlo);
-
-% % Plot the eigenvalues of the beam system
-% plot(eig(full(Sys_Nlo.A)),'b.','markersize',10)
-% xlim([-2000,3]);
 
 % Construct the Internal Model Based Reduced Order Controller
-ContrSys = ConstrContrObsBasedROM(freqs,Sys_Nlo,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+
 
 
 % % For comparison: Construct the Low-Gain Internal Model Based Controller
@@ -156,124 +167,36 @@ ContrSys = ConstrContrObsBasedROM(freqs,Sys_Nlo,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROM
 % [ContrSys,epsgain] = ConstrContrLGReal(freqs,Pvals,epsgain,Sys_Nlo);
 
 
-
-%% The Closed-Loop System
-
-% Construct the closed-loop system using a higher order Galerkin
-% approximation of the control system
-
-Sys_Nhi = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,Nhi);
-
-A = Sys_Nhi.A;
-B = Sys_Nhi.B;
-C = Sys_Nhi.C;
-D = Sys_Nhi.D;
-Bd = Sys_Nhi.Bd;
-
-G1 = ContrSys.G1;
-G2 = ContrSys.G2;
-K = ContrSys.K;
-
-Ae = [A,B*K;G2*C,G1+G2*D*K];
-Be = [Bd, zeros(size(A,1),2);zeros(size(G1,1),dimUd),-G2];
-Ce = [C,D*K];
-De = -eye(2);
+%% Closed-loop simulation
 
 
-% Print the stability margin of the closed-loop system
-Ae_evals=eig(full(Ae));
-max(real(Ae_evals))
+CLSys = ConstrCLSys(Sys,ContrSys);
 
-% Plot eigenvalues of the closed-loop system
-figure(6)
-plot(real(Ae_evals),imag(Ae_evals),'b.','markersize',15)
-set(gca,'tickdir','out')
-grid on
-xlim([-14,0]);
-% axis([-20,0,-35,35])
-
-
-
-%% Simulation
-
-% Define an (Nhi-1)x(Nhi+1) conversion matrix Q_coeff such that
-% (c_k)_k=Q_coeff*(alpha_k)_k where c_k are the Chebyshev coefficients of a
-% function and alpha_k are the coordinates of the same function in the
-% basis {\phi_k}
-ee = ones(Nhi-1,1);
-ls = (0:(Nhi+2)).';
-Dia0 = ee;
-Diam2 = -2*ls(3:(end-2))./(ls(3:(end-2))+1);
-Diam4 = (ls(5:end)-3)./(ls(5:end)-1);
-Q_coeff = full(spdiags([Diam4,0*ee,Diam2,0*ee,Dia0],-4:0,Nhi+3,Nhi-1));
-
-
-% Initial condition v0, defined as a function, 
-% Chebyshev coefficients from Chebfun, converted into coordinates in \phi_k
-% Express the initial function as a truncated Chebyshev expansion
-v0fun = chebfun(v0,'trunc',Nhi+3);
-v0dotfun = chebfun(v0dot,'trunc',Nhi+3);
-% Convert the Chebyshev coefficients (coefficients of the series expansion)
-% to the inner products of the function v0 with the basis functions \phi_k
-v0init  = Q_coeff\chebcoeffs(v0fun);
-v0dotinit  = Q_coeff\chebcoeffs(v0dotfun);
-
-% For error checking:
-% % Plot the approximation of the initial condition in the subspace V 
-% v0check = chebfun(Q_coeff*v0init,'coeffs');
-% plot([v0check;v0])
-
-
-% Define the initial state (initial state of the controller is zero)
-init = [v0init;v0dotinit];
-initCL = [init;zeros(size(G1,1),1)];
-
-% Simulate the closed-loop system
-odefun = @(t,xe) Ae*xe+Be*[wdist(t);yref(t)];
-sol = ode15s(odefun,tspan,initCL);
-
-
-
-%% Plot the output 
-
-xxe_output = deval(sol,tt_output);
-yy = Ce*xxe_output;
+stabmarg = CLStabMargin(CLSys)
 
 figure(1)
-hold off
-clf
-hold on
-plot(tt_output,yref(tt_output),'--','color',0.4*[1,1,1],'linewidth',2);
-plot(tt_output,yy(1,:),'color',[0, 0.4470, 0.7410],'linewidth',2);
-plot(tt_output,yy(2,:),'color',[0.8500, 0.3250, 0.0980],'linewidth',2);
-set(gca,'tickdir','out','PlotBoxAspectRatio',[1,0.4574,0.4574])
-axis([tspan -0.2 0.55])
+PlotEigs(CLSys.Ae,[-20 .3 -150 150])
 
-if PrintFigureTitles, title('The output $y(t)$ and the reference signal','Interpreter','Latex','fontsize',16), end
+%%
+xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
+
+Tend = 16;
+tgrid = linspace(0,Tend,300);
 
 
-%% Plot the error norms \|e(t)\|
+CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
+
+% Choose whther or not to print titles of the figures
+PrintFigureTitles = true;
+
 figure(2)
-clf
-errvals = sqrt(sum((abs(yy-yref(tt_output)).^2),1));
-plot(tt_output,errvals,'color',[0, 0.4470, 0.7410],'linewidth',2);
-set(gca,'tickdir','out','ytick',0:0.1:0.4,'PlotBoxAspectRatio',[1,.4006,.4006])
-grid on
-box off
-axis([tspan -0.00 0.3])
+subplot(3,1,1)
+plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+subplot(3,1,2)
+plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+plotControl(tgrid,CLsim,ContrSys,size(Sys.A,1),PrintFigureTitles)
 
-if PrintFigureTitles, title('The tracking error norms $\|e(t)\|$','Interpreter','Latex','fontsize',16), end
-
-
-%% Plot the control actions
-figure(3)
-uu = K*xxe_output((2*Nhi-2+1):end,:);
-plot(tt_output,uu,'linewidth',2);
-set(gca,'tickdir','out','PlotBoxAspectRatio',[1,.4378,.4378])
-grid on
-box off
-ylim([-1000,1200])
-if PrintFigureTitles, title('The control inputs $u_1(t)$ and $u_2(t)$','Interpreter','Latex','fontsize',16), end
 
 
 %% Plot the state of the controlled beam equation
@@ -284,7 +207,7 @@ if PrintFigureTitles, title('The control inputs $u_1(t)$ and $u_2(t)$','Interpre
 
 xxvals_state = zeros(length(spgrid_state),length(tt_state));
 
-xxe_state = deval(sol,tt_state);
+xxe_state = deval(CLsim.solstruct,tt_state);
 Cheb_coeffs = Q_coeff*xxe_state(1:(Nhi-1),:); % Position
 % Cheb_coeffs = Q_coeff*xxe(Nhi:(2*Nhi-2),:); % Velocity
 for ind = 1:length(tt_state)
@@ -303,7 +226,7 @@ if PrintFigureTitles, title('The deflection of the controlled beam','Interpreter
 %% Animate the solution of the controlled beam equation
 xxvals_anim = zeros(length(spgrid_anim),length(tt_anim));
 
-xxe_anim = deval(sol,tt_anim);
+xxe_anim = deval(CLsim.solstruct,tt_anim);
 Cheb_coeffs = Q_coeff*xxe_anim(1:(Nhi-1),:); % Position
 % Cheb_coeffs = Q_coeff*xxe_animation(Nhi:(2*Nhi-2),:); % Velocity
 for ind = 1:length(tt_anim)

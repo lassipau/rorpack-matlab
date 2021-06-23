@@ -1,4 +1,4 @@
-function ContrSys = ConstrContrObsBasedROM(freqs,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
+function ContrSys = ConstrContrObsBasedROM(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
 % ContrSys = ConstrContrObsBasedReal(freqs,Pvals,Sys)
 %
 % Construct an observer-based robust controller for systems with the same number of 
@@ -9,8 +9,9 @@ function ContrSys = ConstrContrObsBasedROM(freqs,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q
 % vector. The control system is assumed to be real (i.e.,
 % P(conj(s))=conj(P(s))), and P(iw_k) are invertible at the frequencies of
 % the reference and disturbance signals.
-% Sys = The Galerkin approximation (A_N,B_N,C_N,D) of the control system 
-% for the controller design
+% SysApprox = The Galerkin approximation (A^N,B^N,C^N,D) of the control 
+% system for the controller design. This is a struct with fields
+% SysApprox.AN, SysApprox.BN, SysApprox.CN, and SysApprox.D
 % IMstabmarg = intended stability margin of the closed-loop system
 % ROMorder = order of the reduced-order observer in the controller
 %
@@ -22,14 +23,14 @@ function ContrSys = ConstrContrObsBasedROM(freqs,Sys,alpha1,alpha2,R1,R2,Q0,Q1,Q
 % Copyright (C) 2020 by Lassi Paunonen (lassi.paunonen@tuni.fi)
 % Licensed under GNU GPLv3 (see LICENSE.txt).
 
-A = Sys.A;
-B = Sys.B;
-C = Sys.C;
-D = Sys.D;
+AN = SysApprox.AN;
+BN = SysApprox.BN;
+CN = SysApprox.CN;
+D = SysApprox.D;
 
-dimX = size(A,1);
-dimY = size(C,1);
-dimU = size(B,2);
+dimX = size(AN,1);
+dimY = size(CN,1);
+dimU = size(BN,2);
 
 if dimY ~= dimU
   error('The has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
@@ -60,20 +61,20 @@ end
 
 dimZ = size(G1,1);
 
-As = [G1,G2*C;zeros(dimX,dimZ),A];
-Bs = [G2*D;B];
+As = [G1,G2*CN;zeros(dimX,dimZ),AN];
+Bs = [G2*D;BN];
 
 Qs = blkdiag(Q0,Q2);
 
-SigmaN = are((A+alpha1*eye(dimX))',C'*(R1\C),Q1*Q1');
+SigmaN = are((AN+alpha1*eye(dimX))',CN'*(R1\CN),Q1*Q1');
 PiN = are(As+alpha2*eye(dimZ+dimX),Bs*(R2\Bs'),Qs'*Qs);
 
-L = -SigmaN*(C'/R1);
+L = -SigmaN*(CN'/R1);
 K = - (R2\Bs')*PiN;
 K1N = K(:,1:dimZ);
 K2N = K(:,(dimZ+1):end);
 
-rsys = balred(ss(A+L*C,[B+L*D,L],K2N,zeros(dimU,dimU+dimY)),ROMorder);
+rsys = balred(ss(AN+L*CN,[BN+L*D,L],K2N,zeros(dimU,dimU+dimY)),ROMorder);
 ALr = rsys.A;
 Br_full = rsys.B;
 BLr = Br_full(:,1:dimU);

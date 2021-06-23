@@ -1,14 +1,17 @@
-function Sys = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,N)
+function [x0,Sys,Q_coeff] = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0dot,N)
 % Construct a spectral Galerkin approximation with the Chebyshev function 
 % basis functions in [Shen 1995] for the 1D beam equation with Kelvin-Voigt 
 % damping on [-1,1] with clamped boundary conditions at both ends.
 % The system has two inputs with profile functions 'b1' and 'b2', 
 % two measured outputs, which are the deflections of the beam at 'xi1' and 
 % 'xi2', and a single disturbance input with a profile function 'bd1'. The
-% size of the resulting approximate system is (N-1)x(N-1)
+% size of the resulting approximate system is (N-1)x(N-1).
+% v0 and v0dot are the initial profile and velocity, respectively.
+% The output parameter Q_coeff is used for plotting of the results.
 %
 % Copyright (C) 2020 by Lassi Paunonen (lassi.paunonen@tuni.fi)
 % Licensed under GNU GPLv3 (see LICENSE.txt).
+
 
 
 ee = ones(N-1,1);
@@ -79,3 +82,35 @@ Sys.B = B;
 Sys.C = C;
 Sys.D = D;
 Sys.Bd = Bd;
+
+
+% Define an (N-1)x(N+1) conversion matrix Q_coeff such that
+% (c_k)_k=Q_coeff*(alpha_k)_k where c_k are the Chebyshev coefficients of a
+% function and alpha_k are the coordinates of the same function in the
+% basis {\phi_k}
+ee = ones(N-1,1);
+ls = (0:(N+2)).';
+Dia0 = ee;
+Diam2 = -2*ls(3:(end-2))./(ls(3:(end-2))+1);
+Diam4 = (ls(5:end)-3)./(ls(5:end)-1);
+Q_coeff = full(spdiags([Diam4,0*ee,Diam2,0*ee,Dia0],-4:0,N+3,N-1));
+
+
+% Initial condition v0, defined as a function, 
+% Chebyshev coefficients from Chebfun, converted into coordinates in \phi_k
+% Express the initial function as a truncated Chebyshev expansion
+v0fun = chebfun(v0,'trunc',N+3);
+v0dotfun = chebfun(v0dot,'trunc',N+3);
+% Convert the Chebyshev coefficients (coefficients of the series expansion)
+% to the inner products of the function v0 with the basis functions \phi_k
+v0init  = Q_coeff\chebcoeffs(v0fun);
+v0dotinit  = Q_coeff\chebcoeffs(v0dotfun);
+
+% For error checking:
+% % Plot the approximation of the initial condition in the subspace V 
+% v0check = chebfun(Q_coeff*v0init,'coeffs');
+% plot([v0check;v0])
+
+
+% Define the initial state (initial state of the controller is zero)
+x0 = [v0init;v0dotinit];
