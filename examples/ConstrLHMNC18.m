@@ -1,5 +1,8 @@
-function [x0,spgrid,sys] = ConstrLHMNC18(x0fun,N)
-% [x0,spgrid,sys] = ConstrHeat2Dtest1(c,x0fun,N)
+function [x0,spgrid,sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
+% [x0,spgrid,sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
+%
+% Construct the Timoshenko beam model from the conference article by
+% Paunonen, Le Gorrec and Ramirez at LHMNC in 2018.
 % Usage: Can also use solely for defining the initial state x0
 % x0 = initial state
 % spgrid = spatial grid of the domain
@@ -56,5 +59,5 @@ sys.C = C;
 sys.D = 0;
 
 spgrid = xis;
-x0 = x0fun(xis);
+x0 = [x10fun(xis(1:(end-1)));x20fun(xis(2:end));x30fun(xis(1:(end-1)));x40fun(xis(2:end))];
 
