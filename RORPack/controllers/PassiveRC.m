@@ -16,45 +16,16 @@ function [ContrSys,epsgain] = PassiveRC(freqs,Pvals,epsgain,Sys)
 
 dimY = size(Pvals{1},1);
 dimU = size(Pvals{1},2);
-q = length(freqs);
 
-dimZ = IMdim(freqs,dimY);
-  
-  
-ContrSys.G1 = zeros(dimZ);
-ContrSys.K = zeros(dimU,dimZ);
-
-% To add: weights for the components in B_c, based on values of the
-% transfer function at the frequencies
-
-
-if freqs(1)==0
-  zoffset = dimY; 
-  ContrSys.K(:,1:dimY) = eye(dimY);
-%   ContrSys.K(:,1:dimY) = negsqrt(Pvals{1}); % experimental: "optimal" choice of K_0?
-  nzfreqs = freqs(2:end);
-else
-  zoffset = 0;
-  nzfreqs = freqs;
+if ~isequal(dimY,dimU)
+    error('The system has different amounts of inputs and outputs, the controller design cannot be used!')
 end
 
-for ind = 1:length(nzfreqs)
-  indran = zoffset+(ind-1)*2*dimY+(1:(2*dimY));
+[G1,G2tmp] = ConstrIM(freqs,dimY);
 
-  ContrSys.G1(indran,indran) = nzfreqs(ind)*[zeros(dimY) eye(dimY);-eye(dimY) zeros(dimY)];
-  
-%   Ppi = pinv(Pvals{ind});
-%   Ppi = negsqrt(Pvals{ind}); % experimental: "optimal" choice of K_0?
-%   ContrSys.K(:,indran) = [real(Ppi) imag(Ppi)];
-end
-
-if freqs(1)==0
-  ContrSys.G2 = [-eye(dimY);repmat([-eye(dimY);zeros(dimY)],length(nzfreqs),1)];
-else
-  ContrSys.G2 = repmat([-eye(dimY);zeros(dimY)],q,1);
-end
-
-ContrSys.K = -(ContrSys.G2).';
+ContrSys.G1 = G1;
+ContrSys.G2 = -G2tmp;
+ContrSys.K = G2tmp.';
 
 if length(epsgain) == 1
   
@@ -96,10 +67,4 @@ for ind = 1:length(ee_cand)
   end
 
 end
-
-function Amsq = negsqrt(A)
-% Compute "A^{-1/2}" for a matrix A
-
-[U,S,V] = svd(A);
-Amsq = V*diag(1./sqrt(diag(S)))*U';
 
