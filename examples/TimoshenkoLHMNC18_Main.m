@@ -30,7 +30,7 @@ x40fun = @(x) zeros(size(x));
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
 
-[x0,spgrid,Sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N);
+[x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N);
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -102,6 +102,7 @@ epsgain = [10,50];
 
 
 CLSys = ConstrCLSys(Sys,ContrSys);
+figure(1)
 PlotEigs(full(CLSys.Ae))
 
 stabmarg = CLStabMargin(CLSys)
@@ -112,34 +113,45 @@ Tend = 16;
 tgrid = linspace(0,Tend,300);
 
 
-
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
-figure(1)
-subplot(2,1,1)
-hold off
-cla
-hold on
-plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
-plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
-title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
-set(gca,'xgrid','off','tickdir','out','box','off')
-subplot(2,1,2)
-hold off
-cla
-plot(tgrid,CLsim.error,'Linewidth',2);
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-title('Tracking  error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
-%set(gcf,'color',1/255*[252 247 255])
+
+% Choose whther or not to print titles of the figures
+PrintFigureTitles = true;
+
+figure(2)
+subplot(3,1,1)
+plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+subplot(3,1,2)
+plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+plotControl(tgrid,CLsim,ContrSys,4*N,PrintFigureTitles)
 
 
 figure(3)
-colormap jet
-%PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-PlotLHMNCSurf(CLsim.xesol,spgrid,tgrid,[-9 9])
-%PlotLHMNCSurf(CLsim.xesol(205:end,:),spgrid,tgrid,[-9 9])
+plotskip = 2;
+PlotLHMNCSurf(CLsim.xesol(:,1:plotskip:end),spgrid,tgrid(:,1:plotskip:end),[-9 9])
 set(gca,'ztick',-8:4:8);
-%colormap jet
+
+% 
+% figure(1)
+% subplot(2,1,1)
+% hold off
+% cla
+% hold on
+% plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
+% plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
+% title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
+% set(gca,'xgrid','off','tickdir','out','box','off')
+% subplot(2,1,2)
+% hold off
+% cla
+% plot(tgrid,CLsim.error,'Linewidth',2);
+% set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
+% title('Tracking  error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
+% %set(gcf,'color',1/255*[252 247 255])
+% 
+
 
 % figure(4)
 % tt = linspace(0,16,500)
