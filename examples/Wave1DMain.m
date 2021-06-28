@@ -77,6 +77,12 @@ freqs = [1 2 3 4];
 %   end
 % end
 
+% Check that the system, the reference and disturbance signals, and the
+% frequencies are defined in a consistent way.
+Sys = SysConsistent(Sys,yref,wdist,freqs);
+
+
+%%
 
 % epsgainrange = [10,50];
 % epsgain = 13;
