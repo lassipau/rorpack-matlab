@@ -75,8 +75,8 @@ K = -.5*Sys.B';
 L = -.5*Sys.C';
 % PlotEigs(full(Sys.A+L*Sys.C))
 
-ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement');
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR');
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',0.5);
+ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',0.5);
 
 
 CLSys = ConstrCLSys(Sys,ContrSys);
@@ -126,10 +126,10 @@ set(gca,'ztick',-8:4:8);
 %%
 
 
-figure(2)
-colormap jet
+% figure(2)
+% colormap jet
 % No movie recording
-[~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);

@@ -9,9 +9,9 @@ function [ContrSys,epsgain] = PassiveRC(freqs,Pvals,epsgain,Sys)
 % function of the system on the frequencies 'freqs'
 % ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
 
-%if max(real(eig(full(Sys.A))))>=0
-%  error('The system is unstable, the low-gain controller design cannot be completed.')
-%end
+% if max(real(eig(full(Sys.A))))>=0
+%   error('The system is unstable, the low-gain controller design cannot be completed.')
+% end
 
 
 dimY = size(Pvals{1},1);
@@ -31,7 +31,6 @@ ContrSys.K = zeros(dimU,dimZ);
 if freqs(1)==0
   zoffset = dimY; 
   ContrSys.K(:,1:dimY) = eye(dimY);
-%   ContrSys.K(:,1:dimY) = negsqrt(Pvals{1}); % experimental: "optimal" choice of K_0?
   nzfreqs = freqs(2:end);
 else
   zoffset = 0;
@@ -43,9 +42,6 @@ for ind = 1:length(nzfreqs)
 
   ContrSys.G1(indran,indran) = nzfreqs(ind)*[zeros(dimY) eye(dimY);-eye(dimY) zeros(dimY)];
   
-%   Ppi = pinv(Pvals{ind});
-%   Ppi = negsqrt(Pvals{ind}); % experimental: "optimal" choice of K_0?
-%   ContrSys.K(:,indran) = [real(Ppi) imag(Ppi)];
 end
 
 if freqs(1)==0
@@ -96,10 +92,3 @@ for ind = 1:length(ee_cand)
   end
 
 end
-
-function Amsq = negsqrt(A)
-% Compute "A^{-1/2}" for a matrix A
-
-[U,S,V] = svd(A);
-Amsq = V*diag(1./sqrt(diag(S)))*U';
-

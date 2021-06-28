@@ -2,7 +2,7 @@
 
 addpath(genpath('../RORPack/'))
 
-Sys.A = [0, 1;-1,0];
+Sys.A = [0, 1;-1,-1];
 Sys.B = [0;1];
 Sys.C = [0,1];
 Sys.D = 0;
@@ -35,22 +35,22 @@ freqsReal = [1 2 3 6];
 
 freqs = 1i*freqsReal;
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-% 
-% Pvals = cell(1,length(freqs));
-% for ind = 1:length(freqs)
-%   Pvals{ind} = Pappr(freqs(ind));
-% end
+dimX = size(Sys.A,1);
+Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 
-% epsgainrange = [0.01,1.8];
+Pvals = cell(1,length(freqs));
+for ind = 1:length(freqs)
+  Pvals{ind} = Pappr(freqs(ind));
+end
+
+epsgainrange = [0.01,1.8];
 % epsgain = .1;
 %[ContrSys,epsgain] = ConstrContrLG(freqs,Pvals,epsgain,Sys);
 
-% [ContrSys,epsgain] = ConstrContrLGReal(freqsReal,Pvals,epsgainrange,Sys);
-% epsgain
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
+epsgain
 
-ContrSys = ConstrContrREObsReal(freqsReal,Sys);
+% ContrSys = ConstrContrREObsReal(freqsReal,Sys);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
@@ -74,10 +74,10 @@ plotBasics(tgrid,yref,CLsim)
 %%
 
 
-figure(2)
-colormap jet
+% figure(2)
+% colormap jet
 % % No movie recording
-[~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
+% [~,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0.03,0);
 % 
 % % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
