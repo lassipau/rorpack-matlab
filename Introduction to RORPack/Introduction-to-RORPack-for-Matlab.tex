@@ -1,5 +1,6 @@
 \documentclass[11pt, a4paper]{amsart}
 \usepackage{amssymb, array, amsmath, amscd, pdfpages, enumerate, amsthm, setspace, mathtools}
+\usepackage[framed,autolinebreaks,useliterate]{mcode}
 \usepackage[papersize={17cm,26cm},total={12.7cm,22.5cm},left=2.15cm]{geometry}
 
 %\usepackage[smartEllipses]{markdown}
@@ -29,22 +30,22 @@
 \DeclareFixedFont{\itm}{T1}{txtt}{m}{it}{9}  % for normal
 
 % Custom colors
-\usepackage{color}
-\definecolor{deepblue}{rgb}{0,0,0.5}
-\definecolor{deepred}{rgb}{0.6,0,0}
-\definecolor{deepgreen}{rgb}{0,0.5,0}
-\lstset{
-language=Python,
-basicstyle=\ttm,
-otherkeywords={self},             % Add keywords here
-keywordstyle=\ttb\color{deepblue},
-emph={MyClass,__init__},          % Custom highlighting
-commentstyle=\itm,
-emphstyle=\ttb\color{deepred},    % Custom highlighting style
-stringstyle=\color{deepgreen},
-frame=tb,                         % Any extra options here
-showstringspaces=false            % 
-}
+%\usepackage{color}
+%\definecolor{deepblue}{rgb}{0,0,0.5}
+%\definecolor{deepred}{rgb}{0.6,0,0}
+%\definecolor{deepgreen}{rgb}{0,0.5,0}
+%\lstset{
+%language=Python,
+%basicstyle=\ttm,
+%otherkeywords={self},             % Add keywords here
+%keywordstyle=\ttb\color{deepblue},
+%emph={MyClass,__init__},          % Custom highlighting
+%commentstyle=\itm,
+%emphstyle=\ttb\color{deepred},    % Custom highlighting style
+%stringstyle=\color{deepgreen},
+%frame=tb,                         % Any extra options here
+%showstringspaces=false            % 
+%}
 
 \renewcommand{\Dom}{D}
 
@@ -228,7 +229,7 @@ Basic workflow for robust controller design and simulation for a given system is
 \begin{enumerate}
 %  \item Create a main file for the simulation. 
 %    The file includes the following parts in the given order.
-  \item Calling of user-defined Python routines that return a numerical approximation of the linear PDE model.
+  \item Calling of a user-defined Matlab function that returns a numerical approximation of the linear PDE model. In the provided examples this function is in a separate file with the prefix ``Constr''.
   \item Defining the reference and disturbance signals to be considered.
   \item Calling of a \RORname\ routine for construction of a robust controller that is suitable for the type of PDE model.
     This typically involves choosing appropriate parameters for the controller construction.
@@ -238,8 +239,8 @@ Basic workflow for robust controller design and simulation for a given system is
 \end{enumerate}
 The example cases included in \RORname\ are built around main files that follow the same structure, and the users are encouraged to implement their own simulations by modifying the example codes.
 
-It is also possible to combine other Python software packages and Matlab toolboxes in the study of robust controller design for PDE models in order to employ ready-made numerical approximations or additional numerical methods in the computation of required controller parameters. This approach is illustrated in one of the PDE example cases ``\texttt{heat\_1d\_2}'' described in Section~\ref{sec:Heat1D2} (Case~2). 
-In this example the transfer function of the controlled PDE and other parameters used in the controller construction are computed with the \textbf{Chebfun package}~\cite{DriHal14book,Tre13book} (\href{https://chebfun.org/}{https://chebfun.org/}) which provides flexible tools for solution of differential equations with extreme accuracy using spectral methods. 
+It is also possible to combine other Python software packages and Matlab toolboxes in the study of robust controller design for PDE models in order to employ ready-made numerical approximations or additional numerical methods in the computation of required controller parameters. This approach is illustrated in one of the PDE example cases ``\texttt{BeamKelvinVoigt\_main}'' described in Section~\ref{sec:ControlledBeams} (Case Euler-Bernolli Beam with Kelvin-Voigt Damping).
+In this example the system is approximated using the Galerkin method based on a nonlocal basis based on Chebyshev polynomials with the \textbf{Chebfun package}~\cite{DriHal14book} (\href{https://chebfun.org/}{https://chebfun.org/}) which provides flexible tools for solutions of differential equations with extreme accuracy using spectral methods. 
 
 \section{Introduction to Robust Output Regulation}
 
@@ -346,192 +347,306 @@ The other controller structures also use knowledge of the parameters $(A,B,C,D)$
 
 \red{TODO: UPDATE this section to Matlab Version}
 
-The \texttt{rorpack} Python library can be installed for Python 2 or Python 3 as instructed in the \texttt{README.md} file included in the software package (this mainly involves downloading the source codes and typing '\texttt{pip install .}' or '\texttt{pip3 install .}' in the main directory). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
+The \texttt{rorpack} Matlab library can be installed for Matlab R2020a and later (earlier versions may be fine too) as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
 
-The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases included in the file \texttt{heat\_1d\_3.py} and documented in Section~\ref{sec:Heat1D3}. Due to the properties of the Python language, the constructor routines used in the main simulation are written at the \textit{beginning}  of the file.
+The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases included in the files \texttt{Heat1DtestCase3.m} and \texttt{Constr1DHeatCase3.m} and documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab, the constructor routine used in the main simulation is in its own, separate, function file.
 
-Contents of the file \texttt{heat\_1d\_3.py}: The file begins with comment lines and loading of the necessary parts of the \texttt{rorpack} library as well as other Python packages.
+Contents of the files \texttt{Heat1DtestCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DtestCase3.m} begins with comment lines and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
 
 \begin{lstlisting}
-'''
-Heat equation on the interval [0,1] with  Neumann boundary control
-and Dirichlet boundary observation. Approximation with a Finite 
-Difference scheme.
+%% Heat equation on the interval [0,1] with 
+% Neumann boundary control and Dirichlet boundary observation 
+% Approximation with a Finite differences scheme 
 
-Neumann boundary disturbance at x=0, two distributed controls and
-two distributed measurements regulated outputs. The controls act 
-on the intervals 'IB1' and 'IB2' (Default 'IB1' = [0.3,0.4] and 
-'IB2' = [0.6,0.7]) and the measurements are the average 
-temperatures on the intervals 'IC1'  and 'IC2' (Default 
-'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
-'''
-import numpy as np
-from rorpack.system import LinearSystem
-from rorpack.controller import *
-from rorpack.closed_loop_system import ClosedLoopSystem
-from rorpack.plotting import *
-from laplacian import diffusion_op_1d
+% Neumann boundary disturbance at x=0, two distributed controls and
+% two distributed measurement regulated outputs. The controls act 
+% on the intervals 'IB1' and 'IB2' (Default 'IB1' = [0.3,0.4] and 
+% 'IB2' = [0.6,0.7]) and the measurements are the average 
+% temperatures on the intervals 'IC1'  and 'IC2' (Default 
+% 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
+
+addpath(genpath('../RORPack/'))
 \end{lstlisting}
 
-The next part introduces a constructor routine to define the Finite Difference approximation of the heat equation and the input and output operators. The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material.
+The next part defines the parameters $N$, \texttt{cfun} and \texttt{x0fun} used in the construction of the system $(A,B,B_d,C,D)$ with the function \texttt{Constr1DHeatCase3}, which is introduced next. The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material. $x0fun$ describes the initial heat profile of the plant.
 
 \begin{lstlisting}
-def construct_heat_1d_3(N, cfun, IB1, IB2, IC1, IC2):
-    spgrid = np.linspace(0, 1, N+1)
+% Parameters for this example.
+N = 100; 
 
-    plt.plot(spgrid,cfun(spgrid))
-    plt.title('The thermal diffusivity $c(x)$ of the material')
-    plt.tight_layout()
-    plt.grid(True)
-    plt.show()
+% Initial state of the plant
+%x0fun = @(x) zeros(size(x));
+x0fun = @(x) 1*(1+cos(pi*(1-x)));
+%x0fun = @(x) 3*(1-x)+x;
+%x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
+%x0fun = @(x) 1/2*x.^2.*(3-2*x)-1;
+%x0fun = @(x) 1/2*x.^2.*(3-2*x)-1/2;
+%x0fun = @(x) 1*(1-x).^2.*(3-2*(1-x))-1;
+%x0fun = @(x) .5*(1-x).^2.*(3-2*(1-x))-.5;
+%x0fun = @(x) 1/4*(x.^3-1.5*x.^2)-1/4;
+%x0fun = @(x) .2*x.^2.*(3-2*x)-.5;
 
-    h = spgrid[1]-spgrid[0]
-    DiffOp, spgrid = diffusion_op_1d(spgrid, cfun, 'ND')
-    A = DiffOp
+% The spatially varying thermal diffusivity of the material
+% cfun = @(t) ones(size(t));
+% cfun = @(t) 1+t;
+% cfun = @(t) 1-2*t.*(1-2*t);
+% cfun = @(t) 1+0.5*cos(5/2*pi*t);
+cfun = @(t) 0.3-0.6*t.*(1-t);
 
-    B1 = 1/(IB1[1] - IB1[0])*np.logical_and(spgrid >= IB1[0], 
-            spgrid <= IB1[1])
-    B2 = 1/(IB2[1] - IB2[0])*np.logical_and(spgrid >= IB2[0],
-            spgrid <= IB2[1])
-    B = np.stack((B1, B2), axis=1)
-    C1 = h/(IC1[1] - IC1[0])*np.logical_and(spgrid >= IC1[0],
-            spgrid <= IC1[1])
-    C2 = h/(IC2[1] - IC2[0])*np.logical_and(spgrid >= IC2[0],
-            spgrid <= IC2[1])
-    C = np.stack((C1, C2))
-    D = np.zeros((2, 2))
-    Bd = np.bmat([[np.atleast_2d(-2/h)], [np.zeros((N-1, 1))]])
+IB1 = [.3, .4];
+IB2 = [.6, .7];
+IC1 = [.1, .2];
+IC2 = [.8, .9];
 
-    return LinearSystem(A, B, C, D, Bd, np.zeros((2,1))), spgrid
+[x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2);
  \end{lstlisting}
 
- The next part defines the parameters of the system and constructs the system $(A,B,B_d,C,D)$ as an object of the class \texttt{LinearSystem} of \RORname.
+The function \texttt{Constr1DHeatCase3} used to approximate the system begins with comments describing this particular approximation along with argument checking since the inputs \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are not explicitly required to construct the approximation.
 
 \begin{lstlisting}
-# Parameters for this example.
-N = 100
+function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(...
+    cfun,x0fun,N,IB1,IB2,IC1,IC2)
+% [x0,Sys,spgrid] = Constr1DHeatCase3(x0fun,N)
+% 
+% Finite Differences approximation of a 1D Heat equation
+% with a Neumann boundary condition at x=0 and a Dirichlet condition at x=1
+% Usage: Can also use solely for defining the initial state x0
+% cfun = spatially variying thermal diffusivity of the material
+% x0fun = initial heat profile, function handle
+% Sys = system parameters, (sys.A,sys.B,sys.Bd,sys.C,sys.D)
+% N = dimension of the approximated system (does not include point x=1)
+%
+% Case 3: Neumann boundary disturbance at x=0, 2 distributed controls and 
+% two distributed measurements regulated output y(t). The controls affect
+% the intervals 'IB1' = [a_1,b_1] and 'IB2' = [a_2,b_2], and the
+% measurements are the averages of the temperatures on the intervals 
+% 'IC1' = [c_1,d_1] and 'IC2' = [c_2,d_2]. If these parameters are not
+% given, then default configuration   IB1 = [.3, .4], IB2 = [.6, .7], 
+% IC1 = [.1, .2], and IC2 = [.8, .9] is used.
 
-# The spatially varying thermal diffusivity of the material
-# cfun = lambda x: np.ones(np.atleast_1d(x).shape)
-# cfun = lambda x: 1+x
-# cfun = lambda x: 1-2*x*(1-2*x)
-cfun = lambda x: 1+.5*np.cos(5/2*np.pi*x)
-# Note: Lower diffusivity is difficult for the Low-Gain
-# and Passive controllers
-# cfun = lambda x: .2-.4*x*(1-x)
+if nargin <= 3
+  IB1 = [.3, .4];
+  IB2 = [.6, .7];
+  IC1 = [.1, .2];
+  IC2 = [.8, .9];
+end
 
-# Regions of inputs and outputs
-IB1 = np.array([0.3, 0.4])
-IB2 = np.array([0.6, 0.7])
-IC1 = np.array([0.1, 0.2])
-IC2 = np.array([0.8, 0.9])
-
-# Length of the simulation
-t_begin = 0
-t_end = 8
-t_points = 300
-
-# Construct the system.
-sys, spgrid = construct_heat_1d_3(N, cfun, IB1, IB2, IC1, IC2)
+% Check that the intervals are defined correctly
+if ~isempty(find([IB1(:);IB2(:);IC1(:);IC2(:)]<0))...
+        || ~isempty(find([IB1(:);IB2(:);IC1(:);IC2(:)]>1))
+  error(...
+      'All limits of the intervals IB1, IB2, IC1, and IC2 need to be on [0,1].')
+elseif IB1(2)<=IB1(1) || IB2(2)<=IB2(1) ||...
+        IC1(2)<=IC1(1) || IC2(2)<=IC2(1)
+  error(...
+      'All intervals IB1, IB2, IC1, and IC2 need to be of positive lengths.')
+end
   \end{lstlisting}
 
-The next part defines the reference signal $\yref(t)$ (in \texttt{yref}) and the disturbance signal $\wdist(t)$ (in \texttt{wdist}) and lists the (real) frequencies $\set{\gw_k}_{k=1}^q$ in the variable \texttt{freqsReal}. Alternative reference and disturbance signals are commented out in the code for further simulation experiments.
+The rest of the function approximates the system with the appropriate boundary conditions.
+
+\begin{lstlisting}
+% The point x=1 has a Dirichlet boundary condition, and is not chosen as a
+% variable
+spgrid = linspace(0,1,N+1);
+h = 1/N;
+% Case 3 has a Neumann boundary condition at x=0
+% and a Dirichlet condition at x=1
+BCtype = 'ND';
+
+[A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
+
+% Two distributed inputs on the intervals IB1 and IB2
+B1 = 1/(IB1(2)-IB1(1))*(spgrid(1:N)>=IB1(1) & spgrid(1:N)<=IB1(2));
+B1 = B1(:);
+B2 = 1/(IB2(2)-IB2(1))*(spgrid(1:N)>=IB2(1) & spgrid(1:N)<=IB2(2));
+B2 = B2(:);
+
+% Neumann boundary disturbance at x=0, sign is based on the
+% _outwards_ normal derivative
+Bd = sparse([-2/h;zeros(N-1,1)]); 
+
+% Two distributed outputs on the intervals IC1 and IC2
+C1 = h/(IC1(2)-IC1(1))*(spgrid(1:N)>=IC1(1) & spgrid(1:N)<=IC1(2));
+C2 = h/(IC2(2)-IC2(1))*(spgrid(1:N)>=IC2(1) & spgrid(1:N)<=IC2(2));
+
+x0 = x0fun(spgrid(1:N)).';
+
+Sys.A = A;
+Sys.B = [B1,B2];
+Sys.Bd = Bd;
+Sys.C = [C1;C2];
+Sys.D = zeros(2,2);
+Sys.Dd = zeros(2,1);
+  \end{lstlisting}
+
+The next part of the main file defines the reference signal $\yref(t)$ (in \texttt{yref}) and the disturbance signal $\wdist(t)$ (in \texttt{wdist}) and lists the (real) frequencies $\set{\gw_k}_{k=1}^q$ in the variable \texttt{freqsReal}. Alternative reference and disturbance signals are commented out in the code for further simulation experiments.
 \emph{If disturbance inputs are not present in the simulation, $\wdist(t)$ should be defined as a zero signal with \textup{\texttt{wdist = @(t) zeros(size(t))}}. Also \textup{\texttt{Sys.Bd}} should be defined as a $\textup{dimX}\times 1$ zero matrix, and this can be done automatically using the function \textup{\texttt{SysConsistent}}.}
 
 \begin{lstlisting}
-# Define the reference and disturbance signals, and list the
-# required frequencies in 'freqsReal'
-# Case 1:
-yref = lambda t: np.stack((np.sin(2*t), 2*np.cos(3*t)))
-wdist = lambda t: np.sin(6*t)
+% Define the reference and disturbance signals, and list the
+% required frequencies in 'freqsReal'
 
-# Case 2:
-# yref = lambda t: np.ones((2,np.atleast_1d(t).shape[0]))
-# wdist = lambda t: np.zeros(np.atleast_1d(t).shape)
+%yref = @(t) sin(2*t)+.1*cos(6*t);
+%yref = @(t) sin(2*t)+.2*cos(3*t);
+%yref = @(t) ones(size(t));
 
-freqsReal = np.array([0, 1, 2, 3, 6])
+%wdist = @(t) ones(size(t));
+%wdist = @(t) sin(t);
+%wdist = @(t) zeros(size(t));
+
+% Case 1:
+yref = @(t) [sin(2*t);2*cos(3*t)];
+%wdist = @(t) zeros(size(t));
+wdist = @(t) sin(6*t);
+
+% Case 2:
+% yref = @(t) ones(size(t));
+% wdist = @(t) ones(size(t));
+
+% Case 3:
+% yref = @(t) sin(2*t)+.1*cos(6*t);
+% wdist = @(t) sin(t);
+
+freqsReal = [1 2 3 6];
 \end{lstlisting}
 
-The next part constructs the chosen controller structure and the closed-loop system as objects of the \RORname\ classes. Alternative controller structures are commented out in the code for easy comparison of controller performances.
+The next part constructs the chosen controller structure with the corresponding function from the \RORname\ ``controllers'' folder. Alternative controller structures are commented out in the code for easy comparison of controller performances.
 
 \begin{lstlisting} 
-# Construct the controller and the closed loop system.
+%% Construct the controller
 
-# Controller choices, Low-gain robust controller
-# Requires the transfer function values P(i*w_k)
-# epsgainrange = np.array([0.3,0.6])
-# Pvals = np.array(list(map(sys.P, 1j * freqsReal)))
-# contr = LowGainRC(sys, freqsReal, epsgainrange, Pvals)
+% A Low-Gain 'Minimal' Robust Controller
 
+% dimX = size(Sys.A,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% 
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%   Pvals{ind} = Pappr(freqsReal(ind));
+% end
+% 
+% epsgainrange = [0.01,6];
+% % epsgain = .1;
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
+% epsgain
 
-# Dual observer-based controller
-# Requires stabilizing operators K and L1
-# and the transfer function values P_L(i*w_k)
-# K = -sys.B.conj().T
-# L1 = -10*sys.C.conj().T
-# PLvals = np.array(list(map(lambda freq: sys.P_L(freq, L1),
-#     1j * freqsReal)))
-# IMstabmargin = 0.5
-# IMstabmethod = 'LQR'
-# contr = DualObserverBasedRC(sys, freqsReal, PLvals, K, L1, 
-#	IMstabmargin, IMstabmethod)
+% An observer-based robust controller
+% Stabilizing state feedback and output injection operators K and L
+% These are chosen based on collocated design. Only the single unstable
+% eigenvalue at s=0 needs to be stabilized
+K = -Sys.B';
+% K = zeros(2,N);
+% PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
 
-# Observer-based controller
-# Requires stabilizing operators K21 and L
-# and the transfer function values P_K(i*w_k)
-K21 = -sys.B.conj().T
-L = -10*sys.C.conj().T
-PKvals = np.array(list(map(lambda freq: sys.P_K(freq, K21), 
-    1j * freqsReal)))
-IMstabmargin = 0.5
-IMstabmethod = 'LQR'
-contr = ObserverBasedRC(sys, freqsReal, PKvals, K21, L,
-	IMstabmargin, IMstabmethod)
+%
+L = -10*Sys.C';
+%  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-# Construct the closed-loop system 
-clsys = ClosedLoopSystem(sys, contr) 
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+
+% A reduced order observer-based robust controller
+%
+% The construction of the controller uses a Galerkin approximation
+% of the heat system: The Galerkin arpproximation used in the controller
+% design is a lower dimensional numerical approximation of the PDE model.
+Nlow = 50;
+[~,Sys_Nlow,~,~] = Constr1DHeatCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
+
+% Store the numerical approximation in "SysApprox".
+SysApprox.AN = Sys_Nlow.A;
+SysApprox.BN = Sys_Nlow.B;
+SysApprox.CN = Sys_Nlow.C;
+SysApprox.D = Sys_Nlow.D;
+alpha1 = 1;
+alpha2 = 0.5;
+Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
+Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
+R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
+ROMorder = 3;
+
+ContrSys = ObserverBasedROMRC(...
+    freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 \end{lstlisting}
 
-The next part simulates the behaviour of the closed-loop system. The initial state of the system is chosen in the variable \texttt{x0}, and the initial state of the controller is chosen by default to be zero.
+The next part constructs and simulates the behaviour of the closed-loop system.
 
 \begin{lstlisting}
-# Simulate the system, define the initial state x_0
-# x0fun = lambda x: np.zeros(np.size(x))
-x0fun = lambda x: 0.5 * (1 + np.cos(np.pi * (1 - x)))
-# x0fun = lambda x: 3*(1-x)+x
-# x0fun = lambda x: 1/2*x**2*(3-2*x)-1
-# x0fun = lambda x: 1/2*x**2*(3-2*x)-0.5
-# x0fun = lambda x: 1*(1-x)**2*(3-2*(1-x))-1
-# x0fun = lambda x: 0.5*(1-x)**2*(3-2*(1-x))-0.5
-# x0fun = lambda x: 0.25*(x**3-1.5*x**2)-0.25
-# x0fun = lambda x: 0.2*x**2*(3-2*x)-0.5
-x0 = x0fun(spgrid)
+%% Closed-loop construction and simulation
 
-# z0 is chosen to be zero by default
-z0 = np.zeros(contr.G1.shape[0])
-xe0 = np.concatenate((x0, z0))
+% Construct the closed-loop system
+CLSys = ConstrCLSys(Sys,ContrSys);
 
-tgrid = np.linspace(t_begin, t_end, t_points)
-sol,output,error,control,t = clsys.simulate(xe0,tgrid, yref, wdist)
-print('Simulation took %f seconds' % t)
+stabmarg = CLStabMargin(CLSys)
+
+xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
+
+Tend = 8;
+tgrid = linspace(0,Tend,300);
+
+CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 \end{lstlisting}
 
-Finally, the results of the simulation are plotted in separate figures and the behaviour of the controlled state is animated using the user-defined routines.
+Finally, the results of the simulation are plotted in separate figures and the behaviour of the controlled state is animated using the user-defined routines. The option to save the animation as an MPEG-4 or AVI file is commented out.
 
 \begin{lstlisting}
-# Plot the output and the error, and animate the behaviour 
-# of the controlled state.
-plot_output(tgrid, output, yref, 'subplot', 'default')
-plot_error_norm(tgrid, error)
-plot_control(tgrid, control)
+%% Visualization
 
-# In plotting and animating the state, fill in the homogeneous
-# Dirichlet boundary condition at x=1
-sys_state = np.vstack((sol.y[0:N],np.zeros((1,np.size(tgrid)))))
-spgrid = np.concatenate((spgrid,np.atleast_1d(1)))
+figure(1)
+PlotEigs(CLSys.Ae,[-30 .3 -6 6])
 
-plot_1d_surface(tgrid, spgrid, sys_state, colormap=cm.plasma)
-animate_1d_results(spgrid, sys_state, tgrid)
+% Choose whether or not to print titles of the figures
+PrintFigureTitles = true;
+
+figure(2)
+subplot(3,1,1)
+plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+subplot(3,1,2)
+plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+
+% In plotting and animating the state,
+% fill in the homogeneous Dirichlet boundary condition at x=1
+spgrid = [spgrid 1];
+
+figure(3)
+colormap jet
+Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
+
+figure(4)
+% No movie recording
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+
+% Movie recording
+% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
+
+%movie(MovAnim)
+
+figure(5)
+tt = linspace(0,16,500);
+plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
+title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
+set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
+
+% Export movie to AVI
+
+% AnimExport = VideoWriter('Heat1DCase3-animation.mp4','MPEG-4');
+% AnimExport.Quality = 100;
+
+% AnimExport = VideoWriter('Heat1DCase3-animation.avi','Uncompressed AVI');
+
+% AnimExport.FrameRate = 15;
+% open(AnimExport);
+% writeVideo(AnimExport,MovAnim);
+% close(AnimExport);
 \end{lstlisting}
 
 
@@ -1020,6 +1135,7 @@ In the simulations the system is approximated using the orthonormal eigenfunctio
 }
 
 \subsection{The Controlled Beam Equations}
+\label{sec:ControlledBeams}
 
 
 The following example study controller design for controlled beam equation models.

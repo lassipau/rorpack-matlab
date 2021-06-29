@@ -2,13 +2,16 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Case 1: Neumann boundary control at x=0, regulated output y(t) and a 
-% Neumann boundary disturbance at x=1
-% Unstable system, stabilization by stabilizing the only unstable
-% eigenvalue =0
+% Neumann boundary disturbance at x=0, two distributed controls and
+% two distributed measurement regulated outputs. The controls act 
+% on the intervals 'IB1' and 'IB2' (Default 'IB1' = [0.3,0.4] and 
+% 'IB2' = [0.6,0.7]) and the measurements are the average 
+% temperatures on the intervals 'IC1'  and 'IC2' (Default 
+% 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
 
 addpath(genpath('../RORPack/'))
 
+% Parameters for this example.
 N = 100; 
 
 % Initial state of the plant
@@ -46,6 +49,9 @@ IC2 = [.8, .9];
 % plot(tt,sum(h*xx.^2,2),'Linewidth',2)
 % % plot(tt,(xx(:,2)-xx(:,1))*(N-1))
 
+% Define the reference and disturbance signals, and list the
+% required frequencies in 'freqsReal'
+
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
 %yref = @(t) ones(size(t));
@@ -67,26 +73,28 @@ wdist = @(t) sin(6*t);
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-freqs = [1 2 3 6];
+freqsReal = [1 2 3 6];
 
 % Sys.A = Sys.A-Sys.B*Sys.B';
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
 
 % eig(full(Sys.A))
 
+%% Construct the controller
+
 % A Low-Gain 'Minimal' Robust Controller
 
 % dimX = size(Sys.A,1);
 % Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
-% Pvals = cell(1,length(freqs));
-% for ind = 1:length(freqs)
-%   Pvals{ind} = Pappr(freqs(ind));
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%   Pvals{ind} = Pappr(freqsReal(ind));
 % end
 % 
 % epsgainrange = [0.01,6];
 % % epsgain = .1;
-% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
 % epsgain
 
 % An observer-based robust controller
@@ -101,10 +109,10 @@ K = -Sys.B';
 L = -10*Sys.C';
 %  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',1);
-% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',1);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',1);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',1);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
 
 % A reduced order observer-based robust controller
 %
@@ -121,36 +129,37 @@ SysApprox.CN = Sys_Nlow.C;
 SysApprox.D = Sys_Nlow.D;
 alpha1 = 1;
 alpha2 = 0.5;
-Q0 = eye(IMdim(freqs,size(SysApprox.CN,1))); % Size = dimension of the IM 
+Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
 Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
 R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 ROMorder = 3;
 
-ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ObserverBasedROMRC(...
+    freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+%% Closed-loop construction and simulation
 
-%% Closed-loop simulation
-
-
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
-
-figure(1)
-PlotEigs(CLSys.Ae,[-30 .3 -6 6])
-
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 8;
 tgrid = linspace(0,Tend,300);
 
-
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
-% Choose whther or not to print titles of the figures
+%% Visualization
+
+figure(1)
+PlotEigs(CLSys.Ae,[-30 .3 -6 6])
+
+% Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
 figure(2)
@@ -161,9 +170,6 @@ plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
-%%
-
-
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
 spgrid = [spgrid 1];
@@ -172,7 +178,6 @@ figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
-%%
 figure(4)
 % No movie recording
 [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
@@ -182,17 +187,13 @@ figure(4)
 
 %movie(MovAnim)
 
-%%
-
-
 figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
-
-%% Export movie to AVI
+% Export movie to AVI
 
 % AnimExport = VideoWriter('Heat1DCase3-animation.mp4','MPEG-4');
 % AnimExport.Quality = 100;
