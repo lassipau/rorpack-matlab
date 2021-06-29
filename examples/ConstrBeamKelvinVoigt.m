@@ -1,4 +1,4 @@
-function [x0,Sys,Q_coeff] = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0dot,N)
+function [x0,Sys,Q_coeff] = ConstrBeamKelvinVoigt(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0dot,N)
 % Construct a spectral Galerkin approximation with the Chebyshev function 
 % basis functions in [Shen 1995] for the 1D beam equation with Kelvin-Voigt 
 % damping on [-1,1] with clamped boundary conditions at both ends.
@@ -10,7 +10,8 @@ function [x0,Sys,Q_coeff] = ConstrEBKVbeam(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0d
 % The output parameter Q_coeff is used for plotting of the results.
 %
 % Copyright (C) 2020 by Lassi Paunonen (lassi.paunonen@tuni.fi)
-% Licensed under GNU GPLv3 (see LICENSE.txt).
+% Licensed under GNU GPLv3 (see LICENSE.txt at 
+% https://github.com/lassipau/MTNS20-Matlab-simulations/).
 
 
 
@@ -20,6 +21,16 @@ kk = (0:(N-2))';
 Dia0 = pi/2*([2;ones(N-2,1)]+(4*(kk+2).^2+(kk+1).^2)./(kk+3).^2);
 Dia2 = -pi*((kk+2)./(kk+3)+(kk+1).*(kk+4)./(kk+3)./(kk+5));
 Dia4 = pi/2*(kk+1)./(kk+3);
+
+% The basis functions are \phi_k = T_k-2*(k+2)/(k+3)*T_{k+2}+(k+1)/(k+3)*T_{k+4} for k=0..N-4, where T_k are the
+% Chebyshev polynomials of the first kind.
+
+% The inner products are defined as <f,g>_w = \int_{-1}^1 f(x)g(x)(1-x^2)^{-1}dx
+
+% Compile the approximation as a system 
+% M*v''(t) + a*F*v(t) + b*F*v'(t) + c*M*v'(t) = Bu(t)
+% The formulas for the elements M_{kj} = (<\phi_j,\phi_k>_w) 
+% and A_{kj} = (<\phi_j'',(w\phi_k)''>)
 
 % The mass matrix for the second order system
 M = spdiags([Dia4,0*ee,Dia2,0*ee,Dia0,0*ee,[0;0;Dia2(1:(end-2))],0*ee,[zeros(4,1);Dia4(1:(end-4))]],-4:4,N-1,N-1);
@@ -112,5 +123,5 @@ v0dotinit  = Q_coeff\chebcoeffs(v0dotfun);
 % plot([v0check;v0])
 
 
-% Define the initial state (initial state of the controller is zero)
+% Define the initial state 
 x0 = [v0init;v0dotinit];
