@@ -2,6 +2,8 @@
 \usepackage{amssymb, array, amsmath, amscd, pdfpages, enumerate, amsthm, setspace, mathtools}
 \usepackage[papersize={17cm,26cm},total={12.7cm,22.5cm},left=2.15cm]{geometry}
 
+%\usepackage[smartEllipses]{markdown}
+
 \usepackage[utf8]{inputenc}
 \usepackage{amssymb}
 \usepackage{bm}
@@ -13,7 +15,6 @@
 \usepackage{listings}
 %\lstset{language=Python}
 \usepackage[colorlinks=true]{hyperref}
-\usepackage{hyperref}
 
 
 \newcommand{\COMMapproxRC}[1]{{\color{gray}#1}}
@@ -183,6 +184,7 @@ Both the Python and Matlab versions of \RORname\ software are distributed as ope
  \hspace{1.6cm}  \href{https://github.com/lassipau/rorpack-matlab/}{https://github.com/lassipau/rorpack-matlab/} \hspace{.1cm} (Matlab version)
 \end{flushleft}
 %\shorten{
+The project version information can be found in the \texttt{CHANGELOG.md} files, and installation instructions are included in the \texttt{README.md} files.
 
 \section{General Description}
 %\label{sec:intro}
@@ -1017,11 +1019,114 @@ In the simulations the system is approximated using the orthonormal eigenfunctio
   %The system is passive
 }
 
-\subsection{The Beam Models}
+\subsection{The Controlled Beam Equations}
 
-The following example (at the moment the only example on control of beam models) studies controller design for a Timoshenko beam model with collocated in-domain inputs and outputs.
 
-\subsubsection*{Case 1: A Timoshenko beam with collocated in-domain control and observation}
+The following example study controller design for controlled beam equation models.
+
+
+\medskip
+
+\subsubsection*{Example: An Euler--Bernoulli Beam with Kelvin--Voigt Damping}
+~\\[-1ex]
+
+\noindent Main file name: \texttt{BeamKelvinVoigt\_Main.m}
+
+\medskip
+
+The simulation example is taken from the conference article~\cite{PauPhaMTNS20}.
+The goal is to construct a \emph{finite-dimensional} and low-order error feedback controller for output tracking and disturbance rejection of an Euler--Bernoulli beam equation with Kelvin-Voigt damping on $\Omega=(-1,1)$~\citel{ItoMor98}{Sec.~3},
+%\begin{subequations}
+%    \label{eq:EBmodel}
+  \eq{
+%    \frac{\partial^2 v}{\partial t^2}(\xi,t)  &+  \frac{\partial^2 }{\partial \xi^2}\left( \ga \frac{\partial^2 v}{\partial \xi^2}(\xi,t) + \gb \frac{\partial^3 v}{\partial \xi^2 \partial t}(\xi,t)  \right)
+& v_{tt}(\xi,t)
++\left( EI v_{\xi\xi}+d_{KV}I v_{\xi\xi t} \right)_{\xi\xi}(\xi,t)  + d_v v_t(\xi,t)\\
+%+ EI v_{\xi\xi\xi\xi}(\xi,t)+d_{KV} v_{\xi\xi\xi\xi t} (\xi,t) \\
+&\hspace{2cm} = 
+%B_u(\xi)u(t)
+b_1(\xi)u_1(t)+b_2(\xi)u_2(t)
++ B_{d0}(\xi) \wdist(t) 
+    \\
+    &\qquad v(-1,t) = v_\xi(-1,t)= 0,
+    \\
+  &\qquad  v(1,t)=v_\xi(1,t)=0\\
+%    &&\frac{\partial v}{\partial \xi} (0,t) = 0, \\ 
+%    &\quad + \gg \frac{\partial v}{\partial t}(\xi,t)  =  B_0u(t) + B_{d0}(\xi) \wdist(t) ,\\
+    &\qquad v(\xi,0)=v_0(\xi), \qquad v_t(\xi,0)=v_1(\xi),\\
+    &\qquad y(t)= (v(\xi_1,t),v(\xi_2,t))^T.
+%    y_1(t)&=
+%%    \int_{-1}^1 v(\cdot,t)c_1^1(\xi)d\xi + 
+%%    \int_{-1}^1 v_t(\cdot,t)c_2^1(\xi)d\xi \\
+%    y_2(t)&=
+%    \int_{-1}^1 v(\cdot,t)c_1^2(\xi)d\xi + 
+%    \int_{-1}^1 v_t(\cdot,t)c_2^2(\xi)d\xi 
+%%    +C_2\dot{v}(\cdot,t)
+  }
+%\end{subequations}
+The parameters $E>0$ and $I>0$ are the (constant) elastic modulus and 
+the second moment of area, respectively,
+%$EI>0$ is the constant flexural rigidity of the beam
+and $d_{KV}>0$ and $d_v\geq 0$ are the damping coefficients associated to the Kelvin--Voigt damping and viscous damping, respectively.
+The beam is assumed to have constant density $\rho=1$.
+
+The system has two control inputs $u(t)=(u_1(t),u_2(t))^T$ and two measured outputs $y(t)=(y_1(t),y_2(t))^T$.
+The outputs are point observations of the deflection of the beam at distinct points $\xi_1,\xi_2\in(-1,1)$.
+The input profiles
+% $b_1(\cdot),b_2(\cdot)\in \Lp[2](-1,1;\R)$
+$b_1(\cdot),b_2(\cdot)\in C^1(-1,1;\R)$
+are fixed input profiles satisfying $b_j(\pm 1)=b_j'(\pm 1)=0$, $j=1,2$, 
+and the disturbance input term has the form $B_{d0}(\xi)\wdist(t) = \sum_{k=1}^{n_d}b_{dk}(\xi)\wdist^k(t)$ for $\wdist(t)=(\wdist^k(t))_{k=1}^{n_d}$ and for some fixed but unknown profile functions $b_{dk}(\cdot)\in C^1(-1,1;\R)$ with $b_{dk}(\pm 1)=b_{dk}'(\pm 1)=0$ for $k\in \List{n_d}$.
+
+
+
+In the simulation example the physical parameters of the model are 
+\eq{
+\rho=1, \quad
+  \quad
+E=10, \quad
+I=1, \quad
+d_{KV}=0.01, \quad
+d_v=0.4.
+}
+The point observations are located at $\xi_1=-0.6$ and $\xi_2=0.3$, and the input profiles are
+% Input profile functions
+\eq{
+b_1(\xi) = \frac{1}{3}(\xi+1)^2(1-\xi)^6, \quad \mbox{and} \quad
+b_2(\xi) =  \frac{1}{3}(\xi+1)^6(1-\xi)^2.
+}
+The system has a
+single disturbance with a disturbance input profile 
+$b_{d1}(\xi) = (\xi+1)^2(1-\xi)^2$.
+
+
+Because of the Kelvin--Voigt damping, the controlled PDE model satisfies the assumptions required for reduced order internal model based controller design in~\cite{PauPha20}.
+In this example, the PDE model is approximated using a spectral Galerkin method described in~\cite{She95}. This approximation scheme is used for two purposes, first of all to design the ``reduced order internal model based controller'' with the routine \texttt{ObserverBasedROMRC}, and in addition to approximate the controlled PDE system in the closed-loop simulation (with a higher order approximation).
+
+With the chosen parameters of the beam model the controlled PDE system is in fact exponentially stable (but with a fairly small stability margin). Because of this, it is possible to alternatively use the ``low gain internal model based controller'' (\texttt{LowGainRC}) to achieve output tracking and disturbance rejection. Construction of this controller is included in the main file (code commented out). However, the small stability margin of the controlled PDE system also severely limits the size of the achievable closed-loop stability margin. On the other hand, in the simulation example the ``reduced order internal model based controller'' achieves a much higher closed-loop stability margin and convergence rate of the output while only having $4$ additional state variables than the low gain controller (whose order is \emph{minimal}), and with only very reasonable increase in the control input gain. For a more detailed comparison of the performances of the two controllers, you can see~\citel{PauPhaMTNS20}{Sec.~4}, and complete similar simulations by uncommenting the construction of the low gain controller in the main simulation file.
+
+
+
+Figure~\ref{fig:BeamKV} shows the outputs of the simulation example.
+
+\begin{figure}[h!]
+  \begin{minipage}{0.48\linewidth}
+    \begin{flushleft}
+      \includegraphics[width=0.9\linewidth]{BKVoutputs.pdf}
+    \end{flushleft}
+  \end{minipage}
+  \begin{minipage}{0.48\linewidth}
+    \begin{flushright}
+      \includegraphics[width=\linewidth]{BKVprofile.png}
+    \end{flushright}
+  \end{minipage}
+    \caption{Example outputs of the controlled Kelvin--Voigt beam.}
+  \label{fig:BeamKV}
+\end{figure}
+
+\medskip
+
+\subsubsection*{Example: A Timoshenko beam with collocated in-domain control and observation}
 ~\\[-1ex]
 
 \noindent Main file name: \texttt{TimoshenkoLHMNC18\_Main.m}
@@ -1064,17 +1169,19 @@ Figure~\ref{fig:BeamTim1} shows the outputs of the simulation example.
 \begin{figure}[h!]
   \begin{minipage}{0.48\linewidth}
     \begin{flushleft}
-      \includegraphics[width=\linewidth]{B1outputs.pdf}
+      \includegraphics[width=\linewidth]{BTim1outputs.pdf}
     \end{flushleft}
   \end{minipage}
   \begin{minipage}{0.48\linewidth}
     \begin{flushright}
-      \includegraphics[width=0.95\linewidth]{B1profile.png}
+      \includegraphics[width=0.95\linewidth]{BTim1profile.png}
     \end{flushright}
   \end{minipage}
-    \caption{Example outputs of the Timoshenko beam example.}
+    \caption{Example outputs of the controlled Timoshenko beam.}
   \label{fig:BeamTim1}
 \end{figure}
+
+
 
 \section{Contributors}
 
@@ -1086,6 +1193,7 @@ Figure~\ref{fig:BeamTim1} shows the outputs of the simulation example.
   \item[Mikko Aarnos] Developer (2018)
   \item[Jukka-Pekka Humaloja] Developer (2018--)
 \end{description}
+
 
 
   \appendix
