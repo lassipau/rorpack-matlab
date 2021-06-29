@@ -13,3 +13,7 @@ chebfun/
 *.toc
 *.synctex.gz
 *.out
+*.lua
+
+# System files
+.DS_Store

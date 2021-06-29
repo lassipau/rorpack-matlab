@@ -147,6 +147,12 @@ Eero Immonen and Seppo Pohjolainen.
   continuous signals for infinite-dimensional systems.
 \newblock {\em SIAM J. Control Optim.}, 45(5):1714--1735, 2006.
 
+\bibitem{ItoMor98}
+Kazufumi Ito and K.~A. Morris.
+\newblock An approximation theory of solutions to operator {R}iccati equations
+  for {$H^\infty$} control.
+\newblock {\em SIAM J. Control Optim.}, 36(1):82--99, 1998.
+
 \bibitem{JacZwa12book}
 Birgit Jacob and Hans Zwart.
 \newblock {\em Linear Port-Hamiltonian Systems on Infinite-Dimensional Spaces},
@@ -269,6 +275,12 @@ J.~M. Schumacher.
 \newblock Finite-dimensional regulators for a class of infinite-dimensional
   systems.
 \newblock {\em Systems Control Lett.}, 3:7--12, 1983.
+
+\bibitem{She95}
+Jie Shen.
+\newblock Efficient spectral-{G}alerkin method {II}. direct solvers of second-
+  and fourth-order equations using {C}hebyshev polynomials.
+\newblock {\em SIAM J. Sci. Comput.}, 16(1):74--87, 1995.
 
 \bibitem{Tre13book}
 Lloyd~N. Trefethen.

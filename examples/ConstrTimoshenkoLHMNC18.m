@@ -1,4 +1,4 @@
-function [x0,spgrid,sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
+function [x0,spgrid,sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
 % [x0,spgrid,sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
 %
 % Construct the Timoshenko beam model from the conference article by
