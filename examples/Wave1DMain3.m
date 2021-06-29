@@ -74,9 +74,7 @@ freqs = [pi 2*pi 6*pi];
 
 % Passive Robust Controller
 % epsgainrange = [0.01, 0.3];
-% epsgainrange = 0.3;
-epsgainrange = [10,50];
-% epsgain = 13;
+epsgainrange = 0.3;
 % dim_Y = size(Sys.C,1);
 
 dimX = size(Sys.A,1);
@@ -99,8 +97,8 @@ stabmarg = CLStabMargin(CLSys)
 
 % Simulate the system. Initial state x0 is chosen earlier.
 % z0 is chosen to be zero by default
-z0 = zeros(size(ContrSys.G1,1));
-xe0 = [x0, z0];
+z0 = zeros(size(ContrSys.G1,1),1);
+xe0 = [x0;z0];
 
 Tend = 24;
 tgrid = linspace(0, Tend, 501);

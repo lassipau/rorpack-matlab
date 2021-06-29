@@ -78,6 +78,7 @@ for ind = 1:length(ee_cand)
   Ae = [Sys.A Sys.B*K;ContrSys.G2*Sys.C ContrSys.G1+ContrSys.G2*Sys.D*K];
   
   stab_margin = abs(max(real(eig(full(Ae)))));
+  print(stab_margin);
   
   allmargs(ind) = stab_margin;
   if stab_margin<stab_margin_old+marg_tol
