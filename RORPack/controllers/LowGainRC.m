@@ -1,4 +1,4 @@
-function [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys)
+function [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys)
 % ContrSys = LowGainRC(freqs,Pvals)
 %
 % Construct a low-gain simple controller for stable systems, in real form
@@ -16,22 +16,22 @@ end
 
 dimY = size(Pvals{1},1);
 dimU = size(Pvals{1},2);
-q = length(freqs);
+q = length(freqsReal);
 
-dimZ = IMdim(freqs,dimY);
+dimZ = IMdim(freqsReal,dimY);
   
 ContrSys.G1 = zeros(dimZ);
 ContrSys.K = zeros(dimU,dimZ);
 
-if freqs(1)==0
+if freqsReal(1)==0
   zoffset = dimY; 
   ContrSys.K(:,1:dimY) = pinv(Pvals{1});
 %  ContrSys.K(:,1:dimY) = negsqrt(Pvals{1}); % experimental: "optimal" choice of K_0?
 %  ContrSys.K(:,1:dimY) = Pvals{1}'*inv(sqrtm(Pvals{1}*Pvals{1}')); % experimental: "optimal" choice of K_0?
-  nzfreqs = freqs(2:end);
+  nzfreqs = freqsReal(2:end);
 else
   zoffset = 0;
-  nzfreqs = freqs;
+  nzfreqs = freqsReal;
 end
 
 for ind = 1:length(nzfreqs)
@@ -45,7 +45,7 @@ for ind = 1:length(nzfreqs)
   ContrSys.K(:,indran) = [real(Ppi), imag(Ppi)];
 end
 
-if freqs(1)==0
+if freqsReal(1)==0
   ContrSys.G2 = [-eye(dimY);repmat([-eye(dimY);zeros(dimY)],length(nzfreqs),1)];
 else
   ContrSys.G2 = repmat([-eye(dimY);zeros(dimY)],q,1);

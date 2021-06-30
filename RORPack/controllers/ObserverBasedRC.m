@@ -1,10 +1,10 @@
-function [ContrSys,K21] = ObserverBasedRC(freqs,Sys,K21,L,IMstabtype,IMstabmarg)
+function [ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg)
 % ContrSys = ObserverBasedRC(freqs,Pvals,Sys)
 %
 % Construct an observer-based robust controller for systems with the same number of 
 % inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal 
 % model is in real form
-% freqs = Frequencies to be included in the controller, only real nonnegative
+% freqsReal = Frequencies to be included in the controller, only real nonnegative
 % frequencies, if zero frequency is included, it's the first element in the
 % vector. The control system is assumed to be real (i.e.,
 % P(conj(s))=conj(P(s))), and P(iw_k) are invertible at the frequencies of
@@ -29,7 +29,7 @@ if dimY ~= dimU
   error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
 end
 
-q = length(freqs);
+q = length(freqsReal);
 
 
 %if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
@@ -43,14 +43,14 @@ q = length(freqs);
 
 PKappr = @(s) (C+D*K21)*((s*eye(dimX)-(A+B*K21))\B)+D;
 for ind = 1:q
-  if cond(PKappr(1i*freqs(ind)))>1e6
+  if cond(PKappr(1i*freqsReal(ind)))>1e6
     warning(['The matrix P_K(iw_k) for k=' num2str(ind) ' is nearly singular!'])
   end
 end
 
 
 % Construct the internal model
-[G1,G2] = ConstrIM(freqs,dimY);
+[G1,G2] = ConstrIM(freqsReal,dimY);
 
 dimZ = size(G1,1);
 
@@ -63,16 +63,16 @@ B1 = H*B+G2*D;
 if isequal(IMstabtype,'LQR')
   K1 = -lqr(G1+IMstabmarg*eye(dimZ),B1,100*eye(dimZ),0.001*eye(dimU),zeros(dimZ,dimU));
 elseif isequal(IMstabtype,'poleplacement')
-  if freqs(1)==0
-    target_eigs = ones(2*length(freqs)-1,1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
-                    +1i*reshape([freqs(end:-1:1),-freqs(2:end)],2*length(freqs)-1,1)*ones(1,dimY);
+  if freqsReal(1)==0
+    target_eigs = ones(2*length(freqsReal)-1,1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
+                    +1i*reshape([freqsReal(end:-1:1),-freqsReal(2:end)],2*length(freqsReal)-1,1)*ones(1,dimY);
 %     target_eigs
 %     target_eigs = [linspace(-7,-5,length(freqs)*dimY),linspace(-4.9,-3,length(nzfreqs)*dimY)];
     target_eigs = target_eigs(:);
     K1 = -place(G1,B1,target_eigs);
   else
-    target_eigs = ones(2*length(freqs),1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
-                    +1i*reshape([freqs(end:-1:1),-freqs],2*length(freqs),1)*ones(1,dimY);
+    target_eigs = ones(2*length(freqsReal),1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
+                    +1i*reshape([freqsReal(end:-1:1),-freqsReal],2*length(freqsReal),1)*ones(1,dimY);
 %     target_eigs = [linspace(-5,-4,length(freqs)*dimY),linspace(-3.9,-3,length(freqs)*dimY)];
     target_eigs = target_eigs(:);
     K1 = -place(G1,B1,target_eigs);

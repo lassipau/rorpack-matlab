@@ -1,8 +1,8 @@
-function [ContrSys,epsgain] = PassiveRC(freqs,Pvals,epsgain,Sys)
+function [ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgain,Sys)
 % ContrSys = PassiveRC(freqs,dimY,Pvals)
 %
 % Construct a passive simple controller for stable systems, in real form
-% freqs = Frequencies to be included in the controller, only real nonnegative
+% freqsReal = Frequencies to be included in the controller, only real nonnegative
 % frequencies, if zero frequency is included, it's the first element in the
 % vector
 % Pvals = [cell array] Values (or approximations of them) of the values of the transfer
@@ -21,7 +21,7 @@ if ~isequal(dimY,dimU)
     error('The system has different amounts of inputs and outputs, the controller design cannot be used!')
 end
 
-[G1,G2tmp] = ConstrIM(freqs,dimY);
+[G1,G2tmp] = ConstrIM(freqsReal,dimY);
 
 ContrSys.G1 = G1;
 ContrSys.G2 = -G2tmp;
