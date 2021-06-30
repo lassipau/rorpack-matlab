@@ -2,7 +2,7 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Case 1: Neumann boundary control at x=0, regulated output y(t) and a 
+% Case 2: Neumann boundary control at x=0, regulated output y(t) and a 
 % Dirichlet boundary condition at x=1
 % Unstable system, stabilization by stabilizing the only unstable
 % eigenvalue =0
@@ -63,21 +63,22 @@ wdist = @(t) zeros(size(t));
 
 
 % freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqs = [0 1 2 3 6];
+freqsReal = [0 1 2 3 6];
 
 % Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
 
 % eig(full(Sys.A))
 
-% A Low-Gain 'Minimal' Robust Controller
+% Construct the controller
 
+% A Low-Gain 'Minimal' Robust Controller
 % dimX = size(Sys.A,1);
 % Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
-% Pvals = cell(1,length(freqs));
-% for ind = 1:length(freqs)
-%    Pvals{ind} = Pappr(freqs(ind));
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%    Pvals{ind} = Pappr(freqsReal(ind));
 % end
 % 
 % epsgainrange = [0.01,3];
@@ -85,23 +86,36 @@ freqs = [0 1 2 3 6];
 % [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
 % epsgain
 
-% An observer-based robust controller
+% A Passive Robust Controller
+dimX = size(Sys.A,1);
+Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+
+Pvals = cell(1,length(freqsReal));
+for ind = 1:length(freqsReal)
+   Pvals{ind} = Pappr(1i * freqsReal(ind));
+end
+% 
+epsgainrange = [0.01,3];
+% % epsgain = .1;
+[ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgainrange,Sys);
+epsgain
+
+% An observer-based robust controller or
+% a dual observere-based robust controller
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
-% K = 7*[1, zeros(1,N-1)];
 % K = zeros(1,N);
-K = 1/(N-1)*[0.5, ones(1,N-2), 0.5];
+% K = 1/(N-1)*[0.5, ones(1,N-2), 0.5];
 % PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
 
-% L = -7*[2*N;zeros(N-1,1)];
-L = -ones(N,1);
+% L = -ones(N,1);
 % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',0.5);
-% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.5);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.5);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.5);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',0.5);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',0.5);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',0.5);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',0.5);
 
 %% Closed-loop simulation
 

@@ -1,10 +1,10 @@
-function ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
+function ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
 % ContrSys = ObserverBasedROMRC(freqs,Pvals,Sys)
 %
-% Construct an observer-based robust controller for systems with the same number of 
+% Construct a reduced order observer-based robust controller for systems with the same number of 
 % inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal 
 % model is in real form
-% freqs = Frequencies to be included in the controller, only real nonnegative
+% freqsReal = Frequencies to be included in the controller, only real nonnegative
 % frequencies, if zero frequency is included, it's the first element in the
 % vector. The control system is assumed to be real (i.e.,
 % P(conj(s))=conj(P(s))), and P(iw_k) are invertible at the frequencies of
@@ -57,7 +57,7 @@ end
 
 
 % Construct the internal model
-[G1,G2] = ConstrIM(freqs,dimY);
+[G1,G2] = ConstrIM(freqsReal,dimY);
 
 dimZ = size(G1,1);
 

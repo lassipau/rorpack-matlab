@@ -1,13 +1,22 @@
-%% Robust control of a 2D heat equation on a rectangle.  
+%% Robust control of a 2D heat equation with either the dual observer based
+% robust controller (DOBRC) or the observer based robust controller (OBRC). 
+% Neumann boundary control and Dirichlet boundary observation 
+% Approximation with a Finite differences scheme 
+
+% Unstable system, stabilization by stabilizing the only unstable
+% eigenvalue =0
 
 addpath(genpath('../RORPack/'))
 
-N = 31; 
+cval = 1;
+N = 15; 
+M = 16;
 
 % Initial state of the plant
-x0fun = @(x,y) zeros(size(x));
+%x0fun = @(x,y) zeros(size(x));
 %x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
-% x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
+%x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
+x0fun = @(x,y) cos(pi*(1-x));
 %x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x,y) 1*(1-x).^2.*(3-2*(1-x))-1;
@@ -15,7 +24,7 @@ x0fun = @(x,y) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[x0,spgrid,Sys] = ConstrHeat2Dtest2(1,x0fun,N);
+[x0,spgrid,Sys] = ConstrHeat2Dtest2(N,M,x0fun,cval);
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -26,8 +35,8 @@ x0fun = @(x,y) zeros(size(x));
 %wdist = @(t) zeros(size(t));
 
 % Case 1:
-yref = @(t) [(-1) * ones(size(t));cos(pi*t)];
-wdist = @(t) zeros(size(t));
+yref = @(t) sin(2*t)+0.1*cos(3*t);
+%wdist = @(t) zeros(size(t));
 %wdist = @(t) sin(2*t);
 
 % Case 2:
@@ -36,10 +45,9 @@ wdist = @(t) zeros(size(t));
 
 % Case 3:
 % yref = @(t) sin(2*t)+.1*cos(6*t);
-% wdist = @(t) sin(t);
+wdist = @(t) sin(t);
 
-
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
+freqsReal = [0 1 2 3];
 
 % if max(abs(real(freqs)))>0 && max(abs(imag(freqs)))>0
 %   error('nonzero real parts in frequencies!')
@@ -47,41 +55,55 @@ wdist = @(t) zeros(size(t));
 %   freqsReal = unique(abs(freqs));
 % end
 
-freqs = [0 pi];
+% Construct the controller 
 
-dimX = size(Sys.A,1);
-Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% A Low-Gain 'Minimal' Robust Controller
 
-Pvals = cell(1,length(freqs));
-for ind = 1:length(freqs)
-  Pvals{ind} = Pappr(freqs(ind));
-end
+% dimX = size(Sys.A,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% 
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%   Pvals{ind} = Pappr(freqsReal(ind));
+% end
+% 
+% epsgainrange = [0.01,4];
+% 
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
+% epsgain
 
-epsgainrange = [0.01,4];
-% epsgainrange = .5;
-%[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
+% Observer-based robust controller
 
-[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
-epsgain
+% Requires stabilizing operators K21 and L
+% For simplicity: Stabilization with state feedback
+% 1 for interior points, 1/4 for corner points and 1/2 for other boundary
+% points
+K21 = -ones(1,N*M);
+K21(1, 1:M) = K21(1, 1:M) / 2;
+K21(1, (N-1)*M+1:end) = K21(1, (N-1)*M+1:end) / 2;
+K21(1, 1:N:end) = K21(1, 1:N:end) / 2;
+K21(1, M:N:end) = K21(1, M:N:end) / 2;
+L = K21' * 10;
+IMstabmarg = 0.5;
+IMstabtype = 'LQR';
+ContrSys = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg);
 
-% ContrSys = ObserverBasedRC(freqsReal,Sys);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
 figure(1)
-PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
+% PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
 
-% PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
+PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
 %%
 
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
-Tend = 16;
+Tend = 10;
 tgrid = linspace(0,Tend,300);
-
 
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
@@ -95,15 +117,15 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N*N,PrintFigureTitles)
+plotControl(tgrid,CLsim,ContrSys,N*M,PrintFigureTitles)
 
 %%
 
 
-figure(3)
-colormap jet
-% No movie recording
-[~,zlims] = AnimHeat2Dtest2(CLsim,spgrid,tgrid,0.03,0);
+% figure(3)
+% colormap jet
+% % No movie recording
+% [~,zlims] = AnimHeat2Dtest3(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
@@ -114,7 +136,7 @@ colormap jet
 
 % figure(4)
 % colormap jet
-% PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
+% % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
 % PlotHeat2DSurf(x0,spgrid,zlims)
 
 figure(5)
