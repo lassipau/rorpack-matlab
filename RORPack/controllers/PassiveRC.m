@@ -39,7 +39,7 @@ else
 end
 
 % A very crude optimization for the parameter eps>0!
-stab_margin_old = 0;
+stab_margin_old = -1;
 marg_tol = 5e-4;
 
 allmargs = zeros(size(ee_cand));

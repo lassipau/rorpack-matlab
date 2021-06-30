@@ -61,18 +61,16 @@ IC2 = [.8, .9];
 %wdist = @(t) zeros(size(t));
 
 % Case 1:
-yref = @(t) [sin(2*t);2*cos(3*t)];
-%wdist = @(t) zeros(size(t));
-wdist = @(t) sin(6*t);
+% yref = @(t) [sin(2*t);2*cos(3*t)];
+% wdist = @(t) zeros(size(t));
+% wdist = @(t) sin(6*t);
+% freqsReal = [2 3 6];
 
 % Case 2:
-% yref = @(t) ones(size(t));
-% wdist = @(t) ones(size(t));
-
-% Case 3:
-% yref = @(t) sin(2*t)+.1*cos(6*t);
-% wdist = @(t) sin(t);
-
+% yref = @(t) ones(2, size(t,1));
+% wdist = @(t) zeros(size(t));
+yref = @(t) [2*ones(size(t));2*cos(3*t)+sin(2*t)];
+wdist = @(t) 6*cos(t);
 freqsReal = [1 2 3 6];
 
 % Sys.A = Sys.A-Sys.B*Sys.B';
@@ -178,9 +176,9 @@ figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
-figure(4)
+% figure(4)
 % No movie recording
-[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);

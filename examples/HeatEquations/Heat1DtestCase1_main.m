@@ -61,14 +61,14 @@ wdist = @(t) sin(2*t);
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqs = [1 2 3 6];
+freqsReal = [1 2 3 6];
 
 % Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
 
 % eig(full(Sys.A))
+
+% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
 
@@ -84,7 +84,8 @@ freqs = [1 2 3 6];
 % epsgain = .1;
 % [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 
-% An observer-based robust controller
+% An observer-based robust controller or
+% a dual observere-based robust controller
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
@@ -94,7 +95,7 @@ K = 7*[1, zeros(1,N-1)];
 L = -7*[zeros(N-1,1);2*(N-1)];
 PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3]);
 
-ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR', 0.45);
+ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR', 0.45);
 % ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
 % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.45);
 % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
