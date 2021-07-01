@@ -70,7 +70,11 @@ freqsReal = [0 1 2 3 6];
 
 % eig(full(Sys.A))
 
-% Construct the controller
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
+
+%% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
 % 

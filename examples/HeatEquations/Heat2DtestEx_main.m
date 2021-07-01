@@ -50,28 +50,28 @@ wdist = @(t) sin(2*t);
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-freqsReal = [0 1 2 3 6];
+freqsReal = [0, 1, 2, 3, 6];
 
-if max(abs(real(freqsReal)))>0 && max(abs(imag(freqsReal)))>0
-  error('nonzero real parts in frequencies!')
-elseif max(abs(imag(freqsReal)))>0
-  freqsReal = unique(abs(freqsReal));
-end
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
-dimX = size(Sys.A,1);
-Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+
+%% Construct the controller
+
+% A Low-Gain 'Minimal' Robust Controller
+
+Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
   Pvals{ind} = Pappr(freqsReal(ind));
 end
 
-epsgainrange = [0.01,4];
+epsgain = [0.01,4];
 
-[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
 epsgain
 
-% ContrSys = ObserverBasedRC(freqsReal,Sys);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
@@ -79,8 +79,6 @@ stabmarg = CLStabMargin(CLSys)
 
 figure(1)
 PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
-
-% PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
 %%
 
 

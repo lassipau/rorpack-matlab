@@ -68,30 +68,30 @@ wdist = @(t) zeros(size(t));
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqs = [1 2 3 6];
-q = length(freqs);
+freqsReal = [1, 2, 3, 6];
 
 % Sys.A = Sys.A-Sys.B*Sys.B';
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
 
 % eig(full(Sys.A))
-%%
 
-% A Low-Gain 'Minimal' Robust Controller
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-% 
+
+%% Construct the controller
+
+% % A Low-Gain 'Minimal' Robust Controller
+%
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 % Pvals = cell(1,length(freqs));
 % for ind = 1:length(freqs)
 %   Pvals{ind} = Pappr(freqs(ind));
 % end
 % 
-% epsgainrange = [0.01,6];
+% epsgain = [0.01,6];
 % % epsgain = .1;
-% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 % epsgain
 
 % An observer-based robust controller

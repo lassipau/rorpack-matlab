@@ -74,36 +74,36 @@ freqsReal = [pi 2*pi];
 % Include frequencies pi*k that are required in tracking 2-periodic signals
 % freqsReal = pi*(1:9);
 
-%% Construct the controller and the closed loop system
+
+% Check that the system, the reference and disturbance signals, and the
+% frequencies are defined in a consistent way.
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
+%% Construct the controller
 
 % Passive Robust Controller
-epsgainrange = [0.01, 0.3];
-% epsgainrange = 0.3;
-% dim_Y = size(Sys.C,1);
+epsgain = [0.01, 0.3];
+% epsgain = 0.3;
 
-dimX = size(Sys.A,1);
-Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-
+Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
   Pvals{ind} = Pappr(freqsReal(ind));
 end
 
-% Pvals = np.array(list(map(sys.P, 1j * freqsReal)))
-[ContrSys, epsgain] = PassiveRC(freqsReal, Pvals, epsgainrange, Sys);
+[ContrSys, epsgain] = PassiveRC(freqsReal, Pvals, epsgain, Sys);
 epsgain
 % Sys = outputFeedbackStab(Sys, -kappa_S);
 
+%% Closed-loop simulation and visualization of the results
 % Construct the closed-loop system.
 % CLSys = ConstrCLSys(Sys,ContrSys);
 CLSys = ConstrCLSysWithFeedback(ContrSys,Sys,-kappa_S);
 
 stabmarg = CLStabMargin(CLSys)
 
-%% simulation and visualization
-
-% Simulate the system. Initial state x0 is chosen earlier.
-% z0 is chosen to be zero by default
+% Simulate the closed-loop system. Initial state x0 is chosen earlier.
+% the initial state z0 of the controller is chosen to be zero by default.
 z0 = zeros(size(ContrSys.G1,1),1);
 xe0 = [x0;z0];
 
@@ -111,6 +111,7 @@ Tend = 24;
 tgrid = linspace(0, Tend, 501);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
+
 
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
@@ -122,6 +123,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(2,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 
+%% Plot the state of the controlled system
 figure(3)
 colormap jet
 Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
@@ -129,12 +131,15 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 % Plot1DWaveSurf(CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-4 4])
 set(gca,'ztick',-8:4:8);
 
+
+%% Plot the reference signal
 figure(4)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
-% figure(5)
-% colormap jet
+%% Animation
+figure(5)
+colormap jet
 % No movie recording
-% [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
+[~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);

@@ -104,13 +104,3 @@ end
 
 
 
-% % Temp
-% % Check validity of the controller!
-% 
-% Gf1 = ContrSys.G1;
-% Gf2 = ContrSys.G2;
-% Kf = ContrSys.K;
-% Ae = [A B*Kf;Gf2*C Gf1+Gf2*D*Kf];
-% Qe = [-eye(dimX) zeros(dimX,size(Gf1,2));H zeros(size(G1,1),size(Gf1,2)); -eye(dimX) zeros(dimX,size(G1,1)) eye(dimX)];
-
-

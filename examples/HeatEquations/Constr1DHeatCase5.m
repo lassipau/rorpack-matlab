@@ -55,7 +55,7 @@ Sys.A = A;
 Sys.B = B;
 Sys.Bd = zeros(N,1);
 Sys.C = C;
-Sys.D = 0;
+Sys.D = zeros(2,2);
 Sys.Dd = zeros(2,1);
 
 

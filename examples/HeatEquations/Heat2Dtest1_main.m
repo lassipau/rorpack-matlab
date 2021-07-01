@@ -1,4 +1,4 @@
-%% Robust control of a 2D heat equation on a rectangle.  
+%% Robust control of a 2D heat equation on a rectangle with boundary control 
 
 addpath(genpath('../RORPack/'))
 
@@ -17,54 +17,42 @@ x0fun = @(x,y) zeros(size(x));
 
 [x0,spgrid,Sys] = ConstrHeat2Dtest1(1,x0fun,N);
 
-%yref = @(t) sin(2*t)+.1*cos(6*t);
-%yref = @(t) sin(2*t)+.2*cos(3*t);
-%yref = @(t) ones(size(t));
-
-%wdist = @(t) ones(size(t));
-%wdist = @(t) sin(t);
-%wdist = @(t) zeros(size(t));
 
 % Case 1:
 yref = @(t) [(-1) * ones(size(t));cos(pi*t)];
 wdist = @(t) zeros(size(t));
-%wdist = @(t) sin(2*t);
+freqsReal = [0, pi];
 
 % Case 2:
 % yref = @(t) ones(size(t));
 % wdist = @(t) ones(size(t));
+% freqsReal = 0;
 
 % Case 3:
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
+% freqsReal = [0,1,2,6];
+
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
+%% Construct the controller
 
-% if max(abs(real(freqs)))>0 && max(abs(imag(freqs)))>0
-%   error('nonzero real parts in frequencies!')
-% elseif max(abs(imag(freqs)))>0
-%   freqsReal = unique(abs(freqs));
-% end
-
-freqsReal = [0 pi];
-
-dimX = size(Sys.A,1);
-Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% A Low-Gain 'Minimal' Robust Controller
+%
+Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
   Pvals{ind} = Pappr(freqsReal(ind));
 end
 
-epsgainrange = [0.01,4];
-% epsgainrange = .5;
-%[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
-
-[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
+epsgain = [0.01,4];
+% epsgain = .5;
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
 epsgain
 
-% ContrSys = ObserverBasedRC(freqsReal,Sys);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 

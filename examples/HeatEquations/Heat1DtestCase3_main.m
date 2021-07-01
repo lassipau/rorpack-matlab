@@ -79,12 +79,15 @@ freqsReal = [1 2 3 6];
 
 % eig(full(Sys.A))
 
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
+
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 % 
 % Pvals = cell(1,length(freqsReal));
 % for ind = 1:length(freqsReal)
