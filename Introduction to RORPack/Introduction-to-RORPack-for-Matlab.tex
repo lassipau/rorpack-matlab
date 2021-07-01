@@ -369,6 +369,7 @@ addpath(genpath('../RORPack/'))
 \end{lstlisting}
 
 The next part defines the parameters $N$, \texttt{cfun} and \texttt{x0fun} used in the construction of the system $(A,B,B_d,C,D)$ with the function \texttt{Constr1DHeatCase3}, which is introduced next. The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material. \texttt{x0fun} describes the initial heat profile of the plant.
+In this example, the parameters \texttt{IB1} and \texttt{IB2} describe the two intervals where the control is applied to the heat equation, and \texttt{IC1} and \texttt{IC2} describe the internvals of the measurements from the heat equation.
 
 \begin{lstlisting}
 % Parameters for this example.
@@ -383,10 +384,7 @@ x0fun = @(x) 1*(1+cos(pi*(1-x)));
 % cfun = @(t) ones(size(t));
 cfun = @(t) 0.3-0.6*t.*(1-t);
 
-IB1 = [.3, .4];
-IB2 = [.6, .7];
-IC1 = [.1, .2];
-IC2 = [.8, .9];
+IB1 = [.3, .4];  IB2 = [.6, .7];  IC1 = [.1, .2];  IC2 = [.8, .9];
 
 [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2);
  \end{lstlisting}
@@ -418,10 +416,7 @@ function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(...
 % IC1 = [.1, .2], and IC2 = [.8, .9] is used.
 
 if nargin <= 3
-  IB1 = [.3, .4];
-  IB2 = [.6, .7];
-  IC1 = [.1, .2];
-  IC2 = [.8, .9];
+  IB1 = [.3, .4]; IB2 = [.6, .7]; IC1 = [.1, .2]; IC2 = [.8, .9];
 end
 
 % Check that the intervals are defined correctly
@@ -624,7 +619,7 @@ The ``The reduced order observer-based robust controller'', for \emph{parabolic}
 	 \phantom{a}\hspace{3.0cm} R1,R2,Q0,Q1N,Q2N,ROMorder)}
      \end{quotation}
      \medskip
-     where \texttt{sysApprox} contains the parameters of the Galerkin approximation $(A^N,B^N,C^N,D)$ of the plant parameters $(A,B,C,D)$ (a struct with fields \texttt{sysApprox.AN}, \texttt{sysApprox.BN}, \texttt{sysApprox.CN}, \texttt{sysApprox.D}), \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}.
+     where \texttt{sysApprox} contains the parameters of the Galerkin approximation $(A^N,B^N,C^N,D)$ of the plant parameters $(A,B,C,D)$ (a struct with fields \texttt{sysApprox.AN}, \texttt{sysApprox.BN}, \texttt{sysApprox.CN}, \\ \texttt{sysApprox.D}), \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}.
 The parameters \texttt{alpha1}, \texttt{alpha2},
 \texttt{R1}, \texttt{R2}, \texttt{Q0}, \texttt{Q1N}, \texttt{Q2N} are parameters for the LQR/LQG-based stabilization of the closed-loop system (details below). Finally, \texttt{ROMorder} is the desired dimension of the reduced order ``observer-part'' of the controller. The final controller has dimension which is equal to the dimension of the internal model plus \texttt{ROMorder}.
 
@@ -635,7 +630,7 @@ The parameters
 \texttt{Q1N} and \texttt{Q2N} correspond to  the Galerkin approximations (compatible with \texttt{sysApprox}) of the parameters $Q_1\in \Lin(U_0,X)$ and $Q_2\in \Lin(X,Y_0)$ in~\citel{PauPha20}{Sec.~III.A}. They
 can be chosen to correspond to the Galerkin approximations of $Q_1=q_1 I$ and $Q_2=q_2 I$ for some  $q_1,q_2>0$.
 
-The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~\citel{PauPha20}{Sec.~III.A} and it determines the final reduced order dimension of the observer-part of the controller. The size of the parameter should be determined to be sufficiently high so that the closed-loop system is exponentially stable. The result~\citel{PauPha20}{Thm.~III.1} guarantees that closed-loop stability for the original PDE plant and the reduced order controller is achieved if both the Galerkin approximation order $N$ and the model reduction parameter $r\geq N$ are sufficiently high, but (at the moment) there are no concrete lower bounds for these values. Typically, if the decay of the Hankel singular values of $(A^N,B^N,C^N)$ are sufficiently fast, it is possible to achive the closed-loop stability with a fairly small model reduction parameter $r$.
+The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~\citel{PauPha20}{Sec.~III.A} and it determines the final reduced order dimension of the observer-part of the controller. The model reduction step can be skipped completely by setting \texttt{ROMorder=NaN}. The size of the parameter should be determined to be sufficiently high so that the closed-loop system is exponentially stable. The result~\citel{PauPha20}{Thm.~III.1} guarantees that closed-loop stability for the original PDE plant and the reduced order controller is achieved if both the Galerkin approximation order $N$ and the model reduction parameter $r\geq N$ are sufficiently high, but (at the moment) there are no concrete lower bounds for these values. Typically, if the decay of the Hankel singular values of $(A^N,B^N,C^N)$ are sufficiently fast, it is possible to achive the closed-loop stability with a fairly small model reduction parameter $r$.
 
 	\bigskip
 
@@ -643,12 +638,12 @@ The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
        \texttt{DualObserverBasedRC(freqsReal,Sys,K2,L1,\\
-	 \phantom{a}\hspace{2.7cm} IMstabtype,IMstabmarg)}
+	 \phantom{a}\hspace{3.7cm} IMstabtype,IMstabmarg)}
      \end{quotation}
      \medskip
      where \texttt{Sys} contains the parameters of the plant, \texttt{freqsReal} contains the frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}. The parameters \texttt{K2} and \texttt{L1} describe operators $K_2$ and $L_1$, respectively, such that $A+BK_2^\Lambda$ and $A+L_1\CL$ generate exponentially stable semigroups.
 
-     Instead of the approach in~\cite{Pau16a}, the ``internal model'', i.e., the pair $(C_1,G_1)$, in the controller is stabilized using either LQR-based design (\texttt{IMstabtype = 'LQR'}) or pole placement (\texttt{IMstabtype = 'poleplacement'}) with a predefined stability margin \texttt{IMstabmarg}. Note that the variable \texttt{IMstabmarg} only determines the stability margin of the internal model, and the stability margin of the closed-loop system also depends on the stability margins of the semigroups generated by $A+BK_2^\Lambda$ and $A+L_1\CL$.
+     Instead of the approach in~\cite{Pau16a}, the ``internal model'', i.e., the pair $(C_1,G_1)$, in the controller is stabilized either using LQR-based design (\texttt{IMstabtype = 'LQR'}) or alternatively using pole placement (\texttt{IMstabtype = 'poleplacement'}) with a predefined stability margin \texttt{IMstabmarg}. Note that the variable \texttt{IMstabmarg} only determines the stability margin of the internal model, and the stability margin of the closed-loop system also depends on the stability margins of the semigroups generated by $A+BK_2^\Lambda$ and $A+L_1\CL$.
 
 	\bigskip
 %\item \red{ADD: DUAL OBSERVER BASED ROM CONTROLLER}
@@ -693,7 +688,7 @@ The gain in the passive robust controller \texttt{PassiveRC} can analogously be 
 In the Python version of \RORname\ The \RORname\ class \texttt{LinearSystem} has the necessary routines for computing these values based on the matrices \texttt{A}, \texttt{B}, \texttt{C}, and \texttt{D}. However, using the same approximation of the PDE for both controller design and simulation corresponds to essentially controlling the approximation as a finite-dimensional system. If possible, to avoid unrealistically positive results, it is therefore better to use two different approximations for controller construction and simulation. This is especially the case if the validity of the approximation for the computation of the parameters can not be guaranteed with absolute certainty. However, there are of course cases, such Galerkin approximations of parabolic systems~\cite{Mor94}, where the values of the controller parameters can be shown to converge with the order of the approximation, and the above concerns are unnecessary.
 In the Matlab version, the Observer-Based controllers do not (at least currently) use the transfer functions for the construction of the controllers.
 
-For some special PDEs, such as 1D heat or wave equations with constant coefficients, the values $P(i\gw_k)$ may have explicit expressions, but these are very limited special cases. For PDEs with spatially varying parameters there are powerful computational methods that can be used to determine $P(i\gw_k)$, such as the \textbf{Chebfun} package (\href{https://chebfun.org/}{https://chebfun.org/}) employed in \texttt{heat\_1d\_2.py} in Section~\ref{sec:Heat1D2} (``Case 2'').
+For some special PDEs, such as 1D heat or wave equations with constant coefficients, the values $P(i\gw_k)$ may have explicit expressions, but these are very limited special cases. For PDEs with spatially varying parameters there are powerful computational methods that can be used to determine $P(i\gw_k)$, such as the \textbf{Chebfun} package (\href{https://chebfun.org/}{https://chebfun.org/}) employed in \texttt{Heat1DtestCase1\_main.m} in Section~\ref{sec:Heat1D2} (``Case 2'').
 
 
 
@@ -752,6 +747,8 @@ The model on $\Omega = [0,1]$ is
     where $c(\cdot)\geq c_0>0$ is the spatially varying thermal diffusivity of the material.
 The uncontrolled system is exponentially stable due to the homogeneous Dirichlet boundary condition at $\xi = 1$. The system is also impedance passive since the control input and measured output are collocated,  and because of this the robust output regulation problem can be solved using the Passive Robust Controller.
 %    Since the control input $u(t)$ and output $y(t)$ are not collocated, the system can not be 
+
+\blue{In the example, the construction of the low-gain controller employs the \textbf{Chebfun} package in computing the required transfer function values $P(i\gw_k)$.}
 
 \medskip
 
@@ -1442,7 +1439,7 @@ Figure~\ref{fig:BeamTim1} shows the outputs of the simulation example.
 
 
 
-%\bibliographystyle{plain}
-%\bibliography{../../../../../Dropbox/Work/Research/reference}
-\bibliography{Introduction-to-RORPack-for-Matlab}
+\bibliographystyle{plain}
+\bibliography{../../../../../Dropbox/Work/Research/reference}
+%\bibliography{Introduction-to-RORPack-for-Matlab}
 \end{document}

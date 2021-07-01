@@ -138,17 +138,17 @@ plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
 
 % In plotting and animating the state,
-% fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid = [spgrid 1];
-
+% fill in the Dirichlet boundary condition x(1,t)=u(t) at x=1
+spgrid_plot = [spgrid, 1];
+inputs = [zeros(size(ContrSys.K,1),N),ContrSys.K]*CLsim.xesol;
 figure(3)
 colormap jet
-Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
+Plot1DHeatSurf([CLsim.xesol(1:N,:);inputs],spgrid_plot,tgrid,'NN')
 
 %%
 figure(4)
 % No movie recording
-[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat([CLsim.xesol(1:N,:);inputs],spgrid_plot,tgrid,'NN',0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);

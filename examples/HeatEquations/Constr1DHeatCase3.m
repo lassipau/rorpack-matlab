@@ -57,7 +57,7 @@ B2 = B2(:);
 
 % Neumann boundary disturbance at x=0, sign is based on the
 % _outwards_ normal derivative
-Bd = sparse([-2/h;zeros(N-1,1)]); 
+Bd = sparse([2*cfun(0)/h;zeros(N-1,1)]); 
 
 % Two distributed outputs on the intervals IC1 and IC2
 C1 = h/(IC1(2)-IC1(1))*(spgrid(1:N)>=IC1(1) & spgrid(1:N)<=IC1(2));

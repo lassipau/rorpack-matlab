@@ -31,7 +31,9 @@ BCtype = 'ND';
 [A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Neumann boundary input at x=0, sign is based on the _outwards_ normal derivative
-B = sparse([2/h;zeros(N-1,1)]);
+% This is also affected by the diffusion coefficient at x=0 (according to 
+% the approximation in DiffOp1d).
+B = sparse([2*cfun(0)/h;zeros(N-1,1)]);
 
 Bd = B; % Neumann boundary disturbance at x=0
 

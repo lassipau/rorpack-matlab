@@ -89,7 +89,7 @@ freqsReal = [1 2 3 6];
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
-K = 7*[1, zeros(1,N-1)];
+K = -7*[1, zeros(1,N-1)];
 % PlotEigs(full(Sys.A+Sys.B*K),[-20 1 -.3 .3])
 
 L = -7*[zeros(N-1,1);2*(N-1)];

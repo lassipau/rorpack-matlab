@@ -73,30 +73,58 @@ freqsReal = [0 1 2 3 6];
 % Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
-% Pvals = cell(1,length(freqsReal));
-% for ind = 1:length(freqsReal)
-%    Pvals{ind} = Pappr(freqsReal(ind));
-% end
-% 
-% epsgainrange = [0.01,3];
-% % epsgain = .1;
-% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgainrange,Sys);
-% epsgain
-
-% A Passive Robust Controller
-dimX = size(Sys.A,1);
-Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-
+% Compute the required transfer function values P(iw_k) using Chebfun: This
+% can be done by solving a boundary value problem related to each
+% frequency, and evaluating the solution at x=0.
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
-   Pvals{ind} = Pappr(1i * freqsReal(ind));
+    s = freqsReal(ind);
+    cb_A = chebop(0,1);
+    cb_A.op = @(x,w) 1i*s*w-diff(cfun(x)*diff(w));
+    cb_A.lbc = @(w) diff(w)+1;
+    cb_A.rbc = @(w) w;
+    w = cb_A\0;
+    
+    Pvals{ind} = w(0);
 end
-% 
+
+% % Alternative: Approximation using the finite difference approximation (if
+% % Chebfun is not available)
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%    Pvals{ind} = Pappr(1i*freqsReal(ind));
+% end
 epsgainrange = [0.01,3];
-% % epsgain = .1;
+% epsgain = .1;
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
+epsgain
+
+% A Passive Robust Controller
+
+% Compute the required transfer function values P(iw_k) using Chebfun: This
+% can be done by solving a boundary value problem related to each
+% frequency, and evaluating the solution at x=0.
+Pvals = cell(1,length(freqsReal));
+for ind = 1:length(freqsReal)
+    s = freqsReal(ind);
+    cb_A = chebop(0,1);
+    cb_A.op = @(x,w) 1i*s*w-diff(cfun(x)*diff(w));
+    cb_A.lbc = @(w) diff(w)+1;
+    cb_A.rbc = @(w) w;
+    w = cb_A\0;
+    
+    Pvals{ind} = w(0);
+end
+Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+Pvals = cell(1,length(freqsReal));
+for ind = 1:length(freqsReal)
+   Pvals{ind} = Pappr(1i*freqsReal(ind));
+end
+
+epsgainrange = [0.01,3];
+% epsgain = .1;
 [ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgainrange,Sys);
 epsgain
 
@@ -152,11 +180,11 @@ plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid = [spgrid 1];
+spgrid_plot = [spgrid, 1];
 
 figure(3)
 colormap jet
-Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
+Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
 %%
 % figure(4)

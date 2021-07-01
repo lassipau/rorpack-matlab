@@ -5,8 +5,8 @@ function [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys)
 % freqs = Frequencies to be included in the controller, only real nonnegative
 % frequencies, if zero frequency is included, it's the first element in the
 % vector
-% Pvals = [cell array] Values (or approximations of them) of the values of the transfer
-% function of the system on the frequencies 'freqs'
+% Pvals = [cell array] Values (or approximations of them) of the values P(1i*w_k) of the transfer
+% function of the system _complex_ frequencies 1i*w_k, where (w_k) are the _real_ frequencies in 'freqsReal'
 % ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
 
 if max(real(eig(full(Sys.A))))>=0
@@ -16,11 +16,13 @@ end
 
 dimY = size(Pvals{1},1);
 dimU = size(Pvals{1},2);
-q = length(freqsReal);
 
-dimZ = IMdim(freqsReal,dimY);
+[G1,G2tmp] = ConstrIM(freqsReal,dimY);
+
+ContrSys.G1 = G1;
+ContrSys.G2 = -G2tmp;
+dimZ = size(ContrSys.G1,1);
   
-ContrSys.G1 = zeros(dimZ);
 ContrSys.K = zeros(dimU,dimZ);
 
 if freqsReal(1)==0
@@ -34,19 +36,9 @@ end
 
 for ind = 1:length(nzfreqs)
   indran = zoffset+(ind-1)*2*dimY+(1:(2*dimY));
-
-  ContrSys.G1(indran,indran) = nzfreqs(ind)*[zeros(dimY) eye(dimY);-eye(dimY) zeros(dimY)];
-  
   Ppi = pinv(Pvals{ind});
   ContrSys.K(:,indran) = [real(Ppi), imag(Ppi)];
 end
-
-if freqsReal(1)==0
-  ContrSys.G2 = [-eye(dimY);repmat([-eye(dimY);zeros(dimY)],length(nzfreqs),1)];
-else
-  ContrSys.G2 = repmat([-eye(dimY);zeros(dimY)],q,1);
-end
-
 
 
 if length(epsgain) == 1

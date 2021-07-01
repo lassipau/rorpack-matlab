@@ -33,12 +33,13 @@ BCtype = 'ND';
 
 [A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
-% Dirichlet boundary input at x=1
-% B = sparse([-2/h;zeros(N-1,1)]); 
-B = sparse([zeros(N-1,1);1/h^2]); 
+% Dirichlet boundary input at x=1 (CHECK!)
+B = sparse([zeros(N-1,1);cfun(1)/h^2]); 
 
-% Neumann boundary disturbance at x=0
-Bd = sparse([-2/h;zeros(N-1,1)]);
+% A Neumann boundary disturbance at x=0
+% This is also affected by the diffusion coefficient at x=0 (according to 
+% the approximation in DiffOp1d).
+Bd = sparse([2*cfun(0)/h;zeros(N-1,1)]);
 
 C = sparse([1,zeros(1,N-1)]); % Measured temperature at x=0
 

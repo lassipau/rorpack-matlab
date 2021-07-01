@@ -24,3 +24,4 @@ xevals = deval(CLsim.solstruct,tgrid);
 CLsim.xesol = xevals;
 CLsim.output = CLSys.Ce*xevals;
 CLsim.error = CLSys.Ce*xevals+CLSys.De*[wdist(tgrid);yref(tgrid)];
+

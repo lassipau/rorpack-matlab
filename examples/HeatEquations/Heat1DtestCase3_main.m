@@ -128,8 +128,8 @@ SysApprox.AN = Sys_Nlow.A;
 SysApprox.BN = Sys_Nlow.B;
 SysApprox.CN = Sys_Nlow.C;
 SysApprox.D = Sys_Nlow.D;
-alpha1 = 1;
-alpha2 = 0.5;
+alpha1 = 1.5;
+alpha2 = 1;
 Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
 Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
@@ -173,11 +173,11 @@ plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid = [spgrid 1];
+spgrid_plot = [spgrid 1];
 
 figure(3)
 colormap jet
-Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
+Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
 % figure(4)
 % No movie recording
