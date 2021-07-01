@@ -2,7 +2,8 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Neumann boundary disturbance at x=0, two distributed controls and
+% Neumann boundary disturbance at x=0,
+% two distributed controls and
 % two distributed measurement regulated outputs. The controls act 
 % on the intervals 'IB1' and 'IB2' (Default 'IB1' = [0.3,0.4] and 
 % 'IB2' = [0.6,0.7]) and the measurements are the average 
@@ -115,8 +116,10 @@ L = -10*Sys.C';
 % A reduced order observer-based robust controller
 %
 % The construction of the controller uses a Galerkin approximation
-% of the heat system: The Galerkin arpproximation used in the controller
-% design is a lower dimensional numerical approximation of the PDE model.
+% of the heat system:
+% The Galerkin arpproximation used in the controller
+% design is a lower dimensional numerical approximation
+% of the PDE model.
 Nlow = 50;
 [~,Sys_Nlow,~,~] = Constr1DHeatCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
 

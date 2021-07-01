@@ -1,21 +1,24 @@
 function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(...
     cfun,x0fun,N,IB1,IB2,IC1,IC2)
-% [x0,Sys,spgrid] = Constr1DHeatCase3(x0fun,N)
-% 
 % Finite Differences approximation of a 1D Heat equation
-% with a Neumann boundary condition at x=0 and a Dirichlet condition at x=1
+% with a Neumann boundary condition at x=0
+% and a Dirichlet condition at x=1
 % Usage: Can also use solely for defining the initial state x0
-% cfun = spatially variying thermal diffusivity of the material
+% cfun = spatially varying thermal diffusivity of the material
 % x0fun = initial heat profile, function handle
-% Sys = system parameters, (sys.A,sys.B,sys.Bd,sys.C,sys.D)
-% N = dimension of the approximated system (does not include point x=1)
-%
-% Case 3: Neumann boundary disturbance at x=0, 2 distributed controls and 
-% two distributed measurements regulated output y(t). The controls affect
-% the intervals 'IB1' = [a_1,b_1] and 'IB2' = [a_2,b_2], and the
-% measurements are the averages of the temperatures on the intervals 
-% 'IC1' = [c_1,d_1] and 'IC2' = [c_2,d_2]. If these parameters are not
-% given, then default configuration   IB1 = [.3, .4], IB2 = [.6, .7], 
+% N = dimension of the approximated system which
+% (does not include point x=1)
+
+% Case 3: Neumann boundary disturbance at x=0,
+% 2 distributed controls and 
+% two distributed measurements regulated output y(t).
+% The controls affect the intervals 'IB1' = [a_1,b_1]
+% and 'IB2' = [a_2,b_2], and the measurements are
+% the averages of the temperatures on the intervals 
+% 'IC1' = [c_1,d_1] and 'IC2' = [c_2,d_2].
+% If these parameters are not
+% given, then default configuration 
+% IB1 = [.3, .4], IB2 = [.6, .7], 
 % IC1 = [.1, .2], and IC2 = [.8, .9] is used.
 
 if nargin <= 3
@@ -36,8 +39,8 @@ elseif IB1(2)<=IB1(1) || IB2(2)<=IB2(1) ||...
       'All intervals IB1, IB2, IC1, and IC2 need to be of positive lengths.')
 end
 
-% The point x=1 has a Dirichlet boundary condition, and is not chosen as a
-% variable
+% The point x=1 has a Dirichlet boundary condition
+% and is not chosen as a variable
 spgrid = linspace(0,1,N+1);
 h = 1/N;
 % Case 3 has a Neumann boundary condition at x=0
