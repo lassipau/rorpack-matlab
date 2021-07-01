@@ -95,7 +95,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N*N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 

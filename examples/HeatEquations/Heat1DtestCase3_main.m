@@ -169,32 +169,34 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid_plot = [spgrid 1];
+spgrid_plot = [spgrid, 1];
 
 figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
-% figure(4)
+%%
+figure(4)
 % No movie recording
-% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
 
 %movie(MovAnim)
 
+%%
 figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
-% Export movie to AVI
+%% Export movie to AVI
 
 % AnimExport = VideoWriter('Heat1DCase3-animation.mp4','MPEG-4');
 % AnimExport.Quality = 100;

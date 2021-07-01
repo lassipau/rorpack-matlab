@@ -132,7 +132,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 
@@ -140,19 +140,21 @@ plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 % In plotting and animating the state,
 % fill in the Dirichlet boundary condition x(1,t)=u(t) at x=1
 spgrid_plot = [spgrid, 1];
+state_plot = [CLsim.xesol(1:N,:);CLsim.control];
 inputs = [zeros(size(ContrSys.K,1),N),ContrSys.K]*CLsim.xesol;
+BCtype = 'NN';
+
 figure(3)
 colormap jet
-Plot1DHeatSurf([CLsim.xesol(1:N,:);inputs],spgrid_plot,tgrid,'NN')
+Plot1DHeatSurf(state_plot,spgrid_plot,tgrid,BCtype)
 
 %%
 figure(4)
 % No movie recording
-[~,zlims] = Anim1DHeat([CLsim.xesol(1:N,:);inputs],spgrid_plot,tgrid,'NN',0.03,0);
+[~,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,0);
 
 % Movie recording
-% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
-
+% [MovAnim,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,1);
 %movie(MovAnim)
 
 %%

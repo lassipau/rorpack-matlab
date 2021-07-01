@@ -173,7 +173,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 
@@ -187,12 +187,12 @@ colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
 %%
-% figure(4)
+figure(4)
 % No movie recording
-% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype,0.03,0);
 
 % Movie recording
-% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
+% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype,0.03,1);
 
 %movie(MovAnim)
 
