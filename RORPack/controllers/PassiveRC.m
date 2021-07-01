@@ -9,9 +9,9 @@ function [ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgain,Sys)
 % function of the system on the frequencies 'freqs'
 % ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
 
-%if max(real(eig(full(Sys.A))))>=0
-%  error('The system is unstable, the low-gain controller design cannot be completed.')
-%end
+% if max(real(eig(full(Sys.A))))>=0
+%   error('The system is unstable, the low-gain controller design cannot be completed.')
+% end
 
 
 dimY = size(Pvals{1},1);

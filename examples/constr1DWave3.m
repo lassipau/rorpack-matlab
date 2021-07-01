@@ -1,4 +1,4 @@
-function [Sys, x0] = constr1DWave3(N, Bfun, Bdfun, w0fun, wd0fun)
+function [Sys, x0, phin] = constr1DWave3(N, Bfun, Bdfun, w0fun, wd0fun)
 
 phin = @(x,n) diag(n>0)*sqrt(2)*sin(n*pi*x);
 

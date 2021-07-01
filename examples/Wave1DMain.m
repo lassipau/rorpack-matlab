@@ -36,18 +36,29 @@ wd0fun = @(x) zeros(size(x));
 % Begin by defining the function on a single period 0<t<2
 % A nonsmooth triangle signal
 % yref1per = @(t) (2.*t-1).*(t>=0).*(t<=1)+(3-2.*t).*(t>1).*(t<2);
+
+% Semicircles
+% yref1per = @(t) sqrt(1-(t-1).^2);
+
+% Alternating semicircles
+% yref1per = @(t) sqrt(abs(1/4-(t-1/2).^2)).*(t>=0).*(t<1)-sqrt(abs(1/4-(t-3/2).^2)).*(t>=1).*(t<2);
+
+% Bump and constant
+yref1per = @(t) sqrt(abs(1/4-(t-1).^2)).*(t>=1/2).*(t<3/2);
+% yref1per = @(t) sqrt(abs(1/4-(t-1/2).^2)).*(t>=0).*(t<1);
+
 % The constant part of the signal cannot be tracked due to the second order
 % zero of the plant at zero.
 % We therefore normalize yref(t) to have average zero on [0,2]
-% yr_ave = integral(yref1per,0,2);
-% yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
+yr_ave = integral(yref1per,0,2);
+yref = @(t) yref1per(mod(t,2)) - yr_ave/2;
 
 % Case 1:
 % yref = @(t) .5*sin(2*t)+.5*cos(3*t);
-yref = @(t) sin(pi/2*t)-2*cos(pi/2*t);
+% yref = @(t) sin(pi/2*t)-2*cos(pi/2*t);
 % yref = @(t) zeros(size(t));
-%wdist = @(t) zeros(size(t));
-wdist = @(t) sin(2*pi*t);
+wdist = @(t) zeros(size(t));
+% wdist = @(t) sin(2*pi*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -57,11 +68,7 @@ wdist = @(t) sin(2*pi*t);
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
-
-freqs = [1 2 3 4];
-% freqs = [pi/2,pi,2*pi,3*pi,4*pi];
+freqsReal = pi * (1:29);
 
 % dimX = size(Sys.A,1);
 % Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
@@ -79,15 +86,15 @@ freqs = [1 2 3 4];
 
 % Check that the system, the reference and disturbance signals, and the
 % frequencies are defined in a consistent way.
-Sys = SysConsistent(Sys,yref,wdist,freqs);
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 
 %%
 
 % epsgainrange = [10,50];
 % epsgain = 13;
-% [ContrSys,epsgain] =LowGainRC(freqs,Pvals,epsgain,Sys);
-%[ContrSys,epsgain] = PassiveRC(freqs,Pvals,epsgainrange,Sys);
+% [ContrSys,epsgain] =LowGainRC(freqsReal,Pvals,epsgain,Sys);
+%[ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgainrange,Sys);
 
 % % Step 1: Compute stabilizing operators K2 and L so that A+B*K2 and A+L*C
 % % are exponentially stable
@@ -125,10 +132,10 @@ L = -ell*Linf;
 
 
 
-% [ContrSys,K21] = ObserverBasedRC(freqs,Sys,K_S,L,'poleplacement',3);
-[ContrSys,K21] = ObserverBasedRC(freqs,Sys,K_S,L,'LQR',3);
-% [ContrSys,K21] = DualObserverBasedRC(freqs,Sys,K_S,L,'LQR',3);
-% [ContrSys,K21] = DualObserverBasedRC(freqs,Sys,K_S,L,'poleplacement',3);
+% [ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K_S,L,'poleplacement',3);
+[ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = DualObserverBasedRC(freqsReal,Sys,K_S,L,'LQR',3);
+% [ContrSys,K21] = DualObserverBasedRC(freqsReal,Sys,K_S,L,'poleplacement',3);
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
@@ -171,8 +178,8 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(2,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 
-q = length(freqs);
-if freqs(1)==0,dimZ = 2*q-1; else dimZ=2*q;end
+q = length(freqsReal);
+if freqsReal(1)==0,dimZ = 2*q-1; else dimZ=2*q;end
 dimX = size(Sys.A,1);
 dimU = size(ContrSys.K,1);
 
@@ -202,7 +209,7 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 %% Animation
 
 
-% figure(4)
+% figure(5)
 % colormap jet
 % No movie recording
 % [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
