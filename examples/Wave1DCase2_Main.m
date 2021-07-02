@@ -94,17 +94,13 @@ kappa_S = 1;
 % Sys = SysOutputFeedback(Sys, -kappa_S*eye(size(Sys.C,1)));
 
 
-% Passive Robust Controller
+%A Passive Robust Controller
+
+dimY = size(Sys.C,1);
 epsgain = [0.01, 0.3];
 % epsgain = 0.3;
 
-Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
-Pvals = cell(1,length(freqsReal));
-for ind = 1:length(freqsReal)
-  Pvals{ind} = Pappr(freqsReal(ind));
-end
-
-[ContrSys, epsgain] = PassiveRC(freqsReal, Pvals, epsgain, Sys);
+[ContrSys, epsgain] = PassiveRC(freqsReal, dimY, epsgain, Sys, -kappa_S*eye(dimY));
 epsgain
 % Sys = outputFeedbackStab(Sys, -kappa_S);
 
@@ -113,7 +109,7 @@ epsgain
 % CLSys = ConstrCLSys(Sys,ContrSys);
 % CLSys_FB = ConstrCLSysWithFeedback(ContrSys,Sys,-kappa_S);
 
-ContrSys.Dc = -kappa_S*eye(size(Sys.C,1));
+%ContrSys.Dc = -kappa_S*eye(size(Sys.C,1));
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 %%

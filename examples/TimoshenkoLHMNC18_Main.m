@@ -69,17 +69,10 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % example in the LHMNC 2018 conference paper (simulation not included in
 % the paper).
 
-dimX = size(Sys.A,1);
-Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-
-Pvals = cell(1,length(freqsReal));
-for ind = 1:length(freqsReal)
-  Pvals{ind} = Pappr(1i*freqsReal(ind));
-end
-
+dimY = size(Sys.C,1);
 epsgain = [10,50];
 % epsgain = 13;
-[ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgain,Sys);
+[ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys);
 
 
 % % Alternative controller:

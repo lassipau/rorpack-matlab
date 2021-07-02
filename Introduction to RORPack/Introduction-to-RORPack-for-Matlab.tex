@@ -325,7 +325,7 @@ The detailed description of the theory of robust output regulation problem and t
   \item \cite{PauPoh10} and~\cite{PauPoh14a}: The Internal Model Principle for infinite-dimensional linear systems with bounded and unbounded, respectively, input and output operators $B$ and $C$.
   \item \cite{Pau16a,Pau17b}: Robust controller design for \keyterm{regular linear systems}.
   \item \cite{HumPau18,HumKur19}: Robust controller design for \keyterm{port-Hamiltonian systems} and other boundary controlled partial differential equations.
-  \item \cite{RebWei03,Pau17carxiv,PauLeGLHMNC18,PauLeG22}: Robust controller design \keyterm{impedance passive systems}.
+  \item \cite{RebWei03,Pau19,PauLeGLHMNC18,PauLeG22}: Robust controller design \keyterm{impedance passive systems}.
   \item \cite{PauPha20,PhaPau21,HuhPauMTNS20,PauPhaMTNS20} for robust finite-dimensional low-order controller design for parabolic systems using Galerkin approximations and model reduction.
   \item References on the output regulation \keyterm{without} the robustness requirement:~\cite{Poh81a,Sch83b,ByrLau00,Deu11,NatGil14,AulGil15book,XuDub17a,AulGil19,AulGil21arxiv}
 \end{itemize}
@@ -339,7 +339,7 @@ The considered controllers are of the form
   }
 \end{subequations}
 Here $y(t)-\yref(t)$ is the \keyterm{regulation error}.
-The construction of the robust controllers are based on the references~\cite{Pau16a,Pau17carxiv} with certain modifications and improvements. In particular, the internal models are defined in their ``real forms'', making the controller real whenever the parameters of the plant are real. The same controllers also achieve robust output tracking also for reference and disturbance signals with complex coefficients $\set{a_k^j}_{k,j},\set{b_k^j}_{k,j}\subset \C$.
+The construction of the robust controllers are based on the references~\cite{Pau16a,Pau19} with certain modifications and improvements. In particular, the internal models are defined in their ``real forms'', making the controller real whenever the parameters of the plant are real. The same controllers also achieve robust output tracking also for reference and disturbance signals with complex coefficients $\set{a_k^j}_{k,j},\set{b_k^j}_{k,j}\subset \C$.
 
 The constructions of the robust controllers use the knowledge of the frequencies $\set{\gw_k}_k $ of the reference and disturbance signals, the number of outputs $p:=\dim Y$ of the system~\eqref{eq:plantintro}, and certain knowledge of the system. In particular, the ``minimal controllers'' require knowledge of the values $P(i\gw_k)$ of the transfer function $P(\gl)=\CL R(\gl,A)B+D$ of the system at the complex frequencies $\set{i\gw_k}_k\subset i\R$ of the reference and disturbance signals~\eqref{eq:yrefwdist}.
 The other controller structures also use knowledge of the parameters $(A,B,C,D)$ of the system as they involve designing an observer for~\eqref{eq:plantintro}, and require the user to provide stabilizing state feedback and output injection operators. See Section~\ref{sec:ControllerTypes} for more information on the controller-specific requirements.
@@ -648,17 +648,23 @@ The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~
 	\bigskip
 %\item \red{ADD: DUAL OBSERVER BASED ROM CONTROLLER}
 
-  \item The ``passive minimal controller'' based on~\citel{RebWei03}{Thm. 1.2},~\citel{Pau17carxiv}{Sec. 5.1},~\cite{PauLeGLHMNC18}. For a strongly stable impedance passive system the closed-loop stability can be achieved using passive controller design and a \keyterm{power preserving interconnection} between the passive control system and the controller.\\[1ex]
+  \item The ``passive minimal controller'' based on~\citel{RebWei03}{Thm. 1.2},~\citel{Pau19}{Sec. 5.1},~\cite{PauLeG22}. For a strongly stable impedance passive system the closed-loop stability can be achieved using passive controller design and a \keyterm{power preserving interconnection} between the passive control system and the controller.\\[1ex]
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
-	 \texttt{PassiveRC(freqsReal,Pvals,epsgain,Sys)}
+	 \texttt{PassiveRC(freqsReal,dimY,epsgain,Sys,Dc)}
      \end{quotation}
      \medskip
      where
-     \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}\texttt{epsgain} is a parameter $\eps>0$ that controls the norm of $K$ and \texttt{Sys} contains the parameters of the plant.
-     In addition, \texttt{Pvals} is a $(q+1)\times p\times m$ array containing the values $P(i\gw_k)=\CL R(i\gw_k,A)B+D\in \C^{p\times m}$ of the transfer function of~\eqref{eq:plantintro} at the complex frequencies $\set{i\gw_k}_{k=0}^q$ of the reference and disturbance signals in~\eqref{eq:yrefwdist}.
+     \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}, \texttt{dimY} is the dimension of the output space $Y$ (i.e., the number of outputs of the system), and  \texttt{epsgain} is a scalar $\eps>0$ which controls the norm of $K$.
 
-The parameter \texttt{epsgain} can alternatively be a vector of length 2 providing minimal and maximal values for $\eps$. The controller construction has a naive functionality for finding an $\eps$ to optimize stability margin of the numerically approximated closed-loop system (simply by starting from the minimal value and increasing $\eps$ in steps). 
+%     In addition, \texttt{Pvals} is a $(q+1)\times p\times m$ array containing the values $P(i\gw_k)=\CL R(i\gw_k,A)B+D\in \C^{p\times m}$ of the transfer function of~\eqref{eq:plantintro} at the complex frequencies $\set{i\gw_k}_{k=0}^q$ of the reference and disturbance signals in~\eqref{eq:yrefwdist}.
+
+The parameter \texttt{epsgain} can alternatively be a vector of length 2 providing minimal and maximal values for $\eps$. The controller construction has a naive functionality for finding an $\eps$ to optimize stability margin of the numerically approximated closed-loop system (simply by starting from the minimal value and increasing $\eps$ in steps). In this case, the parameter \texttt{Sys} (containing the parameters of the plant) is used for this optimization.
+
+The optional parameter \texttt{Dc}, which is either $\dim Y\times \dim Y$-matrix or a scalar, is an feedthrough term 
+for the controller. The closed-loop structure implies that a nonzero feedthrough term with \texttt{Dc} is equivalent to a ``prestabilizing'' output feedback to the system (plus an additional disturbance term). In particular, controllable unstable passive systems can be prestabilized 
+by setting a negative definite matrix \texttt{Dc}. If \texttt{Dc} is a scalar, it is
+interpreted as ``\texttt{Dc} times identity''.
 
 It should be noted that the controller construction routine does not test passivity, and for a non-passive system the resulting closed-loop system will typically be unstable.
 
@@ -748,7 +754,13 @@ The model on $\Omega = [0,1]$ is
 The uncontrolled system is exponentially stable due to the homogeneous Dirichlet boundary condition at $\xi = 1$. The system is also impedance passive since the control input and measured output are collocated,  and because of this the robust output regulation problem can be solved using the Passive Robust Controller.
 %    Since the control input $u(t)$ and output $y(t)$ are not collocated, the system can not be 
 
-\blue{In the example, the construction of the low-gain controller employs the \textbf{Chebfun} package in computing the required transfer function values $P(i\gw_k)$.}
+In the example, the construction of the low-gain controller employs the \textbf{Chebfun} Matlab package in computing the required transfer function values $P(i\gw_k) = \CL R(i\gw_k,A)B+D$. This can be done by noting that for each $k$ the desired transfer function value is exactly $P(i\gw_k)=\hat{x}(0)$, where $\hat{x}(\cdot)$ is the (unique) solution of the boundary value problem
+\eq{
+  i\gw_k\hat{x}(\xi) &-  \pdb{\xi}(c(\xi)\pd{\hat{x}}{\xi})(\xi)=0\\
+      -\pd{\hat{x}}{\xi}(0) &= 1, \qquad 
+      \hat{x}(1) = 0.
+}
+\textbf{Chebfun} excels in solving such equations with high accuracy, and therefore the use of this package yields very good estimates of $P(i\gw_k)$ for the original system. 
 
 \medskip
 
@@ -855,7 +867,7 @@ The reference and disturbance signals are again of the form~\eqref{eq:yrefwdist}
 
 \medskip
 
-This case is considered in~\citel{Pau16a}{Sec. VII}.
+This example is taken from the article~\citel{Pau16a}{Sec. VII}.
 The system on $\Omega = [0,1]\times [0,1]$ with two inputs $u(t)=(u_1(t),u_2(t))^T$ and two outputs $y(t)=(y_1(t),y_2(t))^T$ is determined by
 %  \begin{subequations}
 %    \label{eq:heatex}
@@ -871,7 +883,7 @@ The system on $\Omega = [0,1]\times [0,1]$ with two inputs $u(t)=(u_1(t),u_2(t))
   Here the parts $\Gamma_0$, $\Gamma_1$, and $\Gamma_2$ of the boundary $\partial \Omega$ are defined so that
   $\Gamma_1 = \setm{\xi=(\xi_1,0)}{0\leq \xi_1\leq 1/2}$,
   $\Gamma_2 = \setm{\xi=(\xi_1,1)}{1/2\leq \xi_1\leq 1}$, 
-  $\Gamma_0 = \partial \Omega \setminus (\Gamma_1 \cup \Gamma_2)$. By~\cite[Cor. 2]{ByrGil02} the heat equation defines a regular linear system with feedthrough $D=0$. The system is also impedance passive.
+  $\Gamma_0 = \partial \Omega \setminus (\Gamma_1 \cup \Gamma_2)$. By~\cite[Cor. 2]{ByrGil02} the heat equation defines a regular linear system with feedthrough $D=0$. The system is also impedance passive due to the fact that the inputs $u(t)$ and the outputs $y(t) $ are collocated.
 %  \eq{
 %    P(\gl) = \frac{\coth(\sqrt{\gl})}{\sqrt{\gl}}, \qquad \gl\in \overline{\C_+}\setminus \set{0},
 %  }
@@ -891,7 +903,7 @@ In the simulations, the system is approximated using the eigenmodes of the Lapla
 
 \medskip
 
-A similar case (but with collocated inputs and outputs) was considered in~\citel{Pau17carxiv}{Sec. 6.3}.
+A similar case (but with collocated inputs and outputs) was considered in~\citel{Pau19}{Sec. 6.3}.
 The system on $\Omega = [0,1]\times [0,1]$ is
 %  \begin{subequations}
 %    \label{eq:heatex}
@@ -1000,7 +1012,7 @@ x(\xi,0)&=x_0(\xi), \quad x_t(\xi,0)=x_1(\xi)\\
     }
     for some $b(\cdot),b_d(\cdot)\in \Lp[2](0,1;\R)$.
     The uncontrolled system is unstable due to the lack of damping. Since the input and output are distributed, it is also not exponentially stabilizable or detectable, but instead it is only strongly (or polynomially~\cite{BorTom10}) stabilizable provided that $\iprod{b(\cdot)}{\sin(k\pi \cdot)}_{\Lp[2]}\neq 0$ for all $k\in\N$.
-    Because of this, it is not possible to use the low-gain controller, and the two observer-based controller designs are not guaranteed to achieve closed-loop stability. However, since the system is impedance passive, the Passive Robust Controller can be used in achieving robust output regulation even in the absence of exponential stability as shown in~\citel{Pau17carxiv}{Sec. 5.1}.
+    Because of this, it is not possible to use the low-gain controller, and the two observer-based controller designs are not guaranteed to achieve closed-loop stability. However, since the system is impedance passive, the Passive Robust Controller can be used in achieving robust output regulation even in the absence of exponential stability as shown in~\citel{Pau19}{Sec. 5.1}.
 Due to the sub-exponential closed-loop stability, the regulation error does not converge with any uniform convergence rate, but instead the rate depends on the initial state of the system. 
 
 In the simulations the system is approximated using the orthonormal eigenfunctions of the undamped wave operator.
@@ -1170,7 +1182,7 @@ Figure~\ref{fig:BeamKV} shows the outputs of the simulation example.
 
 \medskip
 
-The example is related to the article~\cite{PauLeGLHMNC18}.
+The example is related to the article~\cite{PauLeG22}.
 The controlled Timoshenko beam with constant parameters $\rho$ (mass density), $I_\rho$ rotary moment of inertia, $E$  Young's modulus, $I$ moment of inertia, $K$ shear modulus, is given by
 \eq{
 \rho \pd[2]{w}{t}(\xi,t) &= K \pdb{\xi} \left( \pd{w}{\xi}(\xi,t)-\phi(\xi,t) \right) - d_w \pd{w}{t}(\xi,t)\\
