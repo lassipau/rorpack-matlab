@@ -81,6 +81,19 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 %% Construct the controller
 
+% TODO: Check if this works, or if controller feedthrough should be used
+% instead
+% In this example, we prestabilize the system with negative output feedback
+% u(t) = -kappa_S*y(t) + u_new(t)
+% (Alternatively, this can be done using an additional feedthrough term in 
+% the contoller).
+
+% Stabilizing output feedback gain
+kappa_S = 2;
+
+Sys = SysOutputFeedback(Sys, -kappa_S*eye(size(Sys.C,1)));
+
+
 % Passive Robust Controller
 epsgain = [0.01, 0.3];
 % epsgain = 0.3;
