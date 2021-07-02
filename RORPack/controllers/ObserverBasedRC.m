@@ -1,12 +1,12 @@
 function [ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg)
-% ContrSys = ObserverBasedRC(freqs,Pvals,Sys)
-%
-% Construct an observer-based robust controller for systems with the same number of 
-% inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal 
-% model is in real form
-% freqsReal = Frequencies to be included in the controller, only real nonnegative
-% frequencies, if zero frequency is included, it's the first element in the
-% vector. The control system is assumed to be real (i.e.,
+% Construct an observer-based robust controller for systems with
+% the same number of inputs and outputs. The frequencies are assumed to be
+% conjugate pairs, and the internal model is in real form.
+% Inputs:
+%   freqsReal : [1xN double] Frequencies to be included in the controller,
+%   only real nonnegative frequencies, if zero frequency is included,
+%   it's the first element in the vector
+% The control system is assumed to be real (i.e.,
 % P(conj(s))=conj(P(s))), and P(iw_k) are invertible at the frequencies of
 % the reference and disturbance signals.
 % Pvals = [cell array] Values (or approximations of them) of the values of the transfer
