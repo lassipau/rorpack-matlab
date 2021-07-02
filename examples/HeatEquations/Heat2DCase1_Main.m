@@ -1,4 +1,13 @@
 %% Robust control of a 2D heat equation on a rectangle with boundary control 
+% The example is the simulation example from the article "Controller Design 
+% for Robust Output Regulation of Regular Linear Systems" by L. Paunonen,
+% IEEE TAC 2016.
+% The system has two boundary inputs and two collocated boundary outputs,
+% as well as an additional boundary disturbance input. The system is
+% unstable, but its only unstable eigenvalue 0 can be stabilized with
+% negative output feedback. The system is also impedance passive (due to
+% the collocated inputs and outputs).
+
 
 addpath(genpath('../RORPack/'))
 
