@@ -15,7 +15,7 @@ CLSys.Be = [Bd0, -(B0*Kappa);ContrSys.G2*Dd0, -ContrSys.G2*res];
 CLSys.Ce = [C0, D0*ContrSys.K];
 CLSys.De = [Dd0, -res];
 
-% CLSys.Ae = [Sys.A Sys.B*ContrSys.K;ContrSys.G2*Sys.C ContrSys.G1+ContrSys.G2*Sys.D*ContrSys.K];
-% CLSys.Be = [Sys.Bd zeros(size(Sys.Bd,1),size(Sys.C,1));zeros(size(ContrSys.G1,1),size(Sys.Bd,2)) -ContrSys.G2];
-% CLSys.Ce = [Sys.C Sys.D*ContrSys.K];
-% CLSys.De = [zeros(size(Sys.C,1),size(Sys.Bd,2)) -eye(size(Sys.C,1))];
+% An additional output operator for computing the control input u(t) based
+% on the closed-loop state x_e(t)
+CLSys.Ke = [zeros(size(ContrSys.K,1),size(Sys.A,1)), ContrSys.K];
+

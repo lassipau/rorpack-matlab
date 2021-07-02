@@ -68,7 +68,11 @@ freqsReal = [1 2 3 6];
 
 % eig(full(Sys.A))
 
-% Construct the controller
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
+
+%% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
 
@@ -89,7 +93,7 @@ freqsReal = [1 2 3 6];
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
-K = 7*[1, zeros(1,N-1)];
+K = -7*[1, zeros(1,N-1)];
 % PlotEigs(full(Sys.A+Sys.B*K),[-20 1 -.3 .3])
 
 L = -7*[zeros(N-1,1);2*(N-1)];
@@ -100,16 +104,14 @@ ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR', 0.45);
 % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.45);
 % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
 
-%% Closed-loop simulation
+%% Closed-loop simulation and visualization of the results
 
-
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
 PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
-%%
-
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
@@ -118,7 +120,8 @@ tgrid = linspace(0,Tend,300);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
-% Choose whther or not to print titles of the figures
+
+% Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
 figure(1)
@@ -127,7 +130,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 
@@ -139,9 +142,9 @@ Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 %%
 
 
-% figure(3)
+figure(3)
 % No movie recording
-% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);

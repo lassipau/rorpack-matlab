@@ -63,19 +63,21 @@ wdist = @(t) zeros(size(t));
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqs = [0 1 2 3 6];
+freqs = [0, 1, 2, 3, 6];
 
 % Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
 
 % eig(full(Sys.A))
 
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
+%% Construct the controller
+
 % A Low-Gain 'Minimal' Robust Controller
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 % 
 % Pvals = cell(1,length(freqs));
 % for ind = 1:length(freqs)
@@ -132,27 +134,29 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 
 
 % In plotting and animating the state,
-% fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid = [spgrid 1];
+% fill in the Dirichlet boundary condition x(1,t)=u(t) at x=1
+spgrid_plot = [spgrid, 1];
+state_plot = [CLsim.xesol(1:N,:);CLsim.control];
+inputs = [zeros(size(ContrSys.K,1),N),ContrSys.K]*CLsim.xesol;
+BCtype = 'NN';
 
 figure(3)
 colormap jet
-Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
+Plot1DHeatSurf(state_plot,spgrid_plot,tgrid,BCtype)
 
 %%
 figure(4)
 % No movie recording
-[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,0);
 
 % Movie recording
-% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
-
+% [MovAnim,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,1);
 %movie(MovAnim)
 
 %%

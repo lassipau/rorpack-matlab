@@ -1,9 +1,10 @@
 %% A Wave equation in 1D with Neumann boundary control and Dirichlet observation, 
-% based on Guo & Krstic IFAC 2017, Main file
-% Simulation based on modal approximation
-
-% Unstable system, noncollocated I/O. Can be stabilized with output
-% feedback, but the low-gain controller achieves a poor stability margin
+% The example taken from the article by Wei Guo & M. Krstic IFAC PapersOnline 2017
+% Simulation based on modal approximation.
+% 
+% In this example, the system is unstable and has noncollocated I/O. 
+% The system can be stabilized with output feedback, but the low-gain 
+% controller achieves a poor stability margin
 
 addpath(genpath('../RORPack/'))
 
@@ -68,35 +69,39 @@ wdist = @(t) zeros(size(t));
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-freqsReal = pi * (1:29);
+freqsReal = pi*(1:29);
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-% 
-% Pvals = cell(1,length(freqs));
-% for ind = 1:length(freqs)
-%   Pvals{ind} = Pappr(freqs(ind));
-% end
-
-% for ind = 1:length(freqsReal)
-%   if cond(Pappr(freqs(ind)))>1e6
-%     warning(['The matrix P(iw_k) for k=' num2str(ind) ' is nearly singular!'])
-%   end
-% end
 
 % Check that the system, the reference and disturbance signals, and the
 % frequencies are defined in a consistent way.
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 
-%%
+%% Construct the controller
 
-% epsgainrange = [10,50];
+% A Low-Gain 'Minimal' Robust Controller
+
+% dimX = size(Sys.A,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% 
+% for ind = 1:length(freqsReal)
+%   if cond(Pappr(freqs(ind)))>1e6
+%     warning(['The matrix P(iw_k) for k=' num2str(ind) ' is nearly singular!'])
+%   end
+% end
+% 
+% Pvals = cell(1,length(freqs));
+% for ind = 1:length(freqs)
+%   Pvals{ind} = Pappr(freqs(ind));
+% end
+% 
+% epsgain = [10,50];
 % epsgain = 13;
 % [ContrSys,epsgain] =LowGainRC(freqsReal,Pvals,epsgain,Sys);
-%[ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgainrange,Sys);
+% epsgain 
 
-% % Step 1: Compute stabilizing operators K2 and L so that A+B*K2 and A+L*C
+% An observer-based robust controller 
+% % Step 1: Compute stabilizing operators K21 and L so that A+B*K21 and A+L*C
 % % are exponentially stable
 % K21 = -lqr(full(Sys.A),Sys.B,eye(size(Sys.A)),1*eye(dimU),zeros(dimX,dimU));
 % L = -lqr(full((Sys.A).'),(Sys.C).',eye(size(Sys.A)),0.1*eye(dimY),zeros(dimX,dimY)).';
@@ -108,9 +113,6 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % Prestabilization
 k_m = .3;
 Sys.A = Sys.A-k_m*Sys.B*Sys.Cm;
-
-% CHEATING: Prestabilize the Jordan block at s=0
-% Sys.A(1:2,1:2) = [-1 1;0 0];
 
 kappa = .9;
 ell = .8;
@@ -129,7 +131,6 @@ L = -ell*Linf;
 % PlotEigs(Sys.A+L*[Sys.C;Sys.Cm])
 % PlotEigs(Sys.A+L*Sys.C,[-1.5, .01, NaN, NaN])
 % PlotEigs(Sys.A+L*Sys.C)
-
 
 
 % [ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K_S,L,'poleplacement',3);
@@ -163,33 +164,38 @@ x0 = Constr1DWave(w0fun,wd0fun,N);
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 20;
-tgrid = linspace(0,Tend,200);
+tgrid = linspace(0,Tend,401);
 
 
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
-% Choose whther or not to print titles of the figures
+
+% Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
 figure(1)
-subplot(2,1,1)
+subplot(3,1,1)
 plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
-subplot(2,1,2)
+subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
-q = length(freqsReal);
-if freqsReal(1)==0,dimZ = 2*q-1; else dimZ=2*q;end
-dimX = size(Sys.A,1);
-dimU = size(ContrSys.K,1);
 
-K1full = [ContrSys.K(:,1:dimZ), zeros(dimU,dimX)];
-K2full = [zeros(dimU,dimZ) ContrSys.K(:,(dimZ+1):end)];
-figure(2)
-plot(tgrid,[ContrSys.K*CLsim.xesol((2*N+1):end,:);K1full*CLsim.xesol((2*N+1):end,:);K2full*CLsim.xesol((2*N+1):end,:)],'Linewidth',2);
-obserror = sum((CLsim.xesol(1:2:(2*N),:)-CLsim.xesol(dimX+dimZ+(1:2:(2*N)),:)).^2,1);
-figure(3)
-plot(tgrid,obserror,'Linewidth',2);
+% Plots for additional analysis
+% q = length(freqsReal);
+% if freqsReal(1)==0,dimZ = 2*q-1; else dimZ=2*q;end
+% dimX = size(Sys.A,1);
+% dimU = size(ContrSys.K,1);
+% K1full = [ContrSys.K(:,1:dimZ), zeros(dimU,dimX)];
+% K2full = [zeros(dimU,dimZ) ContrSys.K(:,(dimZ+1):end)];
+% figure(5)
+% plot(tgrid,[CLsim.control;K1full*CLsim.xesol((2*N+1):end,:);K2full*CLsim.xesol((2*N+1):end,:)],'Linewidth',2);
+% obserror = sum((CLsim.xesol(1:2:(2*N),:)-CLsim.xesol(dimX+dimZ+(1:2:(2*N)),:)).^2,1);
+% figure(6)
+% plot(tgrid,obserror,'Linewidth',2);
+% title('Observer error in the controller.')
 
 figure(4)
 colormap jet
@@ -209,10 +215,10 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 %% Animation
 
 
-% figure(5)
-% colormap jet
+figure(5)
+colormap jet
 % No movie recording
-% [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
+[~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
@@ -222,16 +228,6 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 % [MovAnim,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,Tpause,record)
 
 %movie(MovAnim)
-
-% figure(3)
-% colormap jet
-% %PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-% PlotHeat2DSurf(x0,spgrid,zlims)
-% 
-% figure(4)
-% tt = linspace(0,16,500)
-% plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
-% set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
 
 %% Export movie to AVI
@@ -251,21 +247,4 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 % writeVideo(AnimExport,MovAnim);
 % close(AnimExport);
 
-
-%%
-
-% K21=K21(:);
-% phinvals = phin(spgrid,(0:(N-1)).'); 
-% K21(1:2:end)*phinvals;
-% plot(spgrid,K21(2:2:end)*phinvals);
-
-
-% A = Sys.A;
-% B = Sys.B;
-% C = Sys.C;
-% C2 = Sys.C2;
-
-% max(max(real(eig(full(A+B*K21)))))
-% max(max(real(eig(full(A-0.75*B*(C2+C))))))
-% max(max(real(eig(full(A-75*B*C)))))
 
