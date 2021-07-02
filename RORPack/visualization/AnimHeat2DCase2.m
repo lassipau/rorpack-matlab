@@ -1,4 +1,4 @@
-function [MovAnim,zlims] = AnimHeat2Dtest3(CLsim,spgrid,tgrid,Tpause,record)
+function [MovAnim,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,Tpause,record)
 % function AnimHeat2Dtest1(CLsim,tgrid)
 %
 % Animate the solution of the 2D Heat equation

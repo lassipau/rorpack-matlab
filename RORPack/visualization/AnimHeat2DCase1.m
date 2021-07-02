@@ -1,4 +1,4 @@
-function [MovAnim,zlims] = AnimHeat2Dtest2(CLsim,spgrid,tgrid,Tpause,record)
+function [MovAnim,zlims] = AnimHeat2DCase1(CLsim,spgrid,tgrid,Tpause,record)
 % function AnimHeat2Dtest1(CLsim,tgrid)
 %
 % Animate the solution of the 2D Heat equation
@@ -15,7 +15,7 @@ yy = spgrid.yy;
 % size of the state space X_N is N^2, here the grid has is N x N
 N = size(xx,1);
 
-xesol = normalizeHeat2DData(N, deval(CLsim.solstruct,tgrid), xx, yy);
+xesol = NormalizeHeat2DData(N, deval(CLsim.solstruct,tgrid), xx, yy);
 
 zz = xesol(1:N^2,:);
 
