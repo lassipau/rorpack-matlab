@@ -1,4 +1,4 @@
-function [x0,spgrid,sys] = ConstrHeat2Dtest2(N,M,x0fun,cval)
+function [x0,spgrid,sys] = ConstrHeat2DCase2(N,M,x0fun,cval)
 % [x0,spgrid,sys] = ConstrHeat2Dtest1(c,x0fun,N)
 % Usage: Can also use solely for defining the initial state x0
 % x0 = initial state

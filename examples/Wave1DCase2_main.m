@@ -22,7 +22,7 @@ w0fun = @(x) 1 + cos(3 * pi * x) + cos(6*x);
 % w0fun = @(x) x .* (x - 1) .* (2 - 5 * x);
 wd0fun = @(x) zeros(size(x));
 
-[Sys, x0, phin] = constr1DWave3(N, Bfun, Bdfun, w0fun, wd0fun);
+[Sys, x0, phin] = ConstrWave1DCase2(N, Bfun, Bdfun, w0fun, wd0fun);
 
 % Stabilizing output feedback gain
 kappa_S = 1;

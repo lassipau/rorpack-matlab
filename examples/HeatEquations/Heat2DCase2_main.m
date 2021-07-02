@@ -24,7 +24,7 @@ x0fun = @(x,y) cos(pi*(1-x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[x0,spgrid,Sys] = ConstrHeat2Dtest2(N,M,x0fun,cval);
+[x0,spgrid,Sys] = ConstrHeat2DCase2(N,M,x0fun,cval);
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);

@@ -1,4 +1,4 @@
-function [x0,spgrid,sys] = ConstrHeat2Dtest1(cval,x0fun,N)
+function [x0,spgrid,sys] = ConstrHeat2DCase1(cval,x0fun,N)
 
 xx = linspace(0,1,N);
 yy = xx;

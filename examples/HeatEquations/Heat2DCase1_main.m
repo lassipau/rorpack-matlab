@@ -15,7 +15,7 @@ x0fun = @(x,y) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[x0,spgrid,Sys] = ConstrHeat2Dtest1(1,x0fun,N);
+[x0,spgrid,Sys] = ConstrHeat2DCase1(1,x0fun,N);
 
 
 % Case 1:

@@ -35,7 +35,7 @@ IB2 = [.6, .7];
 IC1 = [.1, .2];
 IC2 = [.8, .9];
 
-[x0,Sys,spgrid,BCtype] = Constr1DHeatCase5(cfun,x0fun,N);
+[x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N);
 
 
 % Model = ss(Sys.A,Sys.B,Sys.C,Sys.D);

@@ -1,4 +1,4 @@
-function [x0,Sys,phin,Kinf,Linf] = Constr1DWave(w0fun,wd0fun,N)
+function [x0,Sys,phin,Kinf,Linf] = ConstrWave1DCase1(w0fun,wd0fun,N)
 % [x0,Sys,phin] = Constr1DWave(x0fun,N)
 % 
 % Modal approximation of a 1D Wave equation with Neumann boundary input (at x=1) and

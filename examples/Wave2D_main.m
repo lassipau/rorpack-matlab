@@ -8,7 +8,7 @@ Nvals = 8;
 Mvals = 12; % from 0 to Mvals-1
 
 % construction of the 2D Wave approximation 
-[Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = Constr2DWave(Nvals,Mvals);
+[Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = ConstrWave2D(Nvals,Mvals);
 P = @(s) Sys.C*((s*eye(2*Nvals*(2*Mvals-1))-Sys.A)\Sys.B); % transfer function approx.
 
 %% exosystem, controller, closed-loop system

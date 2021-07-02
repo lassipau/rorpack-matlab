@@ -23,7 +23,7 @@ wd0fun = @(x) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[~,Sys,phin,Kinf,Linf] = Constr1DWave(w0fun,wd0fun,N);
+[~,Sys,phin,Kinf,Linf] = ConstrWave1DCase1(w0fun,wd0fun,N);
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);

@@ -9,38 +9,36 @@
 
 addpath(genpath('../RORPack/'))
 
-N = 50; 
+N = 51; 
 
 % Initial state of the plant
 %x0fun = @(x) zeros(size(x));
 x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
-% x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
+%x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x) 1*(1-x).^2.*(3-2*(1-x))-1;
-%x0fun = @(x) .5*(1-x).^2.*(3-2*(1-x))-.5;
+%x0fun = @(x) 0.5*(1-x).^2.*(3-2*(1-x))-0.5;
 %x0fun = @(x) 1/4*(x.^3-1.5*x.^2)-1/4;
-%x0fun = @(x) .2*x.^2.*(3-2*x)-.5;
+%x0fun = @(x) 0.2*x.^2.*(3-2*x)-0.5;
 
 % The spatially varying thermal diffusivity of the material
 % cfun = @(t) ones(size(t));
 % cfun = @(t) 1+t;
-cfun = @(t) 1-2*t.*(1-2*t);
-% cfun = @(t) 1+0.5*cos(5/2*pi*t);
+% cfun = @(t) 1-2*t.*(1-2*t);
+cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % cfun = @(t) 0.3-0.6*t.*(1-t);
 
-[x0,Sys,spgrid,BCtype] = Constr1DHeatCase4(cfun,x0fun,N);
+[x0,Sys,spgrid,BCtype] = ConstrHeat1DCase1(cfun,x0fun,N);
 
-% Model = ss(Sys.A,Sys.B,Sys.C,Sys.D);
-% tt=linspace(0,4*pi);
-% utestfun = @(t) ones(size(t));
-% utestfun = @(t) sin(t);
-% [output,t,xx]=lsim(Model,utestfun(tt),tt);
-% xx = [xx, utestfun(tt(:))]
+% Model = ss(Sys.A,Sys.B,Sys.Cm,Sys.D);
+% tt=linspace(0,4);
+% [output,t,xx]=lsim(Model,ones(size(tt)),tt);
 % plot(spgrid,xx(end,:))
-% surf(spgrid,tt,xx)
-% 
-% % plot(tt,(xx(:,2)-xx(:,1))*(N-1))
+% plot(tt,(xx(:,2)-xx(:,1))*(N-1))
+
+%%
+
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -52,8 +50,8 @@ cfun = @(t) 1-2*t.*(1-2*t);
 
 % Case 1:
 yref = @(t) sin(2*t);%+.2*cos(3*t);
-wdist = @(t) zeros(size(t));
-% wdist = @(t) sin(2*t);
+% wdist = @(t) zeros(size(t));
+wdist = @(t) sin(2*t);
 
 % Case 2:
 % yref = @(t) ones(size(t));
@@ -63,7 +61,7 @@ wdist = @(t) zeros(size(t));
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-freqs = [0, 1, 2, 3, 6];
+freqsReal = [1 2 3 6];
 
 % Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
@@ -73,11 +71,13 @@ freqs = [0, 1, 2, 3, 6];
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
+
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
 
-% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+% dimX = size(Sys.A,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
 % Pvals = cell(1,length(freqs));
 % for ind = 1:length(freqs)
@@ -86,49 +86,45 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % 
 % epsgainrange = [0.01,3];
 % epsgain = .1;
-%[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 
-% An observer-based robust controller
+% An observer-based robust controller or
+% a dual observere-based robust controller
 % Stabilizing state feedback and output injection operators K and L
-% These are chosen based on collocated design. The plant is already stable,
-% but stability margin can be improved.
+% These are chosen based on collocated design. Only the single unstable
+% eigenvalue at s=0 needs to be stabilized
 K = -7*[1, zeros(1,N-1)];
-%K = zeros(1,N);
-%K = -ones(1,N);
-%PlotEigs(full(Sys.A+Sys.B*K),[-20 1 -.3 .3])
+% PlotEigs(full(Sys.A+Sys.B*K),[-20 1 -.3 .3])
 
-L = -20*[zeros(N-1,1);2*(N-1)];
-% L = zeros(N,1);
-% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+L = -7*[zeros(N-1,1);2*(N-1)];
+PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3]);
 
-% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',4);
-ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',4);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',4);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',4);
+ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR', 0.45);
+% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.45);
+% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
 
-%% Closed-loop simulation
+%% Closed-loop simulation and visualization of the results
+
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
-figure(1)
 PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
-%%
-
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 14;
 tgrid = linspace(0,Tend,300);
 
-
-
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
-% Choose whther or not to print titles of the figures
+
+% Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
-figure(2)
+figure(1)
 subplot(3,1,1)
 plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
@@ -139,30 +135,26 @@ plotControl(tgrid,CLsim,PrintFigureTitles)
 %%
 
 
-% In plotting and animating the state,
-% fill in the Dirichlet boundary condition x(1,t)=u(t) at x=1
-spgrid_plot = [spgrid, 1];
-state_plot = [CLsim.xesol(1:N,:);CLsim.control];
-inputs = [zeros(size(ContrSys.K,1),N),ContrSys.K]*CLsim.xesol;
-BCtype = 'NN';
-
-figure(3)
+figure(2)
 colormap jet
-Plot1DHeatSurf(state_plot,spgrid_plot,tgrid,BCtype)
+Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
 %%
-figure(4)
+
+
+figure(3)
 % No movie recording
-[~,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
 % Movie recording
-% [MovAnim,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,1);
+% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
+
 %movie(MovAnim)
 
 %%
 
 
-figure(5)
+figure(4)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)

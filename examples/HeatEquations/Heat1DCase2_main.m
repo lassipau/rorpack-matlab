@@ -30,7 +30,7 @@ x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % cfun = @(t) 0.3-0.6*t.*(1-t);
 
-[x0,Sys,spgrid,BCtype] = Constr1DHeatCase2(cfun,x0fun,N);
+[x0,Sys,spgrid,BCtype] = ConstrHeat1DCase2(cfun,x0fun,N);
 
 % Model = ss(Sys.A,Sys.B,Sys.C,Sys.D);
 % tt=linspace(0,4);
