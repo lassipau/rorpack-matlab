@@ -1,20 +1,28 @@
 function [ContrSys,K2] = DualObserverBasedRC(freqsReal,Sys,K2,L1,IMstabtype,IMstabmarg)
-% ContrSys = DualObserverBasedRC(freqs,Pvals,Sys)
+% Construct a dual observer-based robust controller for systems with
+% the same number of inputs and outputs.
+% Inputs:
+%   freqsReal : [1xN double] Frequencies to be included in the controller,
+%   only real nonnegative frequencies, if zero frequency is included,
+%   it's the first element in the vector
 %
-% Construct a dual observer-based robust controller for systems with the same number of 
-% inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal 
-% model is in real form
-% freqsReal = Frequencies to be included in the controller, only real nonnegative
-% frequencies, if zero frequency is included, it's the first element in the
-% vector. The control system is assumed to be real (i.e.,
-% P(conj(s))=conj(P(s))), and P(iw_k) are invertible at the frequencies of
-% the reference and disturbance signals.
-% Pvals = [cell array] Values (or approximations of them) of the values of the transfer
-% function of the system on the frequencies 'freqs'
-% Sys = The control system for observer design
-% ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
-% IMstabtype = Type of stabilization for the internal model, either 'LQR'
-% or 'poleplacement'
+%   Sys : [struct with fields A,B,C,D] The controlled system
+%
+%   K2 : [M1xN1 matrix] The matrix K2 which should be chosen
+%   so that A + B * K2 is stable.
+%
+%   L : [M2xN2 matrix] The matrix L1 which should be chosen
+%   so that A + L1 * C is stable.
+%
+%   IMstabtype : [string] Stabilization of the internal model
+%   using either 'LQR' or 'poleplacement'
+%
+%   IMstabmarg : [double] The desired stability margin
+%   for the internal model.
+%
+% Outputs:
+%   ContrSys : [struct with fields G1,G2,K] dual observer-based robust controller
+%   for the stable linear system Sys
 
 A = Sys.A;
 B = Sys.B;

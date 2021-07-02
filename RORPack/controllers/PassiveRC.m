@@ -1,13 +1,25 @@
 function [ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgain,Sys)
-% ContrSys = PassiveRC(freqs,dimY,Pvals)
+% Construct a Passive Robust Controller for
+% a stable impedance passive linear system.
+% Inputs:
+%   freqsReal : [1xN double] Frequencies to be included in the controller,
+%   only real nonnegative frequencies, if zero frequency is included,
+%   it's the first element in the vector
 %
-% Construct a passive simple controller for stable systems, in real form
-% freqsReal = Frequencies to be included in the controller, only real nonnegative
-% frequencies, if zero frequency is included, it's the first element in the
-% vector
-% Pvals = [cell array] Values (or approximations of them) of the values of the transfer
-% function of the system on the frequencies 'freqs'
-% ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
+%   Pvals : [cell array] Values (or approximations of them) of the values
+%   of the transfer function of the system on the frequencies 'freqs'
+%
+%   epsgain : [1x1 double/1x2 double] The value of the low-gain parameter
+%   $\eps>0$, can alternatively be a vector of length 2 providing
+%   minimal and maximal values for $\eps$
+%
+%   Sys : [struct with fields A,B,C,D] The controlled system
+%
+% Outputs:
+%   ContrSys : [struct with fields G1,G2,K] Passive Robust Controller
+%   for the stable linear system Sys
+%
+%   epsgain : [double] The (roughly) optimal value of $\eps$
 
 % if max(real(eig(full(Sys.A))))>=0
 %   error('The system is unstable, the low-gain controller design cannot be completed.')

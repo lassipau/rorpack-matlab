@@ -1,25 +1,28 @@
 function ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
-% ContrSys = ObserverBasedROMRC(freqs,Pvals,Sys)
-%
-% Construct a reduced order observer-based robust controller for systems with the same number of
-% inputs and outputs. The frequencies are assumed to be conjugate pairs, and the internal
+% Construct a reduced order observer-based robust controller for systems
+% with the same number of inputs and outputs.
+% The frequencies are assumed to be conjugate pairs, and the internal
 % model is in real form
-% freqsReal = Frequencies to be included in the controller, only real nonnegative
-% frequencies, if zero frequency is included, it's the first element in the
-% vector. The control system is assumed to be real (i.e.,
-% P(conj(s))=conj(P(s))), and P(iw_k) are invertible at the frequencies of
-% the reference and disturbance signals.
-% SysApprox = The Galerkin approximation (A^N,B^N,C^N,D) of the control
-% system for the controller design. This is a struct with fields
-% SysApprox.AN, SysApprox.BN, SysApprox.CN, and SysApprox.D
-% IMstabmarg = intended stability margin of the closed-loop system
-% ROMorder = order of the reduced-order observer in the controller. The
-%            model reduction step can be skipped by setting 'ROMorder=NaN'
+% Inputs:
+%   freqsReal : [1xN double] Frequencies to be included in the controller,
+%   only real nonnegative frequencies, if zero frequency is included,
+%   it's the first element in the vector.
 %
-% ContrSys = Controller parameters (ContrSys.G1,ContrSys.G2,ContrSys.K)
+%   SysApprox : The Galerkin approximation (A^N,B^N,C^N,D) of the control
+%   system for the controller design. This is a struct with fields
+%   SysApprox.AN, SysApprox.BN, SysApprox.CN, and SysApprox.D
+%
+%   IMstabmarg : [double] intended stability margin of the closed-loop system
+%
+%   ROMorder : order of the reduced-order observer in the controller. The
+%            model reduction step can be skipped by setting 'ROMorder=NaN'
 %
 % In this version, the parameters in the LQR/LQG design Q are chosen to be
 % identity matrices.
+%
+% Output:
+%   ContrSys : [struct with fields G1,G2,K] reduced order
+%   observer-based robust controller
 %
 % Copyright (C) 2020 by Lassi Paunonen (lassi.paunonen@tuni.fi)
 % Licensed under GNU GPLv3 (see LICENSE.txt).
