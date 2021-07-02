@@ -170,11 +170,11 @@ PrintFigureTitles = true;
 
 figure(2)
 subplot(3,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,PrintFigureTitles)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 set(gcf,'color','white')
 
 
