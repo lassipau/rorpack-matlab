@@ -132,9 +132,9 @@ spgrid = linspace(0,1,N);
 
 figure(1)
 subplot(2,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(2,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 
 %% Plot the state of the controlled system
 figure(3)

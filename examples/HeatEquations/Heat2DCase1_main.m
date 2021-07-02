@@ -79,11 +79,11 @@ PrintFigureTitles = true;
 
 figure(2)
 subplot(3,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,PrintFigureTitles)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 
@@ -91,10 +91,10 @@ plotControl(tgrid,CLsim,PrintFigureTitles)
 figure(3)
 colormap jet
 % No movie recording
-[~,zlims] = AnimHeat2Dtest2(CLsim,spgrid,tgrid,0.03,0);
+[~,zlims] = AnimHeat2DCase1(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
-% [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
+% [MovAnim,zlims] = AnimHeat2DCase1(CLsim,spgrid,tgrid,0,1);
 
 %movie(MovAnim)
 

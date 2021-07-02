@@ -159,7 +159,7 @@ wd0fun = @(x) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-x0 = Constr1DWave(w0fun,wd0fun,N);
+x0 = ConstrWave1DCase1(w0fun,wd0fun,N);
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
@@ -176,11 +176,11 @@ PrintFigureTitles = true;
 
 figure(1)
 subplot(3,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,PrintFigureTitles)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 
 % Plots for additional analysis
@@ -219,9 +219,6 @@ figure(5)
 colormap jet
 % No movie recording
 [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
-
-% Movie recording
-% [MovAnim,zlims] = AnimHeat2Dtest1(CLsim,spgrid,tgrid,0,1);
 
 % Tpause = 0.05;
 % record = 0;

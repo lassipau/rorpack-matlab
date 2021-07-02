@@ -107,10 +107,10 @@ K = -lqr(Sys.A,Sys.B,0.1*eye(N),10*eye(2));
 L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
 % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 
-ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',1);
-% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'poleplacement',1);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',1);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',1);
+ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
 
 
 % % A reduced order observer-based robust controller
@@ -137,7 +137,7 @@ ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',1);
 % R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 % ROMorder = 3;
 % 
-% ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+% ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 
 %% Closed-loop simulation
@@ -163,11 +163,11 @@ PrintFigureTitles = true;
 
 figure(2)
 subplot(3,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,PrintFigureTitles)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 

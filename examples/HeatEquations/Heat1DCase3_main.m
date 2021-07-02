@@ -124,7 +124,7 @@ L = -10*Sys.C';
 % design is a lower dimensional numerical approximation
 % of the PDE model.
 Nlow = 50;
-[~,Sys_Nlow,~,~] = Constr1DHeatCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
+[~,Sys_Nlow,~,~] = ConstrHeat1DCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
 
 % Store the numerical approximation in "SysApprox".
 SysApprox.AN = Sys_Nlow.A;
@@ -168,11 +168,11 @@ PrintFigureTitles = true;
 
 figure(2)
 subplot(3,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,PrintFigureTitles)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
