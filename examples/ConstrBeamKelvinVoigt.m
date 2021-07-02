@@ -79,7 +79,7 @@ C = [C0,zeros(2,N-1)];
 
 
 % The system has zero feedthrough
-D = 0;
+D = zeros(2,2);
 
 % Construct the disturbance input matrix Bd
 bd1fun = chebfun(bd1,'trunc',N+3);

@@ -53,8 +53,7 @@ wdist = @(t) zeros(size(t));
 % wdist = @(t) sin(t);
 
 
-% freqs = [-3i -2i -1i 0 1i 2i 3i];
-freqsReal = [1 2];
+freqsReal = [1, 2];
 
 
 % Check that the system, the reference and disturbance signals, and the
@@ -125,7 +124,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,4*N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 
 figure(3)

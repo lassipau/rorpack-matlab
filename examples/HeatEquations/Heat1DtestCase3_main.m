@@ -79,12 +79,15 @@ freqsReal = [1 2 3 6];
 
 % eig(full(Sys.A))
 
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
+
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
 
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 % 
 % Pvals = cell(1,length(freqsReal));
 % for ind = 1:length(freqsReal)
@@ -128,8 +131,8 @@ SysApprox.AN = Sys_Nlow.A;
 SysApprox.BN = Sys_Nlow.B;
 SysApprox.CN = Sys_Nlow.C;
 SysApprox.D = Sys_Nlow.D;
-alpha1 = 1;
-alpha2 = 0.5;
+alpha1 = 1.5;
+alpha2 = 1;
 Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
 Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
@@ -169,32 +172,34 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid = [spgrid 1];
+spgrid_plot = [spgrid, 1];
 
 figure(3)
 colormap jet
-Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
+Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
-% figure(4)
+%%
+figure(4)
 % No movie recording
-% [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
 
 %movie(MovAnim)
 
+%%
 figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
-% Export movie to AVI
+%% Export movie to AVI
 
 % AnimExport = VideoWriter('Heat1DCase3-animation.mp4','MPEG-4');
 % AnimExport.Quality = 100;

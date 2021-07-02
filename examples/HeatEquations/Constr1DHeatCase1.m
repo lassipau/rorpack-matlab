@@ -28,9 +28,12 @@ BCtype = 'NN';
 [A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Neumann boundary input at x=0, sign is based on the _outwards_ normal derivative
-B = sparse([-2/h;zeros(N-1,1)]); 
+% This is also affected by the diffusion coefficient at x=0 (according to 
+% the approximation in DiffOp1d).
+B = sparse([2*cfun(0)/h;zeros(N-1,1)]);
 
-Bd = sparse([zeros(N-1,1);2/h]); % Neumann boundary disturbance at x=1
+
+Bd = sparse([zeros(N-1,1);2*cfun(1)/h]); % Neumann boundary disturbance at x=1
 C = sparse([zeros(1,N-1), 1]); % Measured temperature at x=1
 Cm = sparse([1, zeros(1,N-1)]); % Additional output, measured temperature at x=0
 

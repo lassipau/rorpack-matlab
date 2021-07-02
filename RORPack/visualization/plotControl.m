@@ -1,7 +1,7 @@
-function plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+function plotControl(tgrid,CLsim,PrintFigureTitles)
 
-% Plot the control input, if the arguments ContrSys and N are given
-plot(tgrid,[zeros(size(ContrSys.K,1),N),ContrSys.K]*CLsim.xesol,'Linewidth',2);
+% Plot the control input, this is saved in the CLsim structure
+plot(tgrid,CLsim.control,'Linewidth',2);
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 if PrintFigureTitles == true
     title('Control input $u(t)$','Interpreter','latex','Fontsize',16)

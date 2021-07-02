@@ -117,10 +117,9 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N*M,PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 
-%%
-
+%% Animation (DOES NOT WORK YET)
 
 % figure(3)
 % colormap jet

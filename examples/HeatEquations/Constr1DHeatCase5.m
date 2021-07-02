@@ -35,7 +35,7 @@ A = A + gamma*spdiags(ones(N,1),0,N,N);
 
 % Neumann boundary input at x=0 (input u_1(t)) and x=1 (input u_2(t)) 
 % Signs are based on the _outwards_ normal derivatives
-B = [[-2/h;zeros(N-1,1)],[zeros(N-1,1);2/h]]; 
+B = [[2*cfun(0)/h;zeros(N-1,1)],[zeros(N-1,1);-2*cfun(1)/h]]; 
 
 
 IC1 = [.0, .25];
@@ -55,7 +55,7 @@ Sys.A = A;
 Sys.B = B;
 Sys.Bd = zeros(N,1);
 Sys.C = C;
-Sys.D = 0;
+Sys.D = zeros(2,2);
 Sys.Dd = zeros(2,1);
 
 

@@ -63,8 +63,7 @@ N = 70;
 yref1_oneper = @(t) 0.3+0.4*((t<=1).*(t-1/2)+(t>1).*(3/2-t));
 yref = @(t) [yref1_oneper(rem(t,2));zeros(size(t))];
 wdist = @(t) sin(pi*t)+0.4*cos(3*pi*t);
-freqs = pi*(0:10);
-q=10;
+freqsReal = pi*(0:10);
 
 % yref = @(t) [yref1_oneper(rem(t,2));0.1*sin(2*t)];
 % wdist = @(t) sin(pi*t)+0.4*cos(3*pi*t);
@@ -86,6 +85,8 @@ q=10;
 % end
 % plot(ss,Pinvnorms)
 
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 
 %% Construct the reduced order controller 
@@ -109,7 +110,7 @@ SysApprox.D = Sys_Nlow.D;
 alpha1 = 2;
 alpha2 = 0.8;
 
-Q0 = eye(IMdim(freqs,size(SysApprox.CN,1))); % Size = dimension of the IM 
+Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
 Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
@@ -119,7 +120,7 @@ R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 ROMorder = 4;
 
 % Construct the Internal Model Based Reduced Order Controller
-ContrSys = ObserverBasedROMRC(freqs,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 
 % % For comparison: Construct the Low-Gain Internal Model Based Controller
@@ -173,7 +174,7 @@ plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,size(Sys.A,1),PrintFigureTitles)
+plotControl(tgrid,CLsim,PrintFigureTitles)
 set(gcf,'color','white')
 
 
