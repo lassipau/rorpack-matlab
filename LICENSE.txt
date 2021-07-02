@@ -18,6 +18,6 @@ Contact details:
 Associate Professor Lassi Paunonen (project maintainer)
 Email: lassi.paunonen@tuni.fi
 Mathematics
-Faculty of Information Technology and Communication
+Faculty of Information Technology and Communication Sciences
 Tampere University
 PO. Box 692, 33101 Tampere, Finland
