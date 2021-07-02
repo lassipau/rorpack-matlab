@@ -17,8 +17,8 @@ N = 40;
 Bfun = @(x) 10 * (1 - x);
 Bdfun = @(x) 5 * x .* (1 - x);
 % ('w0' = initial profile, 'wd0' = initial velocity)
-% w0fun = @(x) zeros(size(x));
-w0fun = @(x) 1 + cos(3 * pi * x) + cos(6*x);
+w0fun = @(x) zeros(size(x));
+% w0fun = @(x) 1 + cos(3 * pi * x) + cos(6*x);
 % w0fun = @(x) x .* (x - 1) .* (2 - 5 * x);
 wd0fun = @(x) zeros(size(x));
 
@@ -89,9 +89,9 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % the contoller).
 
 % Stabilizing output feedback gain
-kappa_S = 2;
+kappa_S = 1;
 
-Sys = SysOutputFeedback(Sys, -kappa_S*eye(size(Sys.C,1)));
+% Sys = SysOutputFeedback(Sys, -kappa_S*eye(size(Sys.C,1)));
 
 
 % Passive Robust Controller
@@ -111,7 +111,13 @@ epsgain
 %% Closed-loop simulation and visualization of the results
 % Construct the closed-loop system.
 % CLSys = ConstrCLSys(Sys,ContrSys);
-CLSys = ConstrCLSysWithFeedback(ContrSys,Sys,-kappa_S);
+% CLSys_FB = ConstrCLSysWithFeedback(ContrSys,Sys,-kappa_S);
+
+ContrSys.Dc = -kappa_S*eye(size(Sys.C,1));
+CLSys = ConstrCLSys(Sys,ContrSys);
+
+%%
+
 
 stabmarg = CLStabMargin(CLSys)
 
