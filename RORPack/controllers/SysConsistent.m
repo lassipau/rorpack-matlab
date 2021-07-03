@@ -28,12 +28,27 @@ end
 if ~isfield(Sys,'Bd')
     if nargin >= 3 
         Sys.Bd = zeros(dimX,length(wdist(0)));
-        fprintf('Disturbance input matrix Bd not given, defining as Bd=0.\n')
+        fprintf('Disturbance input operator Bd not given, defining as Bd=0.\n')
     else
         Sys.Bd = zeros(dimX,1);
-        fprintf('Disturbance input matrix Bd not given, defining as Bd=0 for SCALAR disturbance.\n')
+        fprintf('Disturbance input operator Bd not given, defining as Bd=0 for SCALAR disturbance.\n')
     end
 end
+
+dimUd = size(Sys.Bd,2);
+
+if ~isfield(Sys,'Dd') 
+    Sys.Dd = zeros(dimY,dimUd);
+    fprintf('Disturbance feedthrough matrix Dd not given, defining as Dd=0.\n')
+end
+    
+checkBdDd = isequal(size(Sys.Bd,1),dimX) && isequal(size(Sys.Dd,2),dimUd) && isequal(size(Sys.Dd,1),dimY);
+    
+if ~checkBdDd
+    error('Dimensions of A, Bd, and Dd are not consistent!')
+end
+    
+        
 
 % Check the possible matrices Cm and Dm (separate measured output of the
 % system)

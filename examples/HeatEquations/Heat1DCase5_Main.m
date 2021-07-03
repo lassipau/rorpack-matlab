@@ -11,7 +11,7 @@
 
 addpath(genpath('../RORPack/'))
 
-N = 100; 
+N = 70; 
 
 % Initial state of the plant
 %x0fun = @(x) zeros(size(x));
@@ -32,21 +32,26 @@ cfun = @(t) ones(size(t));
 % cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % cfun = @(t) 0.3-0.6*t.*(1-t);
 
-[x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N);
+% Input profile for the distributed input disturbance (w_{dist,3}(t))
+Bd_profile = @(xi) sin(pi/2*xi);
+% Bd_profile = @(xi) zeros(size(xi));
 
-% Define the reference and disturbance signals (the system has two outputs
-% and two disturbance inputs)
+[x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N,Bd_profile);
+
+% Define the reference and disturbance signals: the system has two outputs
+% and three disturbance inputs (two input disturbances and a distributed
+% disturbance)
 % Case 1:
 yref = @(t) [sin(2*t);2*cos(3*t)];
-wdist = @(t) [sin(6*t);-ones(size(t))];
-% wdist = @(t) zeros(2,size(t));
+wdist = @(t) [sin(6*t);-ones(size(t));0.2*sin(3*t)];
+% wdist = @(t) zeros(3,size(t));
 
 % Case 2:
 % yref = @(t) [sin(2*t)+.3*cos(6*t);ones(size(t))];
-% wdist = @(t) [sin(1*t);ones(size(t))+.3*sin(3*t+0.3)];
+% wdist = @(t) [sin(1*t);ones(size(t))+.3*sin(3*t+0.3);ones(size(t))];
 
 
-freqsReal = [1, 2, 3, 6];
+freqsReal = [0, 1, 2, 3, 6];
 
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
@@ -55,6 +60,8 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 %% Construct the controller
 
 % % A Low-Gain 'Minimal' Robust Controller
+% % Since the system is unstable, requires prestabilization with a
+% % controller feedthrough term.
 %
 % Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 % Pvals = cell(1,length(freqs));
@@ -67,65 +74,38 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 % epsgain
 
-% A Passive Robust Controller
-% Since the system is unstable, requires prestabilization with a
-% controller feedthrough term.
 
-% Negative feedback gain for output stabilization
-kappa_S = -2.5;
+% % A Passive Robust Controller
+% % Since the system is unstable, requires prestabilization with a
+% % controller feedthrough term.
+% 
+% % Negative feedback gain for output stabilization
+% kappa_S = -2.5;
+% 
+% dimY = size(Sys.C,1);
+% epsgain = [0.01,3];
+% % epsgain = .1;
+% [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
+% epsgain
 
-dimY = size(Sys.C,1);
-epsgain = [0.01,3];
-% epsgain = .1;
-[ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
-epsgain
 
-
-% % An observer-based robust controller
-% % Stabilizing state feedback and output injection operators K and L
-% % These are chosen either based on collocated design or using LQR/LQG. 
-% % Only the single unstable eigenvalue at s=0 needs to be stabilized.
-% % K = -10*Sys.B';
+% An observer-based robust controller
+% Stabilizing state feedback and output injection operators K and L
+% These are chosen either based on collocated design or using LQR/LQG. 
+% Only the single unstable eigenvalue at s=0 needs to be stabilized.
+K = -2*Sys.C;
 % K = -lqr(Sys.A,Sys.B,0.1*eye(N),10*eye(2));
-% % K = zeros(2,N);
-% % PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
-% 
-% % L = -10*Sys.C';
+PlotEigs(full(Sys.A+Sys.B*K),[-10 .1 -1 1])
+
+L = -3*Sys.B;
 % L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
-% % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
-% 
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
-% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+
+ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
  
-
-% % A reduced order observer-based robust controller
-% % DISCLAIMER: This is not directly supported by the theoretical results in
-% % Paunonen-Phan 2020 due to the control at the boundaries!
-% %
-% % The construction of the controller uses a Galerkin approximation
-% % of the heat system: The Galerkin arpproximation used in the controller
-% % design is a lower dimensional numerical approximation of the PDE model.
-% Nlow = 50;
-% [~,Sys_Nlow,~,~] = Constr1DHeatCase5(cfun,x0fun,Nlow);
-% 
-% % Store the Galerkin approximation in "SysApprox".
-% SysApprox.AN = Sys_Nlow.A;
-% SysApprox.BN = Sys_Nlow.B;
-% SysApprox.CN = Sys_Nlow.C;
-% SysApprox.D = Sys_Nlow.D;
-% alpha1 = 1;
-% alpha2 = 0.5;
-% Q0 = eye(IMdim(freqs,size(SysApprox.CN,1))); % Size = dimension of the IM 
-% Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
-% Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
-% R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
-% R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
-% ROMorder = 3;
-% 
-% ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
-
 
 %% Closed-loop simulation
 CLSys = ConstrCLSys(Sys,ContrSys);
@@ -133,12 +113,12 @@ CLSys = ConstrCLSys(Sys,ContrSys);
 stabmarg = CLStabMargin(CLSys)
 
 figure(1)
-PlotEigs(CLSys.Ae,[-30 .3 -6 6])
+PlotEigs(CLSys.Ae,[-5 .3 NaN NaN])
 
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
-Tend = 8;
+Tend = 16;
 tgrid = linspace(0,Tend,300);
 
 

@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N)
+function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N,Bd_profile)
 % [x0,Sys,spgrid] = Constr1DHeatCase5(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
@@ -30,8 +30,9 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N)
 % Case 5: Similar to Case 1, but with two boundary inputs and outputs: 
 % Neumann boundary control u_1(t) at x=0, and u_2(t) at x=1. Pointwise
 % temperature measurements y_1(t) at x=0, and y_2(t) at x=1. Two input
-% disturbances w_{dist,1}(t) at x=0 and w_{dist,2}(t) at x=1. The system is
-% unstable (eigenvalue at 0), but is impedance passive and can be
+% disturbances w_{dist,1}(t) at x=0 and w_{dist,2}(t) at x=1, and a third
+% distributed disturbance with profile "Bd_profile" (function). The system 
+% is unstable (eigenvalue at 0), but is impedance passive and can be
 % stabilized with negative output feedback.
 
 
@@ -45,10 +46,11 @@ BCtype = 'NN';
 
 % Neumann boundary input at x=0 (input u_1(t)) and x=1 (input u_2(t)) 
 % Signs are based on the _outwards_ normal derivatives
-B = [[2*cfun(0)/h;zeros(N-1,1)],[zeros(N-1,1);-2*cfun(1)/h]]; 
+B = [[2*cfun(0)/h;zeros(N-1,1)],[zeros(N-1,1);2*cfun(1)/h]]; 
 
-% Two input disturbances
-Bd = B;
+% Two input disturbances and a thrid
+Bd_distr = Bd_profile(spgrid(:));
+Bd = sparse([B,Bd_distr]);
 
 % Measured temperatures at x=0 (y_1(t)) and x=1 (y_2(t))
 C = sparse([1, zeros(1,N-1);zeros(1,N-1), 1]); 
@@ -61,7 +63,7 @@ Sys.B = B;
 Sys.Bd = Bd;
 Sys.C = C;
 Sys.D = zeros(2,2);
-Sys.Dd = zeros(2,1);
+Sys.Dd = zeros(2,3);
 
 
 
