@@ -2,10 +2,12 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Case 1: Neumann boundary control at x=0, regulated output y(t) and a 
-% Neumann boundary disturbance at x=1
-% Unstable system, stabilization by stabilizing the only unstable
-% eigenvalue =0
+% Case 5: Similar to Case 1, but with two boundary inputs and outputs: 
+% Neumann boundary control u_1(t) at x=0, and u_2(t) at x=1. Pointwise
+% temperature measurements y_1(t) at x=0, and y_2(t) at x=1. Two input
+% disturbances w_{dist,1}(t) at x=0 and w_{dist,2}(t) at x=1. The system is
+% unstable (eigenvalue at 0), but is impedance passive and can be
+% stabilized with negative output feedback.
 
 addpath(genpath('../RORPack/'))
 
@@ -30,50 +32,21 @@ cfun = @(t) ones(size(t));
 % cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % cfun = @(t) 0.3-0.6*t.*(1-t);
 
-IB1 = [.3, .4];
-IB2 = [.6, .7];
-IC1 = [.1, .2];
-IC2 = [.8, .9];
-
 [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N);
 
-
-% Model = ss(Sys.A,Sys.B,Sys.C,Sys.D);
-% tt=linspace(0,4);
-% [output,t,xx]=lsim(Model,ones(2,length(tt)),tt,ones(N,1));
-% h = spgrid(2)-spgrid(1);
-% % plot(tt,output,'Linewidth',2)
-% plot(tt,sum(h*xx.^2,2),'Linewidth',2)
-% % plot(tt,(xx(:,2)-xx(:,1))*(N-1))
-
-
-%yref = @(t) sin(2*t)+.1*cos(6*t);
-%yref = @(t) sin(2*t)+.2*cos(3*t);
-%yref = @(t) ones(size(t));
-
-%wdist = @(t) ones(size(t));
-%wdist = @(t) sin(t);
-%wdist = @(t) zeros(size(t));
-
+% Define the reference and disturbance signals (the system has two outputs
+% and two disturbance inputs)
 % Case 1:
 yref = @(t) [sin(2*t);2*cos(3*t)];
-wdist = @(t) zeros(size(t));
-% wdist = @(t) sin(6*t);
+wdist = @(t) [sin(6*t);-ones(size(t))];
+% wdist = @(t) zeros(2,size(t));
 
 % Case 2:
-% yref = @(t) ones(size(t));
-% wdist = @(t) ones(size(t));
+% yref = @(t) [sin(2*t)+.3*cos(6*t);ones(size(t))];
+% wdist = @(t) [sin(1*t);ones(size(t))+.3*sin(3*t+0.3)];
 
-% Case 3:
-% yref = @(t) sin(2*t)+.1*cos(6*t);
-% wdist = @(t) sin(t);
 
 freqsReal = [1, 2, 3, 6];
-
-% Sys.A = Sys.A-Sys.B*Sys.B';
-% PlotEigs(full(Sys.A),[-20 1 -.3 .3])
-
-% eig(full(Sys.A))
 
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
@@ -94,24 +67,38 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 % epsgain
 
-% An observer-based robust controller
-% Stabilizing state feedback and output injection operators K and L
-% These are chosen based on collocated design. Only the single unstable
-% eigenvalue at s=0 needs to be stabilized
-% K = -10*Sys.B';
-K = -lqr(Sys.A,Sys.B,0.1*eye(N),10*eye(2));
-% K = zeros(2,N);
-% PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
+% A Passive Robust Controller
+% Since the system is unstable, requires prestabilization with a
+% controller feedthrough term.
 
-% L = -10*Sys.C';
-L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
-% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+% Negative feedback gain for output stabilization
+kappa_S = -2.5;
 
-ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
-% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+dimY = size(Sys.C,1);
+epsgain = [0.01,3];
+% epsgain = .1;
+[ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
+epsgain
 
+
+% % An observer-based robust controller
+% % Stabilizing state feedback and output injection operators K and L
+% % These are chosen either based on collocated design or using LQR/LQG. 
+% % Only the single unstable eigenvalue at s=0 needs to be stabilized.
+% % K = -10*Sys.B';
+% K = -lqr(Sys.A,Sys.B,0.1*eye(N),10*eye(2));
+% % K = zeros(2,N);
+% % PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
+% 
+% % L = -10*Sys.C';
+% L = -lqr(Sys.A',Sys.C',10*eye(N),eye(2))';
+% % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+% 
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+ 
 
 % % A reduced order observer-based robust controller
 % % DISCLAIMER: This is not directly supported by the theoretical results in

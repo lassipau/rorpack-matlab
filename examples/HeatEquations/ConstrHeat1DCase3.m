@@ -1,5 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase3(...
-    cfun,x0fun,N,IB1,IB2,IC1,IC2)
+function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2)
 % Finite Differences approximation of a 1D Heat equation
 % with a Neumann boundary condition at x=0
 % and a Dirichlet condition at x=1

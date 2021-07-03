@@ -72,15 +72,15 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 % % A Passive Robust Controller
 % % Since the system is unstable, requires prestabilization with a
-% controller feedthrough term.
+% % controller feedthrough term.
 % 
 % % Negative feedback gain for output stabilization
 % kappa_S = -2.5;
 % 
 % dimY = size(Sys.C,1);
-% epsgainrange = [0.01,3];
+% epsgain = [0.01,3];
 % % epsgain = .1;
-% [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgainrange,Sys,kappa_S*eye(dimY));
+% [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
 % epsgain
 
 % An Observer-Based Robust Controller or
