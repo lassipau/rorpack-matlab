@@ -203,7 +203,7 @@ end
 ContrSys.G1 = [G1,zeros(dimZ0,size(ALr,1));BLr*K1N,ALr+BLr*K2r];
 ContrSys.G2 = [G2;-Lr];
 ContrSys.K = [K1N, K2r];
-
+ContrSys.Dc = zeros(dimU,dimY);
 
 
 

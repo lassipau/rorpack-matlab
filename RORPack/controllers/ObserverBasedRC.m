@@ -99,7 +99,7 @@ K2 = K21+K1*H;
 ContrSys.G1 = [G1 zeros(dimZ,dimX); (B+L*D)*K1 A+B*K2+L*(C+D*K2)];
 ContrSys.G2 = [G2;-L];
 ContrSys.K = [K1, K2];
-
+ContrSys.Dc = zeros(dimU,dimY);
 
 if issparse(A)
   ContrSys.G1 = sparse(ContrSys.G1);
