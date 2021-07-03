@@ -1,12 +1,11 @@
 %% Robust control of a 2D heat equation on a rectangle with boundary control 
-% The example is the simulation example from the article "Controller Design 
-% for Robust Output Regulation of Regular Linear Systems" by L. Paunonen,
-% IEEE TAC 2016.
 % The system has two boundary inputs and two collocated boundary outputs,
 % as well as an additional boundary disturbance input. The system is
-% initially unstable, but its only unstable eigenvalue 0 is prestabilized 
-% with negative output feedback A-B*C. The system is also impedance passive 
-% (due to the collocated inputs and outputs).
+% unstable, but its only unstable eigenvalue 0 can be stabilized with
+% negative output feedback. The system is also impedance passive (due to
+% the collocated inputs and outputs).
+% The example is similar to the 2D heat equation example "Case 1", but 
+% the unstable eigenvalue 0 of the system is not prestabilized.
 
 
 addpath(genpath('../RORPack/'))
@@ -24,7 +23,7 @@ x0fun = @(x,y) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[x0,spgrid,Sys] = ConstrHeat2DCase1(1,x0fun,N);
+[x0,spgrid,Sys] = ConstrHeat2DCase3(1,x0fun,N);
 
 
 % Case 1:
@@ -48,30 +47,72 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 %% Construct the controller
 
-% A Low-Gain 'Minimal' Robust Controller
+% % A Low-Gain 'Minimal' Robust Controller 
+% % Since the system is unstable, requires prestabilization with a
+% % controller feedthrough term.
+% 
+% % Negative feedback gain for output stabilization
+% kappa_S = -2.5;
+% % Controller feedthrough term (i.e., effective output feedback for the
+% system)
+% Dc = kappa_S*eye(dimY);
 %
-Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+% 
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%   Pvals{ind} = Pappr(freqsReal(ind));
+% end
+% 
+% epsgain = [0.01,4];
+% % epsgain = .5;
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
+% epsgain
 
-Pvals = cell(1,length(freqsReal));
-for ind = 1:length(freqsReal)
-  Pvals{ind} = Pappr(freqsReal(ind));
-end
 
-epsgain = [0.01,4];
-% epsgain = .5;
-[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
-epsgain
+% % A Passive Robust Controller
+% % Since the system is unstable, requires prestabilization with a
+% controller feedthrough term.
+% 
+% % Negative feedback gain for output stabilization
+% kappa_S = -2.5;
+% 
+% dimY = size(Sys.C,1);
+% epsgainrange = [0.01,3];
+% % epsgain = .1;
+% [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgainrange,Sys,kappa_S*eye(dimY));
+% epsgain
 
+% An Observer-Based Robust Controller or
+% a dual observere-based robust controller
+% Stabilizing state feedback and output injection operators K and L
+% These are chosen based on collocated design. Only the single unstable
+% eigenvalue at s=0 needs to be stabilized
+K_gain = 2.5;
+L_gain = 3;
+
+K = -K_gain*Sys.B';
+% PlotEigs(full(Sys.A+Sys.B*K),[-20 .1 -.3 .3])
+L = -L_gain*Sys.C';
+% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
+ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
+
+
+%% Construct the closed-loop system
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
 figure(1)
-PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
+PlotEigs(CLSys.Ae,[-20 .3 NaN NaN]);
 
-% PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
-%%
+
+%% Closed-loop simulation
 
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];

@@ -1,4 +1,6 @@
-function SysFB = SysOutputFeedback(Sys, K)
+function SysFB = SysOutputFeedback(Sys,K)
+% function SysFB = SysOutputFeedback(Sys,K)
+%
 % Applies output feedback y(t)=K*u(t)+u_new(t) to the system 'Sys'
 % (A+BK(I+DK)^(-1)C,B(I+KD)^(-1),(I+DK)^(-1)C,(I+DK)^(-1)D) 
 % obtained from (A,B,C,D) with output feedback u(t)=Ky(t)

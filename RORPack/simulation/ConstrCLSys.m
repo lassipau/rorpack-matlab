@@ -1,10 +1,18 @@
 function CLSys = ConstrCLSys(Sys,ContrSys)
-% CLsys = ConstrCLSys(Sys,ContrSys)
+% function CLsys = ConstrCLSys(Sys,ContrSys)
 %
-% Construct the closed-loop system
-% The inputs of the closed-loop system are the disturbance signal wdist(t) 
-% and the reference signal yref(t)
-% CLsys = CL system parameters, (CLsys.Ae,CLsys.Be,CLsys.Ce,CLsys.De) 
+% Construct the closed-loop system of the system 'Sys' and the dynamic
+% error feedback controller 'ContrSys'. The inputs of the closed-loop is
+% of the form [wdist(t);yref(t)] where wdist(t) is the disturbance signal 
+% and yref(t) is the reference signal. The use of the consistency check 
+% routine "SysConsistent" is recommended before calling ConstrCLSys.
+%
+% Inputs: 
+% 'Sys' = [struct] The linear system with parameters (Sys.A,Sys.B,Sys.Bd,Sys.C,Sys.D,Sys.Dd)
+% 'ContrSys' = [struct] The controller with parameters (ContrSys.G1,ContrSys.G2,ContrSys.K,ContrSys.Dc)
+%
+% Outputs:
+% 'CLSys' = [struct] The closed-loop system with parameters (CLsys.Ae,CLsys.Be,CLsys.Ce,CLsys.De) 
 
 if ~isfield(Sys,'Bd')
     error('Disturbance input operator "Bd" is not defined! (Use "SysConsistent" before closed-loop construction).')

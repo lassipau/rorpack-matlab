@@ -1,4 +1,6 @@
 function [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys)
+% function [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys)
+%
 % Construct a low-gain simple controller for stable systems, in real form
 % Inputs:
 %   freqsReal : [1xN double] Frequencies to be included in the controller,

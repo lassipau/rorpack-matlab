@@ -1,6 +1,13 @@
 function [ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg)
-% Construct an observer-based robust controller for systems with
-% the same number of inputs and outputs. 
+% function [ContrSys,K21] = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg)
+%
+% Construct an Observer-Based Robust Controller for systems with
+% the same number of inputs and outputs. The construction follows the 
+% article "Controller Design for Robust Output Regulation of Regular Linear 
+% Systems" by L. Paunonen, IEEE TAC, 2016 (Section VI) where it was
+% presented for regular linear systems (generalising earlier results by
+% T. Hämäläinen and S. Pohjolainen, SICON, 2010, and E. Immonen, SICON, 2007.
+%
 % Inputs:
 %   freqsReal : [1xN double] Frequencies to be included in the controller,
 %   only real nonnegative frequencies, if zero frequency is included,
@@ -34,19 +41,10 @@ dimY = size(C,1);
 dimU = size(B,2);
 
 if dimY ~= dimU
-  error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
+  error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed (in this form).')
 end
 
 q = length(freqsReal);
-
-
-%if freqs(1)==0, dimZ = dimY*(2*q-1); else dimZ = dimY*2*q; end
-
-%B1 = zeros(dimZ,dimY);
-%if freqs(1)==0
-%  offset = 1;
-%  B1(1:dimY,:) = PKvals;
-%end
 
 
 PKappr = @(s) (C+D*K21)*((s*eye(dimX)-(A+B*K21))\B)+D;
@@ -74,30 +72,27 @@ elseif isequal(IMstabtype,'poleplacement')
   if freqsReal(1)==0
     target_eigs = ones(2*length(freqsReal)-1,1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
                     +1i*reshape([freqsReal(end:-1:1),-freqsReal(2:end)],2*length(freqsReal)-1,1)*ones(1,dimY);
-%     target_eigs
-%     target_eigs = [linspace(-7,-5,length(freqs)*dimY),linspace(-4.9,-3,length(nzfreqs)*dimY)];
     target_eigs = target_eigs(:);
     K1 = -place(G1,B1,target_eigs);
   else
     target_eigs = ones(2*length(freqsReal),1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
                     +1i*reshape([freqsReal(end:-1:1),-freqsReal],2*length(freqsReal),1)*ones(1,dimY);
-%     target_eigs = [linspace(-5,-4,length(freqs)*dimY),linspace(-3.9,-3,length(freqs)*dimY)];
     target_eigs = target_eigs(:);
     K1 = -place(G1,B1,target_eigs);
   end
 else
   error('Unknown stabilization type for the Internal Model')
 end
-% Add: scaling to K1 or G2 through an additional gain parameter!
 
 K2 = K21+K1*H;
 
 
-% Alternative, choose [K1 K2] to stabilize ([A 0;G2*C G1],[B;G2*D])
+% IN PROGRESS: An alternative option for stabilization: If K21 not given, 
+% could use LQR to construct [K1 K2] as a stabilizing feedback gain for the 
+% pair ([A 0;G2*C G1],[B;G2*D])
 % Kfull = -lqr([G1 G2*C;zeros(dimX,dimZ) A],[G2*D;B],blkdiag(200*eye(dimZ),.01*eye(dimX)),0.01*eye(dimU),zeros(dimZ+dimX,dimU));
 % K1 = Kfull(:,1:dimZ);
 % K2 = Kfull(:,(dimZ+1):end);
-
 % max(real(eig([G1 G2*C;zeros(dimX,dimZ) A]+[G2*D;B]*Kfull)))
 
 

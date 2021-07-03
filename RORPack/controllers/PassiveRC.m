@@ -1,6 +1,10 @@
 function [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,Dc)
-% Construct a Passive Robust Controller for
-% a stable impedance passive linear system.
+% function [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,Dc)
+%
+% Construct a Passive Robust Controller for an impedance passive linear
+% system which is either exponentially or strongly stable, or stabilizable 
+% (i.e., can be stabilized with negative output feedback).
+%
 % Inputs:
 %   freqsReal : [1xN double] Frequencies to be included in the controller,
 %   only real nonnegative frequencies, if zero frequency is included,
@@ -25,8 +29,10 @@ function [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,Dc)
 %   feedthrough term with 'Dc' is equivalent to a 'prestabilizing' output
 %   feedback to the system (plus an additional disturbance term). In
 %   particular, controllable unstable passive systems can be prestabilized 
-%   by setting a negative definite matrix 'Dc'. If 'Dc' is a scalar, it is
-%   interpreted as "Dc*eye(dimY)".
+%   by setting a negative definite matrix 'Dc'. This term is required if
+%   the system is initially unstable, and the output feedback u(t)=Dc*y(t)
+%   is required to lead to an exponentially or strongly stable system.
+%   If 'Dc' is a scalar, it is interpreted as "Dc*eye(dimY)".
 %
 % Outputs:
 %   ContrSys : [struct with fields G1,G2,K] Passive Robust Controller
@@ -34,9 +40,6 @@ function [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,Dc)
 %
 %   epsgain : [double] The (roughly) optimal value of $\eps$
 
-% if max(real(eig(full(Sys.A))))>=0
-%   error('The system is unstable, the low-gain controller design cannot be completed.')
-% end
 
 
 [G1,G2tmp] = ConstrIM(freqsReal,dimY);
@@ -51,9 +54,21 @@ if nargin > 4
     else
         ContrSys.Dc = Dc;
     end
+    
+    % Check that the controller feedthrough term stabilizes the original
+    % system.
+    SysFB = SysOutputFeedback(Sys,ContrSys.Dc);
+    if max(real(eig(full(SysFB.A))))>=0
+        error('The output feedback u(t)=Dc*y(t) does not stabilize the system!')
+    end
 else
     ContrSys.Dc = zeros(dimY);
+    % Check that the system is exponentially stable.
+    if max(real(eig(full(Sys.A))))>=0
+        error('The system is unstable, the passive controller design cannot be completed.')
+    end
 end
+
 
 
 if length(epsgain) == 1

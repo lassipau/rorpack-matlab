@@ -1,14 +1,13 @@
-%% Approximate robust output regulation of boundary control systems
-% example case from the paper "Approximate robust output regulation of
-% boundary control systems" by Jukka-Pekka Humaloja, Mikael Kurula and
-% Lassi Paunonen
+%% A boundary controlled 2D wave equation on an annulus
+% The example case from the paper "Approximate robust output regulation of
+% boundary control systems" by J.-P. Humaloja, M. Kurula and L. Paunonen.
 % based on the code from https://codeocean.com/capsule/5706891/tree/v1
 
 Nvals = 8;
 Mvals = 12; % from 0 to Mvals-1
 
-% construction of the 2D Wave approximation 
-[Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = ConstrWave2D(Nvals,Mvals);
+% Construction of the 2D wave equation model
+[Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = ConstrWave2DCase1(Nvals,Mvals);
 P = @(s) Sys.C*((s*eye(2*Nvals*(2*Mvals-1))-Sys.A)\Sys.B); % transfer function approx.
 
 %% exosystem, controller, closed-loop system

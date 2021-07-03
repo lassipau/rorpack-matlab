@@ -240,7 +240,7 @@ Basic workflow for robust controller design and simulation for a given system is
 \end{enumerate}
 The example cases included in \RORname\ are built around main files that follow the same structure, and the users are encouraged to implement their own simulations by modifying the example codes.
 
-It is also possible to combine other Python software packages and Matlab toolboxes in the study of robust controller design for PDE models in order to employ ready-made numerical approximations or additional numerical methods in the computation of required controller parameters. This approach is illustrated in one of the PDE example cases ``\texttt{BeamKelvinVoigt\_main}'' described in Section~\ref{sec:ControlledBeams} (Case Euler-Bernolli Beam with Kelvin-Voigt Damping).
+It is also possible to combine other Python software packages and Matlab toolboxes in the study of robust controller design for PDE models in order to employ ready-made numerical approximations or additional numerical methods in the computation of required controller parameters. This approach is illustrated in one of the PDE example cases ``\texttt{BeamKelvinVoigt\_Main}'' described in Section~\ref{sec:ControlledBeams} (Case Euler-Bernolli Beam with Kelvin-Voigt Damping).
 In this example the system is approximated using the Galerkin method based on a nonlocal basis based on Chebyshev polynomials with the \textbf{Chebfun package}~\cite{DriHal14book} (\href{https://chebfun.org/}{https://chebfun.org/}) which provides flexible tools for solutions of differential equations with extreme accuracy using spectral methods. 
 
 \section{Introduction to Robust Output Regulation}
@@ -348,9 +348,9 @@ The other controller structures also use knowledge of the parameters $(A,B,C,D)$
 
 The \texttt{rorpack} Matlab library can be installed for Matlab R2020a and later (earlier versions may be fine too) as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
 
-The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases included in the files \texttt{Heat1DtestCase3.m} and \texttt{Constr1DHeatCase3.m} and documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab, the constructor routine used in the main simulation is in its own, separate, Matlab function file.
+The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases included in the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m} and documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab, the constructor routine used in the main simulation is in its own, separate, Matlab function file.
 
-Contents of the files \texttt{Heat1DtestCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DtestCase3.m} begins with comment lines and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
+Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DCase3.m} begins with comment lines and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
 
 \begin{lstlisting}
 %% Heat equation on the interval [0,1] with 
@@ -671,7 +671,7 @@ It should be noted that the controller construction routine does not test passiv
 	\bigskip
 
      \COMMapproxRC{
-     \item An ``approximate robust controller'' based on the reference~\cite{HumKur18} for finite-dimensional approximate control design for systems with infinite-dimensional output spaces.\\[1ex]
+     \item An ``approximate robust controller'' based on the reference~\cite{HumKur19} for finite-dimensional approximate control design for systems with infinite-dimensional output spaces.\\[1ex]
 	 Calling sequence for the construction:\\[-1ex]
 	   \begin{quotation}
 	     \texttt{ApproximateRC(\dots)}
@@ -694,7 +694,7 @@ The gain in the passive robust controller \texttt{PassiveRC} can analogously be 
 In the Python version of \RORname\ The \RORname\ class \texttt{LinearSystem} has the necessary routines for computing these values based on the matrices \texttt{A}, \texttt{B}, \texttt{C}, and \texttt{D}. However, using the same approximation of the PDE for both controller design and simulation corresponds to essentially controlling the approximation as a finite-dimensional system. If possible, to avoid unrealistically positive results, it is therefore better to use two different approximations for controller construction and simulation. This is especially the case if the validity of the approximation for the computation of the parameters can not be guaranteed with absolute certainty. However, there are of course cases, such Galerkin approximations of parabolic systems~\cite{Mor94}, where the values of the controller parameters can be shown to converge with the order of the approximation, and the above concerns are unnecessary.
 In the Matlab version, the Observer-Based controllers do not (at least currently) use the transfer functions for the construction of the controllers.
 
-For some special PDEs, such as 1D heat or wave equations with constant coefficients, the values $P(i\gw_k)$ may have explicit expressions, but these are very limited special cases. For PDEs with spatially varying parameters there are powerful computational methods that can be used to determine $P(i\gw_k)$, such as the \textbf{Chebfun} package (\href{https://chebfun.org/}{https://chebfun.org/}) employed in \texttt{Heat1DtestCase1\_main.m} in Section~\ref{sec:Heat1D2} (``Case 2'').
+For some special PDEs, such as 1D heat or wave equations with constant coefficients, the values $P(i\gw_k)$ may have explicit expressions, but these are very limited special cases. For PDEs with spatially varying parameters there are powerful computational methods that can be used to determine $P(i\gw_k)$, such as the \textbf{Chebfun} package (\href{https://chebfun.org/}{https://chebfun.org/}) employed in \texttt{Heat1DCase1\_Main.m} in Section~\ref{sec:Heat1D2} (``Case 2'').
 
 
 
@@ -717,7 +717,7 @@ In each of the cases, the semidiscretization of the PDE is completed using Finit
 \subsubsection*{Case 1: Neumann boundary input at $\xi = 0$, disturbance and output at $\xi = 1$}
 ~\\[-1ex]
 
-  \noindent Main file name: \texttt{Heat1DtestCase1\_main.m}
+  \noindent Main file name: \texttt{Heat1DCase1\_Main.m}
 
 \medskip
 
@@ -739,7 +739,7 @@ The example uses the ``Observer-Based Robust Controller'' and ``Dual Observer-Ba
 \label{sec:Heat1D2}
 ~\\[-1ex]
 
-  \noindent Main file name: \texttt{Heat1DtestCase2\_main.m}
+  \noindent Main file name: \texttt{Heat1DCase2\_Main.m}
 
 \medskip
 
@@ -768,7 +768,7 @@ In the example, the construction of the low-gain controller employs the \textbf{
 \label{sec:Heat1D3}
 ~\\[-1ex]
 
-  \noindent Main file name: \texttt{Heat1DtestCase3\_main.m}
+  \noindent Main file name: \texttt{Heat1DCase3\_Main.m}
 
 \medskip
 
@@ -863,7 +863,7 @@ The reference and disturbance signals are again of the form~\eqref{eq:yrefwdist}
 ~\\[-1ex]
 
 
-  \noindent Main file name: \texttt{Heat2Dtest1\_main.m}
+  \noindent Main file name: \texttt{Heat2DCase1\_Main.m}
 
 \medskip
 
@@ -899,7 +899,7 @@ In the simulations, the system is approximated using the eigenmodes of the Lapla
 \subsubsection*{Case 2: Non-collocated input and output}
 ~\\[-1ex]
 
-  \noindent Main file name: \texttt{Heat2Dtest2\_main.m}
+  \noindent Main file name: \texttt{Heat2DCase2\_Main.m}
 
 \medskip
 
@@ -924,6 +924,17 @@ The uncontrolled system is unstable due to the eigenvalue $\gl=0$.
 
 In the simulations, the system is approximated using Finite Differences with a uniform grid. 
 
+
+\subsubsection*{Case 3: Collocated input and output}
+~\\[-1ex]
+
+
+  \noindent Main file name: \texttt{Heat2DCase3\_Main.m}
+
+\medskip
+
+The example is the same as ``Case 1'', but does not include prestabilization of the unstable eigenvalue at $\gl = 0$. Since the system is impedance passive, the controller design can be completed using the Passive Robust Controller in \texttt{ConstrPassiveRC}, but the controller requires the (otherwise optional) feedthrough term, which should be a negative definite $2\times 2$ matrix. Alternatively, the controller design can be completed using either the Observer-Based Robust Controller (\texttt{ConstrObsBasedRC}) or the Dual Observer-Based Robust Controller (\texttt{ConstrDualObsBasedRC}). In these cases, the required state feedback operator $K_{21}$ and and output injection operator $L$ for the exponential stabilization of the pairs $(A,B)$ and $(\CL,A)$ can be designed using collocated design, i.e., by choosing these as  $K_{21}=-\gamma_K B'$ and $L=-\gamma_L '$. Note that in the article~\cite{Pau16a} the stabilizing operators were assumed to be bounded, but the controller design can also be constructed with \emph{unbounded} operators due to the more general results in~\cite{Pau17b}.
+
 \subsection{The 1D Wave Equations}
 
 In these examples we consider  one-dimen\-sional undamped and damped wave equations with control and observation at the boundaries and inside the domain. 
@@ -933,7 +944,7 @@ In these examples we consider  one-dimen\-sional undamped and damped wave equati
 \subsubsection*{Case 1: Non-collocated boundary input and output, disturbance near the output}
 ~\\[-1ex]
 
-  \noindent Main file name: \texttt{Wave1DtestCase1\_main.m}
+  \noindent Main file name: \texttt{Wave1DCase1\_Main.m}
   
   \medskip
 
@@ -998,7 +1009,7 @@ Figure~\ref{fig:1Dwave1} shows example results of the simulation for two differe
 \subsubsection*{Case 2: Collocated distributed input and output}
 ~\\[-1ex]
 
-  \noindent Main file name: \texttt{Wave1DtestCase2\_main.m}
+  \noindent Main file name: \texttt{Wave1DCase2\_Main.m}
 
   \medskip
 
@@ -1017,11 +1028,17 @@ Due to the sub-exponential closed-loop stability, the regulation error does not 
 
 In the simulations the system is approximated using the orthonormal eigenfunctions of the undamped wave operator.
 
+\medskip
 
-\COMMapproxRC{
-  \subsection{The 2D Wave Equation on an Annulus}
 
-  The boundary controlled 2D wave equation we consider is of the form as in~\cite{HumKur18}. In particular, 
+\subsection{The 2D Wave Equation on an Annulus}
+~\\[-1ex]
+
+  \noindent Main file name: \texttt{Wave2DCase1\_Main.m}
+
+  \medskip
+
+  The boundary controlled 2D wave equation we consider is of the form of the simulation example in~\cite{HumKur19}. In particular, 
   $\Omega\subset\R^n$ is a bounded domain (an open connected set) with a Lipschitz-continuous boundary $\partial\Omega$ split into two parts $\Gamma_0,\Gamma_1$ such that $\overline{\Gamma_0}\cup\overline{\Gamma_1}=\partial\Omega$, $\Gamma_0\cap\Gamma_1=\emptyset$, and $\partial\Gamma_0,\partial\Gamma_1$ both have surface measure zero. The wave equation is of the form
   %\begin{equation}\label{eq:waveintro}
   %  \left\{
@@ -1042,30 +1059,44 @@ In the simulations the system is approximated using the orthonormal eigenfunctio
   We choose $\partial \Omega = \Gamma_0 \cup \Gamma_1$ where $\Gamma_0 = \set{\zeta \in \partial\Omega \mid \|\zeta\| = 1}$ and $\Gamma_1 = \set{\zeta \in \partial\Omega \mid \|\zeta\| = 2}$ so that the control and the measurement are on the outer boundary of the annulus.
 
   The output space is infinite-dimensional,  $Y :=  \setm{h\in H^{1/2}(\partial\Omega)}{ h\vert_{\Gamma_0}=0}$ which is continuously and densely embedded into $L^2(\Gamma_1)$~\citel{TucWei09book}{Thm.~13.6.10}. 
-  The \keyterm{approximate robust controller} is designed based on finite-dimensional Fourier subspaces
-  %\eq{
-  %  Y_N := \operatorname{span}\left(e^{ik\cdot}\right)_{k=-N}^N
-  %}
-  of $Y$, and the corresponding orthonormal projection $P_N$ onto $Y_N$.
-  %
-  %as the sequence $\displaystyle \left(\frac{1}{\sqrt{2\pi}}e^{ik\cdot}\right)$ is an orthonormal basis of $L^2([-\pi, \pi])$. The projection $P_N$ from $Y$ onto $Y_N$ is then given by
-  %\begin{equation}
-  %  \label{eq:PN}
-  %	P_N y := \frac{1}{2\pi}\sum_{k=-N}^N \left\langle y, e^{ik\cdot} \right\rangle_{L^2([-\pi, \pi])} e^{ik\cdot}.  
-  %\end{equation}
-
-  The initial reference and disturbance signals in the example are given by
+The initial reference and disturbance signals in the example are given by
   \eq{
     y_{ref}(\theta, t)&  = \frac{1}{2\pi^2}(\pi - \theta)^2\sin(\pi t) +
     \frac{1}{2}\sin\left(\frac{\theta}{2}\right)\cos(2\pi t) \\
     w(\theta, t) & = \cos(\theta)\sin(2\pi t) + \sin(\theta)\sin(\pi t).
   }
   The real frequencies are then $\gw_1=\pi$, $ \gw_2=2\pi$.
+Because of of the technical challenges arising from the infinite-dimensional input and outputs spaces of the model, the example is not (at the moment) written completely in ``RORPack style''. In particular, the closed-loop construction is based on expressing the signals $\yref(t)$ and $\wdist(t)$ as outputs of an \emph{exosystem}, and the also the controller is constructed by hand in the main file of the simulation example. The controller is the ``Approximate internal model based controller'' introduced in the reference~\cite{HumKur19}, and it is not (yet) implemented in RORPack as a general controller construction routine.
 
   The numerical approximation in the example is done using the spectral method based on the eigenvalues and eigenfunctions of the undamped wave equation on the annulus. The approximate controller includes the stabilizing term $D_c$ which corresponds to pre-stabilizing the system with negative output feedback. 
   %The initial choice for the controller is the 
   %The system is passive
-}
+
+%\COMMapproxRC{
+%  The \keyterm{approximate robust controller} is designed based on finite-dimensional Fourier subspaces
+%  %\eq{
+%  %  Y_N := \operatorname{span}\left(e^{ik\cdot}\right)_{k=-N}^N
+%  %}
+%  of $Y$, and the corresponding orthonormal projection $P_N$ onto $Y_N$.
+%  %
+%  %as the sequence $\displaystyle \left(\frac{1}{\sqrt{2\pi}}e^{ik\cdot}\right)$ is an orthonormal basis of $L^2([-\pi, \pi])$. The projection $P_N$ from $Y$ onto $Y_N$ is then given by
+%  %\begin{equation}
+%  %  \label{eq:PN}
+%  %	P_N y := \frac{1}{2\pi}\sum_{k=-N}^N \left\langle y, e^{ik\cdot} \right\rangle_{L^2([-\pi, \pi])} e^{ik\cdot}.  
+%  %\end{equation}
+%
+%  The initial reference and disturbance signals in the example are given by
+%  \eq{
+%    y_{ref}(\theta, t)&  = \frac{1}{2\pi^2}(\pi - \theta)^2\sin(\pi t) +
+%    \frac{1}{2}\sin\left(\frac{\theta}{2}\right)\cos(2\pi t) \\
+%    w(\theta, t) & = \cos(\theta)\sin(2\pi t) + \sin(\theta)\sin(\pi t).
+%  }
+%  The real frequencies are then $\gw_1=\pi$, $ \gw_2=2\pi$.
+%
+%  The numerical approximation in the example is done using the spectral method based on the eigenvalues and eigenfunctions of the undamped wave equation on the annulus. The approximate controller includes the stabilizing term $D_c$ which corresponds to pre-stabilizing the system with negative output feedback. 
+%  %The initial choice for the controller is the 
+%  %The system is passive
+%}
 
 \subsection{The Controlled Beam Equations}
 \label{sec:ControlledBeams}

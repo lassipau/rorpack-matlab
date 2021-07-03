@@ -1,10 +1,7 @@
-function [x0,spgrid,sys] = ConstrHeat2DCase1(cval,x0fun,N)
-% Construct the system operators for the 2D heat equation example "Case 1".
-% The system has 2 boundary inputs and 2 collocated boundary outputs, and
-% an additional boundary disturbance input. The system is impedance
-% passive, and it is prestabilized with negative output feedback. The
-% numerical approximation is based on the modal approximation of the 2D
-% Laplacian.
+function [x0,spgrid,Sys] = ConstrHeat2DCase3(cval,x0fun,N)
+% Construct the system operators for the 2D heat equation example "Case 3".
+% The construction is the same as for the "Case 1", but the system is not
+% stabilized with output feedback.
 
 xx = linspace(0,1,N);
 yy = xx;
@@ -37,12 +34,12 @@ b24 = (2*sin(nn(2:size(nn,1),:)*(pi/2))./(nn(2:size(nn,1),:)*pi)) * b24part;
 b2 = [b21 b22;b23 b24];
 
 B = [b1(:) b2(:)];
-sys.B = B;
+Sys.B = B;
 C = 2*B';
-sys.C = C;
-sys.D = zeros(size(C,1),size(B,2));
-sys.Bd = zeros(N*M,1);
-% Exponential stabilization with negative output feedback.
-sys.A = A0 - B*C;
+Sys.C = C;
+Sys.D = zeros(size(C,1),size(B,2));
+Sys.Bd = zeros(N*M,1);
+Sys.A = A0;
+
 
 end

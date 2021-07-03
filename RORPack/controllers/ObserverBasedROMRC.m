@@ -1,8 +1,14 @@
 function ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
-% Construct a reduced order observer-based robust controller for systems
-% with the same number of inputs and outputs.
-% The frequencies are assumed to be conjugate pairs, and the internal
-% model is in real form
+% function ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder)
+%
+% Construct a Reduced Order Robust Controller for parabolic systems. The
+% controller design is based on Galerkin approximation of the system and
+% contains a model reduction step for reducing the order of the controller.
+% The design is appicable to systems with bounded input and output 
+% operators. The controller design was introduced in the the article 
+% "Reduced Order Controller Design for Robust Output Regulation" by L.
+% Paunonen and D. Phan, IEEE TAC, 2020.
+%
 % Inputs:
 %   freqsReal : [1xN double] Frequencies to be included in the controller,
 %   only real nonnegative frequencies, if zero frequency is included,
@@ -16,9 +22,6 @@ function ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q
 %
 %   ROMorder : order of the reduced-order observer in the controller. The
 %            model reduction step can be skipped by setting 'ROMorder=NaN'
-%
-% In this version, the parameters in the LQR/LQG design Q are chosen to be
-% identity matrices.
 %
 % Output:
 %   ContrSys : [struct with fields G1,G2,K] reduced order
