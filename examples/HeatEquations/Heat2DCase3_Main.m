@@ -48,59 +48,75 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 %% Construct the controller
 
 % % A Low-Gain 'Minimal' Robust Controller 
-% % Since the system is unstable, requires prestabilization with a
-% % controller feedthrough term.
+% %
+% % Since the system is not impedance passive, the unstable eigenvalue s=0 
+% % can be stabilized with negative output feedback u(t)=-kappa_S*y(t). This 
+% % can be used in the design of the Low Gain Robust Controller with a 
+% % feedthrough operator -kappa_S*eye(dimY) (here dimY=2).
 % 
-% % Negative feedback gain for output stabilization
+% % Stabilizing output feedback gain
 % kappa_S = -2.5;
-% % Controller feedthrough term (i.e., effective output feedback for the
-% system)
-% Dc = kappa_S*eye(dimY);
-%
-% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+% % Controller feedthrough term 
+% Dc = kappa_S*eye(size(Sys.C,1));
+% 
+% % Since the controller has a feedthrough term, the Pvals need to be
+% % computed for the "prestabilized" system (A+B*Dc*C,B,C) (since D=0).
+% % For nonzero frequencies we can use the formula 
+% % P_{Dc}(i*w_k) = (I-P(i*w_k)*Dc)\P(i*w_k), but for s=0 we need to compute
+% % this separately due to the fact that P(0) is not defined.
+% 
+% dimX = size(Sys.A,1);
+% dimY = size(Sys.C,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
 % 
 % Pvals = cell(1,length(freqsReal));
 % for ind = 1:length(freqsReal)
-%   Pvals{ind} = Pappr(freqsReal(ind));
+%     if freqsReal(ind)==0
+%         Pvals{ind} = Sys.C*((-Sys.A-Sys.B*Dc*Sys.C)\Sys.B)+Sys.D;
+%     else
+%         Pval_nominal = Pappr(freqsReal(ind));
+%         Pvals{ind} = (eye(dimY)-Pval_nominal*Dc)\Pval_nominal;
+%     end
 % end
 % 
 % epsgain = [0.01,4];
 % % epsgain = .5;
-% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc);
 % epsgain
 
 
-% % A Passive Robust Controller
-% % Since the system is unstable, requires prestabilization with a
-% % controller feedthrough term.
+% A Passive Robust Controller
+%
+% Since the system is unstable, requires prestabilization with a
+% controller feedthrough term.
+
+% Negative feedback gain for output stabilization
+kappa_S = -2.5;
+
+dimY = size(Sys.C,1);
+epsgain = [0.01,3];
+% epsgain = .1;
+[ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
+epsgain
+
+% % An Observer-Based Robust Controller or a Dual Observer-Based Robust Controller
+% %
+% % Stabilizing state feedback and output injection operators K and L
+% % These are chosen based on collocated design to stabilize the single 
+% % unstable eigenvalue s=0.
+% K_gain = 2.5;
+% L_gain = 3;
 % 
-% % Negative feedback gain for output stabilization
-% kappa_S = -2.5;
+% K = -K_gain*Sys.B';
+% % PlotEigs(full(Sys.A+Sys.B*K),[-20 .1 -.3 .3])
+% L = -L_gain*Sys.C';
+% % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 % 
-% dimY = size(Sys.C,1);
-% epsgain = [0.01,3];
-% % epsgain = .1;
-% [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
-% epsgain
-
-% An Observer-Based Robust Controller or
-% a dual observere-based robust controller
-% Stabilizing state feedback and output injection operators K and L
-% These are chosen based on collocated design. Only the single unstable
-% eigenvalue at s=0 needs to be stabilized
-K_gain = 2.5;
-L_gain = 3;
-
-K = -K_gain*Sys.B';
-% PlotEigs(full(Sys.A+Sys.B*K),[-20 .1 -.3 .3])
-L = -L_gain*Sys.C';
-% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
-
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
-ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
-
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
+ 
 
 %% Construct the closed-loop system
 

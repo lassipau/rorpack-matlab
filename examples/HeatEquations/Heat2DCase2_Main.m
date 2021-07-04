@@ -55,27 +55,14 @@ freqsReal = [0 1 2 3];
 %   freqsReal = unique(abs(freqs));
 % end
 
-% Construct the controller 
+%% Construct the controller 
 
-% A Low-Gain 'Minimal' Robust Controller
-
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-% 
-% Pvals = cell(1,length(freqsReal));
-% for ind = 1:length(freqsReal)
-%   Pvals{ind} = Pappr(freqsReal(ind));
-% end
-% 
-% epsgainrange = [0.01,4];
-% 
-% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
-% epsgain
 
 % Observer-based robust controller
 
-% Requires stabilizing operators K21 and L
-% For simplicity: Stabilization with state feedback
+% Requires the construction of the stabilizing operators K21 and L to
+% stabilize the single unstable eigenvalue s=0.
+%
 % 1 for interior points, 1/4 for corner points and 1/2 for other boundary
 % points
 K21 = -ones(1,N*M);
@@ -86,7 +73,47 @@ K21(1, M:N:end) = K21(1, M:N:end) / 2;
 L = K21' * 10;
 IMstabmarg = 0.5;
 IMstabtype = 'LQR';
+% IMstabtype = 'poleplacement';
+
 ContrSys = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg);
+
+
+% % A Low-Gain 'Minimal' Robust Controller
+% %
+% % Even though the system is not impedance passive, the single unstable
+% % eigenvalue s=0 can be stabilized with negative output feedback
+% % u(t)=-kappa_S*y(t). This can be used in the design of the Low Gain Robust
+% % Controller with a feedthrough operator -kappa_S*eye(dimY) (here dimY=1).
+% 
+% % Stabilizing output feedback gain
+% kappa_S = -4;
+% Dc = kappa_S*eye(size(Sys.C,1));
+% 
+% % Since the controller has a feedthrough term, the Pvals need to be
+% % computed for the "prestabilized" system (A+B*Dc*C,B,C) (since D=0).
+% % For nonzero frequencies we can use the formula 
+% % P_{Dc}(i*w_k) = (I-P(i*w_k)*Dc)\P(i*w_k), but for s=0 we need to compute
+% % this separately due to the fact that P(0) is not defined.
+% 
+% dimX = size(Sys.A,1);
+% dimY = size(Sys.C,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% 
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%     if freqsReal(ind)==0
+%         Pvals{ind} = Sys.C*((-Sys.A-Sys.B*Dc*Sys.C)\Sys.B)+Sys.D;
+%     else
+%         Pval_nominal = Pappr(freqsReal(ind));
+%         Pvals{ind} = (eye(dimY)-Pval_nominal*Dc)\Pval_nominal;
+%     end
+% end
+% 
+% epsgain = [0.01,2];
+% 
+% % Construct the Low-Gain Robust Controller with a feedthrough term Dc.
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc);
+% epsgain
 
 
 CLSys = ConstrCLSys(Sys,ContrSys);
