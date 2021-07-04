@@ -959,7 +959,7 @@ rectangle $\Omega = [0,1]\times [0,1]$. The PDE system is defined as
   $\Gamma_2 = \setm{\xi=(\xi_1,1)}{0\leq \xi_1\leq 1}$, 
   $\Gamma_3 = \setm{\xi=(\xi_1,0)}{0\leq \xi_1\leq 1/2}$, 
   $\Gamma_0 = \partial \Omega \setminus (\Gamma_1 \cup \Gamma_2\cup \Gamma_3)$. By~\cite[Cor. 2]{ByrGil02} the heat equation defines a regular linear system with feedthrough $D=0$.
-The uncontrolled system is unstable due to the eigenvalue $\gl=0$.  
+The uncontrolled system is unstable due to the eigenvalue $\gl=0$. Since the system is unstable, the primary choices of the controllers are the Observer Based Robust Controller (\texttt{ObserverBasedRC}) and Dual Observer Based Robust Controller (\texttt{DualObserverBasedRC}). However, since the single unstable eigenvalue can be stabilized also by negative output feedback of the form $u(t)=-\gamma y(t)$, it is also possible to use the Low-Gain Robust Controller with a negative definite feedthrough term $D_c$ (given as the optional parameter \texttt{Dc}). The Low-Gain Robust Controller is by default commented out in the code in \texttt{Heat2DCase2\_Main.m}.
 
 In the simulations, the system is approximated using Finite Differences with a uniform grid. 
 
