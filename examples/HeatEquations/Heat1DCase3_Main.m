@@ -174,13 +174,16 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
+
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
 spgrid_plot = [spgrid, 1];
 
 figure(3)
 colormap jet
-Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
+surf_t_plotskip = 1;
+surf_n_plotskip = 2;
+Plot1DHeatSurf(CLsim.xesol(1:surf_n_plotskip:N,1:surf_t_plotskip:end),spgrid_plot(1:surf_n_plotskip:end),tgrid(1:surf_t_plotskip:end),BCtype)
 
 %%
 figure(4)

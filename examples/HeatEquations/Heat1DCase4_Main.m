@@ -6,9 +6,13 @@
 % Case 4: Dirichlet boundary control at x=1, regulated output y(t) and a 
 % Neumann boundary disturbance at x=0. The system is exponentially stable,
 % but does not define a "wellposed" or "regular linear system" on the
-% natural state space X=L^2(0,1). Since the current theory does not
-% guarantee that the controller designs would work, these are simulations
-% are only for experimentation purposes. That is, PROCEED WITH CAUTION! ;)
+% natural state space X=L^2(0,1), but instead a "Boundary Control System".
+% The Low-Gain Robust Controller can be used due to the theory in the
+% references Humaloja-Paunonen IEEE TAC 2018 and Humaloja-Kurula-Paunonen
+% IEEE TAC 2019. Also other controllers can be constructed, but since the 
+% current theory does not guarantee that the controller designs would work, 
+% these are simulations are only for experimentation purposes. 
+% That is, PROCEED WITH CAUTION! ;)
 
 addpath(genpath('../RORPack/'))
 
@@ -68,19 +72,12 @@ wdist = @(t) zeros(size(t));
 
 freqsReal = [0, 2];
 
-% Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
-% PlotEigs(full(Sys.A),[-20 1 -.3 .3])
-
-% eig(full(Sys.A))
-
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
-% % DISCLAIMER: THE EXISTING THEORY DOES NOT GUARANTEE THAT THESE 
-% % CONTROLLER WOULD WORK FOR THIS SYSTEM 
 
 Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 Pvals = cell(1,length(freqsReal));
@@ -112,16 +109,18 @@ epsgain
 % % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',4);
 % % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',4);
 
-%% Closed-loop simulation
+%% Closed-loop simulation and visualization of the results
+
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
 figure(1)
 PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
-%%
 
 
+% Simulate the closed-loop system
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 14;

@@ -123,7 +123,8 @@ z0 = zeros(size(ContrSys.G1,1),1);
 xe0 = [x0;z0];
 
 Tend = 24;
-tgrid = linspace(0, Tend, 501);
+% Tend = 14;
+tgrid = linspace(0, Tend, 601);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
@@ -133,15 +134,18 @@ PrintFigureTitles = true;
 spgrid = linspace(0,1,N);
 
 figure(1)
-subplot(2,1,1)
+subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
-subplot(2,1,2)
+subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% Plot the state of the controlled system
 figure(3)
 colormap jet
-Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
+surf_plotskip = 2;
+Plot1DWaveSurf(CLsim.xesol(1:2*N,1:surf_plotskip:end),phin,spgrid,tgrid(1:surf_plotskip:end))
 % Plot1DWaveSurf(CLsim.xesol(1:2*N,:)-CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-9 9])
 % Plot1DWaveSurf(CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-4 4])
 set(gca,'ztick',-8:4:8);

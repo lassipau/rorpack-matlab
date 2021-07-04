@@ -107,7 +107,9 @@ ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
 % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
  
 
-%% Closed-loop simulation
+%% Closed-loop simulation and visualization of the results
+
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
@@ -116,14 +118,14 @@ figure(1)
 PlotEigs(CLSys.Ae,[-5 .3 NaN NaN])
 
 
+% Simulate the closed-loop system
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 16;
 tgrid = linspace(0,Tend,300);
 
-
-
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
+
 
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;

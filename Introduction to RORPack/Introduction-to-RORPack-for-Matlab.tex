@@ -14,6 +14,7 @@
 \usepackage{graphicx} 
 \usepackage{ifthen}
 \usepackage{listings}
+\usepackage{wasysym}
 %\lstset{language=Python}
 \usepackage[colorlinks=true]{hyperref}
 
@@ -126,6 +127,7 @@
 
 \newcommand{\yref}{y_{\mbox{\scriptsize\textit{ref}}}}
 \newcommand{\wdist}{w_{\mbox{\scriptsize\textit{dist}}}}
+\newcommand{\wdk}[1][k]{w_{\mbox{\scriptsize\textit{dist},$#1$}}}
 \newcommand{\yrefpert}{\tilde{y}_{\mbox{\scriptsize\textit{ref}}}}
 \newcommand{\wdistpert}{\tilde{w}_{\mbox{\scriptsize\textit{dist}}}}
 \newcommand{\ydk}[1][k]{y_{d,#1}}
@@ -348,7 +350,7 @@ The other controller structures also use knowledge of the parameters $(A,B,C,D)$
 
 The \texttt{rorpack} Matlab library can be installed for Matlab R2020a and later (earlier versions may be fine too) as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
 
-The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases included in the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m} and documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab, the constructor routine used in the main simulation is in its own, separate, Matlab function file.
+The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases are included in the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m} and are documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab the constructor routine used in the main simulation is in its own separate Matlab function file.
 
 Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DCase3.m} begins with comment lines and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
 
@@ -764,8 +766,7 @@ In the example, the construction of the low-gain controller employs the \textbf{
 
 \medskip
 
-\subsubsection*{Case 3: Distributed input and output, boundary disturbance at $\xi = 0$, Dirichlet at $\xi = 1$}
-\label{sec:Heat1D3}
+\subsubsection*{Case 3: Distributed input and output, boundary disturbance at $\xi = 0$, Dirichlet boundary condition at $\xi = 1$}
 ~\\[-1ex]
 
   \noindent Main file name: \texttt{Heat1DCase3\_Main.m}
@@ -792,22 +793,12 @@ The uncontrolled system is stable because of the homogeneous Dirichlet boundary 
 Figure~\ref{fig:1Dheat3} shows example results of the simulations including plots of the outputs and reference signals, norm of the regulation error, computed control signals, and the state of the controlled system as a function of $\xi$ and $t$.
 
 \begin{figure}[h!]
-  \begin{minipage}{0.48\linewidth}
-    \includegraphics[width=\linewidth]{H1d3out.png}
-
-    \vspace{2ex}
-
-    \includegraphics[width=\linewidth]{H1d3err.png}
+  \begin{minipage}{0.46\linewidth}
+    \includegraphics[width=.95\linewidth]{H1D3outputs.pdf}
   \end{minipage}
   \hfill
-  \begin{minipage}{0.48\linewidth}
-    \includegraphics[width=.95\linewidth]{H1d3surf.png}
-
-    \vspace{2ex}
-
-    \begin{center}
-      \includegraphics[width=0.93\linewidth]{H1d3control.png}
-    \end{center}
+  \begin{minipage}{0.52\linewidth}
+    \includegraphics[width=\linewidth]{H1d3surf.png}
   \end{minipage}
 %  \includegraphics{}
 \caption{Example output of the 1D Heat equation (``Case 3'').}
@@ -850,6 +841,54 @@ Figure~\ref{fig:1Dheat3} shows example results of the simulations including plot
 %%      \item $B$ at $x=0$ or $x=1$
 %%    \end{itemize}
 %%\end{itemize}
+
+\subsubsection*{Case 4: Dirichlet boundary input at $\xi=1$, boundary disturbance and measurement at $\xi = 0$}
+\label{sec:Heat1D3}
+~\\[-1ex]
+
+  \noindent Main file name: \texttt{Heat1DCase4\_Main.m}
+
+\medskip
+
+The model on $\Omega = [0,1]$ is
+\eq{
+  \pd{x}{t}(\xi,t) &=  \pdb{\xi}(c(\xi)\pd{x}{\xi})(\xi,t)  \\
+      -\pd{x}{\xi}(0,t) &= \wdist(t), \qquad 
+      x(1,t) = u(t),  \quad x(\xi,0)=x_0(\xi),\\
+      y(t) &= x(0,t)
+    }
+    where $c(\cdot)\geq c_0>0$ is the spatially varying thermal diffusivity of the material.
+%    $b_1(\xi)=10\chi_{[.3,.6]}(\xi)$ and $b_2(\xi)=10\chi_{[.6,.7]}(\xi)$ and 
+The uncontrolled system is stable because of the Dirichlet-type boundary condition at $\xi = 1$. The system, however, does not give rise to a wellposed or regular linear system on the natural state space $X=\Lp[2](0,1)$, but only on $X=H^{-1}(0,1)$.
+It does, however, give rise to a well-defined Boundary Control System~\cite{Sal87a,CheMor03,MalSta06} on $X=\Lp[2](0,1)$, and the use of the Low-Gain Robust Controller (\texttt{LowGainRC}) is justified by the theory presented in~\cite{HumPau18,HumKur19}.
+
+Other controller designs can be used in this simulation example, but as we do not cover the details on approximation of regular linear systems defined on $H^{-1}(0,1)$, 
+ this simulation example 
+should be considered to be for experimentation purposes only. That is, \emph{use at your own risk!} \smiley{}
+
+\medskip
+
+\subsubsection*{Case 5: Neumann boundary inputs and input disturbances at $\xi = 0$ and $\xi=1$,  and collocated outputs}
+~\\[-1ex]
+
+  \noindent Main file name: \texttt{Heat1DCase5\_Main.m}
+
+\medskip
+
+The model defined on
+ $\Omega = [0,1]$ is similar to ``Case 1'', but now has two Neumann boundary control inputs and collocated outputs (at $\xi=0$ and $\xi=1$), i.e.,
+\eq{
+  \pd{x}{t}(\xi,t) &=  \pdb{\xi}(c(\xi)\pd{x}{\xi})(\xi,t) + b_d(\xi)\wdk[3](t), \qquad x(\xi,0)=x_0(\xi) \\
+      -\pd{x}{\xi}(0,t) &= u_1(t) + \wdk[1](t), \qquad 
+      \pd{x}{\xi}(1,t) = u_2(t)+\wdk[2](t), \\
+      y(t) &= (x(0,t),x(1,t))^T
+    }
+    where $c(\cdot)\geq c_0>0$ is the spatially varying \textit{thermal diffusivity} of the material.
+The third disturbance input acts through the input profile $b_d(\cdot)$ (defined by \texttt{Bd\_profile} in the code).
+    The uncontrolled system is unstable due to the eigenvalue $\gl=0$. 
+The system is impedance passive (due to the collocated inputs and outputs) and  it can be stabilized with negative output feedback.
+For controller design we can use the Passive Robust Controller (with a negative definite feedthrough term), or alternatively
+either the Observer-Based Robust Controller or Dual Observer-Based Robust Controller.
 
 \subsection{The 2D Heat Equations on Rectangular Domains}
 
@@ -925,6 +964,8 @@ The uncontrolled system is unstable due to the eigenvalue $\gl=0$.
 In the simulations, the system is approximated using Finite Differences with a uniform grid. 
 
 
+\medskip
+
 \subsubsection*{Case 3: Collocated input and output}
 ~\\[-1ex]
 
@@ -980,23 +1021,18 @@ Figure~\ref{fig:1Dwave1} shows example results of the simulation for two differe
 
 \begin{figure}[h!]
   \centering
-  \begin{minipage}{0.48\linewidth}
+  \begin{minipage}{0.43\linewidth}
     \begin{flushleft}
-      \includegraphics[width=\linewidth]{W1dout_triangle.png}
+      \includegraphics[width=0.95\linewidth]{W1D2outputs.pdf}
     \end{flushleft}
   \end{minipage}
-  \begin{minipage}{0.48\linewidth}
+  \begin{minipage}{0.55\linewidth}
     \begin{flushright}
-      \includegraphics[width=\linewidth]{W1dout_semic.png}
+      \includegraphics[width=\linewidth]{W1D2profile.png}
     \end{flushright}
   \end{minipage}
 
-  \vspace{3ex}
-
-    \begin{center}
-      \includegraphics[width=.95\linewidth]{W1dprofile_triangle.png}
-    \end{center}
-    \caption{Example outputs of the periodic tracking for the 1D wave equation (``Case 1'').}
+    \caption{Example outputs of the periodic tracking for the 1D wave equation (``Case 2'').}
   \label{fig:1Dwave1}
 \end{figure}
 
@@ -1071,6 +1107,25 @@ Because of of the technical challenges arising from the infinite-dimensional inp
   The numerical approximation in the example is done using the spectral method based on the eigenvalues and eigenfunctions of the undamped wave equation on the annulus. The approximate controller includes the stabilizing term $D_c$ which corresponds to pre-stabilizing the system with negative output feedback. 
   %The initial choice for the controller is the 
   %The system is passive
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}{0.48\linewidth}
+    \begin{flushleft}
+      \includegraphics[width=0.95\linewidth]{W2D1error.pdf}
+
+      \includegraphics[width=0.95\linewidth]{W2D1output.png}
+    \end{flushleft}
+  \end{minipage}
+  \begin{minipage}{0.48\linewidth}
+    \begin{flushright}
+      \includegraphics[width=0.95\linewidth]{W2D1profile.png}
+    \end{flushright}
+  \end{minipage}
+
+    \caption{Example outputs of the approximate tracking for the 2D wave equation (``Case 1'').}
+  \label{fig:2Dwave1}
+\end{figure}
 
 %\COMMapproxRC{
 %  The \keyterm{approximate robust controller} is designed based on finite-dimensional Fourier subspaces

@@ -35,9 +35,6 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase4(cfun,x0fun,N)
 % unstable (eigenvalue at 0), but is impedance passive and can be
 % stabilized with negative output feedback.
 
-, regulated output y(t) and a 
-% Neumann boundary disturbance at x=1. Additional measured output at x=0
-
 
 % The point x=1 has a Dirichlet boundary condition, and is not chosen as a
 % variable
