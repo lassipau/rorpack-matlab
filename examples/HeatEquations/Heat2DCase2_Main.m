@@ -3,14 +3,15 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Unstable system, stabilization by stabilizing the only unstable
-% eigenvalue =0
+% The system is unstable with a single unstable eigenvalue s=0.
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
+
 
 cval = 1;
-N = 15; 
-M = 16;
+N = 16; 
+M = N; % WARNING: The approximation currently only works correctly with M=N.
+
 
 % Initial state of the plant
 %x0fun = @(x,y) zeros(size(x));
@@ -129,7 +130,7 @@ PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
-Tend = 10;
+Tend = 8;
 tgrid = linspace(0,Tend,300);
 
 
@@ -145,13 +146,14 @@ subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
+set(gcf,'color','white')
 
 %% Animation (DOES NOT WORK YET)
 
-% figure(3)
-% colormap jet
-% % No movie recording
-% [~,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0.03,0);
+figure(3)
+colormap jet
+% No movie recording
+[~,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0,1);
@@ -160,10 +162,10 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %%
 
-% figure(4)
-% colormap jet
-% % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-% PlotHeat2DSurf(x0,spgrid,zlims)
+figure(4)
+% PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
+plotind = 155;
+PlotHeat2DSurf(CLsim.xesol(1:N*M,plotind),spgrid)
 
 figure(5)
 tt = linspace(0,16,500);

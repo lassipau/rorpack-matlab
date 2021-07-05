@@ -9,7 +9,7 @@
 % unstable (eigenvalue at 0), but is impedance passive and can be
 % stabilized with negative output feedback.
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 70; 
 

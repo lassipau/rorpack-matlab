@@ -8,7 +8,7 @@
 % the unstable eigenvalue 0 of the system is not prestabilized.
 
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 31; 
 

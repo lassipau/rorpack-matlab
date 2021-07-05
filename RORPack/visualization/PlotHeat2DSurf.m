@@ -31,6 +31,8 @@ h = surf(xx,yy,reshape(zz,N,M));
 % set(h,'linewidth',0.5,'edgecolor',0.5*[1 1 1])
 axis(axlims)
 caxis(zlims)
-
 ylabel('$y$','Interpreter','latex','Fontsize',20)
+xlabel('$x$','Interpreter','latex','Fontsize',20)
+
+
 

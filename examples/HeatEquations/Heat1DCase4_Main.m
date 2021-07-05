@@ -14,7 +14,7 @@
 % these are simulations are only for experimentation purposes. 
 % That is, PROCEED WITH CAUTION! ;)
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 50; 
 

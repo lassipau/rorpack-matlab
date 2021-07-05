@@ -8,7 +8,7 @@
 % However, since the system is passive,
 % the Passive Robust Controller can be used in achieving robust output regulation.
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 % Parameters for this example.
 N = 40;

@@ -55,7 +55,7 @@ else
   MovAnim = [];
   for ind = 1:length(tgrid)
     
-    surf(xx,yy,reshape(zz(:,ind),N,M));
+    surf(xx,yy,reshape(zz(:,ind),N,M).');
     axis(axlims)
     caxis(zlims)
     xlabel('$x$','Interpreter','latex','Fontsize',20)

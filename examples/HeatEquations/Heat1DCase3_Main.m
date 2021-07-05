@@ -10,9 +10,10 @@
 % temperatures on the intervals 'IC1'  and 'IC2' (Default 
 % 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
-% Parameters for this example.
+% Parameters for this example. 
+% Size of the numerical approximation.
 N = 100; 
 
 % Initial state of the plant
@@ -28,11 +29,11 @@ x0fun = @(x) 1*(1+cos(pi*(1-x)));
 %x0fun = @(x) .2*x.^2.*(3-2*x)-.5;
 
 % The spatially varying thermal diffusivity of the material
-% cfun = @(t) ones(size(t));
-% cfun = @(t) 1+t;
-% cfun = @(t) 1-2*t.*(1-2*t);
-% cfun = @(t) 1+0.5*cos(5/2*pi*t);
-cfun = @(t) 0.3-0.6*t.*(1-t);
+% cfun = @(xi) ones(size(xi));
+% cfun = @(xi) 1+xi;
+% cfun = @(xi) 1-2*xi.*(1-2*xi);
+% cfun = @(xi) 1+0.5*cos(5/2*pi*xi);
+cfun = @(xi) 0.3-0.6*xi.*(1-xi);
 
 IB1 = [.3, .4];
 IB2 = [.6, .7];
@@ -120,7 +121,7 @@ L = -10*Sys.C';
 %
 % The construction of the controller uses a Galerkin approximation
 % of the heat system:
-% The Galerkin arpproximation used in the controller
+% The Galerkin approximation used in the controller
 % design is a lower dimensional numerical approximation
 % of the PDE model.
 Nlow = 50;
@@ -131,6 +132,8 @@ SysApprox.AN = Sys_Nlow.A;
 SysApprox.BN = Sys_Nlow.B;
 SysApprox.CN = Sys_Nlow.C;
 SysApprox.D = Sys_Nlow.D;
+
+% Parameters for the stabilization step of the controller design
 alpha1 = 1.5;
 alpha2 = 1;
 Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
@@ -138,42 +141,51 @@ Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
 R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
+
+% Size of the final reduced-order observer part of the controller
 ROMorder = 3;
 
 ContrSys = ObserverBasedROMRC(...
     freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
-Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+
 %% Closed-loop construction and simulation
 
 % Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 8;
 tgrid = linspace(0,Tend,300);
 
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
 %% Visualization
 
+% Plot the (approximate) eigenvalues of the closed-loop system
 figure(1)
 PlotEigs(CLSys.Ae,[-30 .3 -6 6])
 
 % Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
-PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-PlotControl(tgrid,CLsim,PrintFigureTitles)
-
+plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1

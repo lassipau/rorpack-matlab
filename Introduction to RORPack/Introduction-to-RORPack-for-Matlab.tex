@@ -173,7 +173,7 @@
   This document contains the mathematical introduction to RORPack --- a software package for robust output tracking and disturbance rejection for linear PDE systems. The RORPack library is open-source and freely available at 
 https://github.com/lassipau/rorpack/ and
 https://github.com/lassipau/rorpack-matlab/
-The package contains functionality for automated construction of robust internal model based controllers, simulation of the controlled systems, visualisation of the results, as well as a collection of example cases on robust output regulation of controlled heat and wave equations.
+The package contains functionality for automated construction of robust internal model based controllers, simulation of the controlled systems, visualisation of the results, as well as a collection of example cases on robust output regulation of controlled heat and wave equations on 1D and 2D spatial domains.
 \end{abstract}
 
 {\small\tableofcontents}
@@ -194,19 +194,18 @@ The project version information can be found in the \texttt{CHANGELOG.md} files,
 %\label{sec:intro}
 
 \RORname\ is a software package
-for controller design and simulation of robust output tracking and disturbance rejection for linear partial differential equation models. 
+for controller design and simulation of robust output tracking and disturbance rejection for linear partial differential equation (PDE) models. 
 The package is available as a Python library and a Matlab package.
 %Its main purpose is to give an  
 The software contains a number of complete examples on robust controller design and simulation of PDE models
 %. The types of models (at the moment) include
 of the following types:
 \begin{itemize}
-  \item one-dimensional diffusion equations with either boundary or distributed control and observation.
-  \item two-dimensional heat equation on a rectangular domain.
-  \item one-dimensional wave equations with either distributed or boundary control and observation.
-    \COMMapproxRC{
-    \item two-dimensional wave equation on an annulus with boundary control and observation
-    }
+  \item one-dimensional (1D) and two-dimensional (2D) diffusion equations with control and observation either at the boundary or inside the spatial domain.
+%  \item two-dimensional heat equation on a rectangular domain.
+  \item 1D wave equations with either boundary or in-domain control and observation.
+    \item A 2D wave equation on an annulus with boundary control and observation
+\item 1D beam equations with boundary or in-domain control and observation.
 \end{itemize}
 New examples will also be added in the future versions of the package.
 %This collection of examples will also be expanded in the future.
@@ -228,22 +227,29 @@ All comments and suggestions for improvements are welcome! These can be sent dir
 
 \subsection{Controller Design and Simulation Workflow}
 
-Basic workflow for robust controller design and simulation for a given system is that the user creates a main file with the following parts:
+Basic workflow for robust controller design and simulation for a given system is that the user creates a ``main simulation file'' with the following parts:
 \begin{enumerate}
 %  \item Create a main file for the simulation. 
 %    The file includes the following parts in the given order.
   \item Calling of a user-defined Matlab function that returns a numerical approximation of the linear PDE model. In the provided examples this function is in a separate file with the prefix ``Constr''.
   \item Defining the reference and disturbance signals to be considered.
-  \item Calling of a \RORname\ routine for construction of a robust controller that is suitable for the type of PDE model.
-    This typically involves choosing appropriate parameters for the controller construction.
+  \item Calling of a \RORname\ routine for construction of a ``robust controller'' that is suitable for the type of the PDE model.
+    This also involves defining the parameters of the controller construction.
   \item Calling of \RORname\ routines for construction and simulation of the closed-loop system. The routines return numerical data describing the output, the error, the control signal, and the closed-loop state.
   \item Calling of \RORname\ routines for visualising the behaviour of the output and the output error, as well as 
     user-defined routines for illustrating the behaviour of the state of the controlled PDE system (multidimensional plots or animations).
 \end{enumerate}
-The example cases included in \RORname\ are built around main files that follow the same structure, and the users are encouraged to implement their own simulations by modifying the example codes.
+The example cases included in \RORname\ are built around main files that follow the above structure, and the users are encouraged to implement their own simulations by modifying the example codes.
 
-It is also possible to combine other Python software packages and Matlab toolboxes in the study of robust controller design for PDE models in order to employ ready-made numerical approximations or additional numerical methods in the computation of required controller parameters. This approach is illustrated in one of the PDE example cases ``\texttt{BeamKelvinVoigt\_Main}'' described in Section~\ref{sec:ControlledBeams} (Case Euler-Bernolli Beam with Kelvin-Voigt Damping).
-In this example the system is approximated using the Galerkin method based on a nonlocal basis based on Chebyshev polynomials with the \textbf{Chebfun package}~\cite{DriHal14book} (\href{https://chebfun.org/}{https://chebfun.org/}) which provides flexible tools for solutions of differential equations with extreme accuracy using spectral methods. 
+It is also possible to combine other Python software packages and Matlab toolboxes in the study of robust controller design for PDE models in order to employ ready-made numerical approximations or additional numerical methods in the computation of required controller parameters.
+ This approach is illustrated the PDE example cases ``\texttt{Heat1DCase2\_Main}'' (see Section~\ref{sec:Heat1D2}) and 
+ ``\texttt{BeamKelvinVoigt\_Main}'' (see Section~\ref{sec:BeamKV}) 
+both of which utilise the \textbf{Chebfun package}~\cite{DriHal14book} (\href{https://chebfun.org/}{https://chebfun.org/}), 
+  which provides flexible tools for numerical approximation with Chebyshev polynomials and solution of differential equations with extreme accuracy using spectral methods. 
+In \texttt{Heat1DCase2\_Main} the \textbf{Chebfun} package is used to compute high-accuracy approximations of the \emph{transfer function} of the controlled PDE system, and 
+in \texttt{BeamKelvinVoigt\_Main} the package is used to implement a spectral Galerkin approximation~\cite{She95} of an Euler--Bernoulli beam with nonlocal basis based on Chebyshev polynomials.
+
+%(Case Euler-Bernolli Beam with Kelvin-Voigt Damping).  In this example the system is approximated using the Galerkin method based on a nonlocal basis based on Chebyshev polynomials with  which provides flexible tools for solutions of differential equations with extreme accuracy using spectral methods. 
 
 \section{Introduction to Robust Output Regulation}
 
@@ -259,7 +265,11 @@ The purpose of the \RORname\ package is to illustrate controller design for line
 on a Banach or a Hilbert space $X$.
 Controlled linear PDE models describing diffusion-convection phenomena, waves and vibrations and elastic deformations can be written in this form with a suitable differential operator~$A$~\cite{CurZwa95book,TucWei09book,JacZwa12book}. 
 %generating a \keyterm{strongly continuous semigroup} on $X$.
-In our main control problem the goal is to design a dynamic error feedback controller in such a way that the output $y(t)$ of the system converges to a given reference signal $\yref(t)$ despite the external disturbance signal $\wdist(t)$. In addition, the controller needs to be \keyterm{robust} in the sense that it achieves the output tracking and disturbance rejection even if the parameters $(A,B,B_d,C,D,D_d)$ are perturbed or contain small uncertainties.
+In our main control problem the goal is to design a dynamic error feedback controller in such a way that
+\begin{quotation}
+ ``the output $y(t)$ of the system converges to a given reference signal $\yref(t)$ despite the external disturbance signal $\wdist(t)$''. 
+\end{quotation}
+In addition, the controller needs to be \keyterm{robust} in the sense that it achieves the output tracking and disturbance rejection even if the parameters $(A,B,B_d,C,$ $D,D_d)$ are perturbed or contain small uncertainties.
 
 Our main emphasis is on robust output regulation of \keyterm{diffusion-convection equations}, \keyterm{wave equations}, and \keyterm{beam and plate equations}. However, the \RORname\ package can also be used for construction of controllers for  finite-dimensional systems with given matrices $(A,B,B_d,C,D,D_d)$. 
 
@@ -346,13 +356,14 @@ The construction of the robust controllers are based on the references~\cite{Pau
 The constructions of the robust controllers use the knowledge of the frequencies $\set{\gw_k}_k $ of the reference and disturbance signals, the number of outputs $p:=\dim Y$ of the system~\eqref{eq:plantintro}, and certain knowledge of the system. In particular, the ``minimal controllers'' require knowledge of the values $P(i\gw_k)$ of the transfer function $P(\gl)=\CL R(\gl,A)B+D$ of the system at the complex frequencies $\set{i\gw_k}_k\subset i\R$ of the reference and disturbance signals~\eqref{eq:yrefwdist}.
 The other controller structures also use knowledge of the parameters $(A,B,C,D)$ of the system as they involve designing an observer for~\eqref{eq:plantintro}, and require the user to provide stabilizing state feedback and output injection operators. See Section~\ref{sec:ControllerTypes} for more information on the controller-specific requirements.
 
-\section{Using the Software}
+\section{Using the Software (Matlab version)}
 
-The \texttt{rorpack} Matlab library can be installed for Matlab R2020a and later (earlier versions may be fine too) as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
+The \texttt{rorpack} Matlab library can be installed for Matlab R2019a and later\footnote{Various earlier versions should be fine too, but these have not been tested.} as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
 
 The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases are included in the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m} and are documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab the constructor routine used in the main simulation is in its own separate Matlab function file.
 
-Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DCase3.m} begins with comment lines and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
+Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DCase3.m} begins with general comment lines.
+% and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
 
 \begin{lstlisting}
 %% Heat equation on the interval [0,1] with 
@@ -366,15 +377,14 @@ Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: T
 % 'IB2' = [0.6,0.7]) and the measurements are the average 
 % temperatures on the intervals 'IC1'  and 'IC2' (Default 
 % 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
-
-addpath(genpath('../RORPack/'))
 \end{lstlisting}
 
-The next part defines the parameters $N$, \texttt{cfun} and \texttt{x0fun} used in the construction of the system $(A,B,B_d,C,D)$ with the function \texttt{Constr1DHeatCase3}, which is introduced next. The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material. \texttt{x0fun} describes the initial heat profile of the plant.
+The next part defines the parameters $N$, \texttt{cfun} and \texttt{x0fun} used in the construction of the system $(A,B,B_d,C,D,D_d)$ with routine \texttt{Constr1DHeatCase3} (detailed below). The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material. \texttt{x0fun} describes the initial heat profile of the plant.
 In this example, the parameters \texttt{IB1} and \texttt{IB2} describe the two intervals where the control is applied to the heat equation, and \texttt{IC1} and \texttt{IC2} describe the internvals of the measurements from the heat equation.
 
 \begin{lstlisting}
 % Parameters for this example.
+% Size of the numerical approximation.
 N = 100; 
 
 % Initial state of the plant
@@ -383,15 +393,16 @@ x0fun = @(x) 1*(1+cos(pi*(1-x)));
 %x0fun = @(x) 3*(1-x)+x;
 
 % The spatially varying thermal diffusivity of the material
-% cfun = @(t) ones(size(t));
-cfun = @(t) 0.3-0.6*t.*(1-t);
+% cfun = @(xi) ones(size(xi));
+cfun = @(xi) 0.3-0.6*xi.*(1-xi);
 
 IB1 = [.3, .4];  IB2 = [.6, .7];  IC1 = [.1, .2];  IC2 = [.8, .9];
 
 [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2);
  \end{lstlisting}
 
-The function \texttt{Constr1DHeatCase3} used to approximate the system begins with comments describing this particular approximation along with argument checking since the inputs \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are not explicitly required to construct the approximation.
+The function \texttt{Constr1DHeatCase3} used in constructing the approximation of the PDE system begins with comment lines, checking if \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are given as parameters (or if these should be set to default values), and a consistency check for the parameters.
+% approximate the system begins with comments describing this particular approximation along with argument checking since the inputs \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are not explicitly required to construct the approximation.
 
 \begin{lstlisting}
 function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(...
@@ -405,15 +416,13 @@ function [x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(...
 % N = dimension of the approximated system which
 % (does not include point x=1)
 
-% Case 3: Neumann boundary disturbance at x=0,
-% 2 distributed controls and 
-% two distributed measurements regulated output y(t).
-% The controls affect the intervals 'IB1' = [a_1,b_1]
+% Case 3: Neumann boundary disturbance at x=0, two distributed 
+% controls and two distributed measured outputs.
+% The controls act on the intervals 'IB1' = [a_1,b_1]
 % and 'IB2' = [a_2,b_2], and the measurements are
 % the averages of the temperatures on the intervals 
 % 'IC1' = [c_1,d_1] and 'IC2' = [c_2,d_2].
-% If these parameters are not
-% given, then default configuration 
+% If these parameters are not given, then default configuration 
 % IB1 = [.3, .4], IB2 = [.6, .7], 
 % IC1 = [.1, .2], and IC2 = [.8, .9] is used.
 
@@ -424,16 +433,18 @@ end
 % Check that the intervals are defined correctly
 if ~isempty(find([IB1(:);IB2(:);IC1(:);IC2(:)]<0))...
         || ~isempty(find([IB1(:);IB2(:);IC1(:);IC2(:)]>1))
-  error(...
-      'All limits of the intervals IB1, IB2, IC1, and IC2 need to be on [0,1].')
+  error('All limits of the intervals IB1, IB2, IC1, and IC2 need to be on [0,1].')
 elseif IB1(2)<=IB1(1) || IB2(2)<=IB2(1) ||...
         IC1(2)<=IC1(1) || IC2(2)<=IC2(1)
-  error(...
-      'All intervals IB1, IB2, IC1, and IC2 need to be of positive lengths.')
+  error('All intervals IB1, IB2, IC1, and IC2 need to be of positive lengths.')
 end
   \end{lstlisting}
 
-The rest of the function approximates the system with the appropriate boundary conditions.
+The rest of the code constructs a Finite Difference approximation of the heat equation on $[0,1]$ with the two distributed inputs (on the invervals \texttt{IB1} and \texttt{IB2}) and the two measured outputs, which are the temperature averages over the intervals \texttt{IC1} and \texttt{IC2}. The second order differential operator is constructed using the general-purpose routine \texttt{DiffOP1d}, which constructs an approximation of a diffusion operator with a spatially varying diffusion coefficient.
+Also the Neumann boundary disturbance operator $B_d$ and the initial state $x_0$ are approximated according to the same Finite Difference approximation. At the end of the code, all parameters of the system are saved to the main variable \texttt{Sys}, which is a Matlab structure with fields 
+\texttt{A}, \texttt{B}, \texttt{Bd},  
+\texttt{C}, \texttt{D}, \texttt{Dd}
+corresponding to the parameters $(A,B,B_d,C,D,D_d)$ of~\eqref{eq:plantintro}.
 
 \begin{lstlisting}
 % The point x=1 has a Dirichlet boundary condition
@@ -453,8 +464,8 @@ B2 = 1/(IB2(2)-IB2(1))*(spgrid(1:N)>=IB2(1) & spgrid(1:N)<=IB2(2));
 B2 = B2(:);
 
 % Neumann boundary disturbance at x=0, sign is based on the
-% _outwards_ normal derivative
-Bd = sparse([-2/h;zeros(N-1,1)]); 
+% outwards normal derivative
+Bd = sparse([2/h;zeros(N-1,1)]); 
 
 % Two distributed outputs on the intervals IC1 and IC2
 C1 = h/(IC1(2)-IC1(1))*(spgrid(1:N)>=IC1(1) & spgrid(1:N)<=IC1(2));
@@ -471,7 +482,7 @@ Sys.Dd = zeros(2,1);
   \end{lstlisting}
 
 The next part of the main file defines the reference signal $\yref(t)$ (in \texttt{yref}) and the disturbance signal $\wdist(t)$ (in \texttt{wdist}) and lists the (real) frequencies $\set{\gw_k}_{k=1}^q$ in the variable \texttt{freqsReal}. Alternative reference and disturbance signals are commented out in the code for further simulation experiments.
-\emph{If disturbance inputs are not present in the simulation, $\wdist(t)$ should be defined as a zero signal with \textup{\texttt{wdist = @(t) zeros(size(t))}}. Also \textup{\texttt{Sys.Bd}} should be defined as a $\textup{dimX}\times 1$ zero matrix, and this can be done automatically using the function \textup{\texttt{SysConsistent}}.}
+\emph{If disturbance inputs are not present in the studied PDE model, $\wdist(t)$ should be defined as a zero signal with \textup{\texttt{wdist = @(t) zeros(size(t))}}. Also \textup{\texttt{Sys.Bd}} and \textup{\texttt{Sys.Dd}} should be defined as $\textup{dimX}\times 1$ and $\textup{dimY}\times 1$ zero matrices, and this can be done automatically using the function \textup{\texttt{SysConsistent}}.}
 
 \begin{lstlisting}
 % Define the reference and disturbance signals, and list the
@@ -481,10 +492,14 @@ The next part of the main file defines the reference signal $\yref(t)$ (in \text
 yref = @(t) [sin(2*t);2*cos(3*t)];
 %wdist = @(t) zeros(size(t));
 wdist = @(t) sin(6*t);
-freqsReal = [1 2 3 6];
+freqsReal = [1, 2, 3, 6];
+
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 \end{lstlisting}
 
 The next part constructs the chosen controller structure with the corresponding function from the \RORname\ ``controllers'' folder. Alternative controller structures are commented out in the code for easy comparison of controller performances.
+The use of the controller construction routines is documented in detail in Section~\ref{sec:ControllerTypes} as well as in the the comments of the example files.
 
 \begin{lstlisting} 
 %% Construct the controller
@@ -493,33 +508,35 @@ The next part constructs the chosen controller structure with the corresponding 
 %
 % The construction of the controller uses a Galerkin approximation
 % of the heat system:
-% The Galerkin arpproximation used in the controller
-% design is a lower dimensional numerical approximation
-% of the PDE model.
+% The Galerkin approximation used in the controller design 
+% is a lower dimensional numerical approximation of the PDE model.
 Nlow = 50;
-[~,Sys_Nlow,~,~] = Constr1DHeatCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
+[~,Sys_Nlow,~,~] = Constr1DHeatCase3(cfun,x0fun,Nlow,IB1,IB2,...  
+                                     IC1,IC2);
 
 % Store the numerical approximation in "SysApprox".
 SysApprox.AN = Sys_Nlow.A;
 SysApprox.BN = Sys_Nlow.B;
 SysApprox.CN = Sys_Nlow.C;
 SysApprox.D = Sys_Nlow.D;
+
+% Parameters for the stabilization step of the controller design
 alpha1 = 1;
 alpha2 = 0.5;
-Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
+Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the internal model
 Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
 R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
 R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
+
+% Size of the final reduced-order observer part of the controller
 ROMorder = 3;
 
-ContrSys = ObserverBasedROMRC(...
-    freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
-
-Sys = SysConsistent(Sys,yref,wdist,freqsReal);
+ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,...
+                              alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 \end{lstlisting}
 
-The next part constructs and simulates the behaviour of the closed-loop system.
+The next part constructs and simulates the behaviour of the closed-loop system. In particular, \texttt{CLSys} is a Matlab structure which stores the main operators $(A_e,B_e,C_e,D_e)$ of the closed-loop system in the fields \texttt{CLSys.Ae}, \texttt{CLSys.Be},   \texttt{CLSys.Ce}, and \texttt{CLSys.De}\footnote{There are different conventions in the literature for definition of the ``inputs'' of the closed-loop system (and the definition of $B_e$). \RORname\ uses the version where the input of the closed-loop system is $(\wdist(t),\yref(t))^T$ (like in~\cite{PauPha20}), instead of the state of \keyterm{an exosystem}.}.
 
 \begin{lstlisting}
 %% Closed-loop construction and simulation
@@ -527,27 +544,35 @@ The next part constructs and simulates the behaviour of the closed-loop system.
 % Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 8;
 tgrid = linspace(0,Tend,300);
 
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 \end{lstlisting}
 
-Finally, the results of the simulation are plotted in separate figures and the behaviour of the controlled state is animated using the user-defined routines. The option to save the animation as an MPEG-4 or AVI file is commented out.
+Finally, the results of the simulation are plotted in separate figures and the behaviour of the controlled state is animated using the user-defined routines. Code for saving the animation as an MPEG-4 or AVI file is commented out.
 
 \begin{lstlisting}
 %% Visualization
 
+% Plot the (approximate) eigenvalues of the closed-loop system
 figure(1)
 PlotEigs(CLSys.Ae,[-30 .3 -6 6])
 
 % Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
 plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -558,26 +583,22 @@ plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
-spgrid = [spgrid 1];
+spgrid = [spgrid, 1];
 
 figure(3)
-colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
 figure(4)
 % No movie recording
-[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
-
+[~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid, ...
+                       BCtype,0.03,0);
 % Movie recording
-% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,1);
-
-%movie(MovAnim)
-
+% [MovAnim,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,...
+                               BCtype,0.03,1);
 figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
-title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
+title('Reference $y_{ref}$','Interpreter','latex','Fontsize',16)
 \end{lstlisting}
 
 
@@ -588,22 +609,38 @@ In this section we list the concrete controllers implemented in \RORname.
 The documentation of the code includes additional information on the usage of the construction routines.
 The controllers are the following:
 \begin{itemize}
-  \item The ``minimal robust controller'' (including only the internal model), based on references~\cite{HamPoh00},~\citel{Pau16a}{Sec. IV}. Stabilization of the closed-loop system is based on selection of a suitable \keyterm{low-gain parameter} $\eps>0$.\\[1ex]
+  \item The ``Low-Gain (Minimal) Robust Controller'' (including only the internal model), based on references~\cite{HamPoh00,RebWei03},~\citel{Pau16a}{Sec. IV}. Stabilization of the closed-loop system is based on selection of a suitable \keyterm{low-gain parameter} $\eps>0$. This controller can be used for systems which are exponentially stable (or stabilizable with output feedback).\\[1ex]
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
-       \texttt{LowGainRC(freqsReal,Pvals,epsgain,Sys)}
+       \texttt{LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc)}
      \end{quotation}
      \medskip
-     where \texttt{Sys} contains the parameters of the plant, \texttt{freqsReal} contains the frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}, \texttt{epsgain} is the value of the low-gain parameter $\eps>0$. Finally, \texttt{Pvals} is a $(q+1)\times p\times m$ array containing the values $P(i\gw_k)=\CL R(i\gw_k,A)B+D\in \C^{p\times m}$ of the transfer function of~\eqref{eq:plantintro} at the complex frequencies $\set{i\gw_k}_{k=0}^q$ of the reference and disturbance signals in~\eqref{eq:yrefwdist}.
+     where \texttt{Sys} contains the parameters of the plant, \texttt{freqsReal} contains the frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}, \texttt{epsgain} is the value of the low-gain parameter $\eps>0$. 
+The (optional) parameter \texttt{Dc} is the feedthrough matrix $D_c$ of the controller~\eqref{eq:controller}. Since the controller feedthrough 
+ is equivalent to a ``preliminary'' output feedback  $u(t)=D_c y(t)+ \tilde{u}(t)$ to the system (plus an additional disturbance term), for unstable systems the parameter \texttt{Dc} should be an output feedback matrix which stabilizes the system exponentially. 
+If \texttt{Dc} is not given, the controller will by default have zero feedthrough.
+
+The parameter \texttt{Pvals} is a is a cell array of length $q+1$ containing transfer function values $P_{D_c}(i\gw_k)\in \C^{p\times m}$ at the complex frequencies $\set{i\gw_k}_{k=0}^q$ of $\wdist(t)$ and $\yref(t)$. Here $P_{D_c}(\gl)$ is the transfer function of the system $(A^{D_c},B^{D_c},C^{D_c},D^{D_c})$ which is obtained from $(A,B,C,D)$ with output feedback $u(t)=D_c y(t)+ \tilde{u}(t)$.
+The values have the theoretical formula
+ $$P_{D_c}(i\gw_k)=\CL^{D_c} R(i\gw_k,A^{D_c})B^{D_c}+D^{D_c},$$
+ but they can also be computed via a solution of a boundary value problem (see, e.g., \texttt{Heat1DCase2\_Main.m} in Section~\ref{sec:Heat1D2}), or measured from the response of a physical model. 
+If the
+transfer function $P(\gl)$ of $(A,B,C,D)$ is well-defined at
+$iw_k$, then $P_{D_c}(i\gw_k)$ can be computed with the formula 
+$P_{D_c}(i\gw_k) = (I-P(i\gw_k)Dc)\inv P(i\gw_k)$, and if $D_c=0$, then 
+$P_{Dc}(i\gw_k) = P(i\gw_k)$.
+% of the transfer function of~\eqref{eq:plantintro} at the complex frequencies $\set{i\gw_k}_{k=0}^q$ of the reference and disturbance signals in~\eqref{eq:yrefwdist}.
+
+
      The parameter \texttt{epsgain} can alternatively be a vector of length 2 providing minimal and maximal values for $\eps$. The controller construction has a naive functionality for finding an $\eps$ to optimize stability margin of the numerically approximated closed-loop system (simply by starting from the minimal value and increasing $\eps$ in steps). 
 
      \bigskip
 
-  \item The ``observer-based robust controller'', based on references~\citel{HamPoh10}{Sec. 7},~\citel{Pau16a}{Sec. VI},~\citel{Pau17b}{Sec. 5}. The closed-loop stability is achieved using an observer for the state of the system~\eqref{eq:plantintro}.\\[1ex]
+  \item The ``Observer Based Robust Controller'', based on references~\citel{HamPoh10}{Sec. 7},~\citel{Pau16a}{Sec. VI},~\citel{Pau17b}{Sec. 5}. The closed-loop stability is achieved using an observer for the state of the system~\eqref{eq:plantintro}. This controller can be used for both stable and unstable systems.\\[1ex]
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
        \texttt{ObserverBasedRC(freqsReal,Sys,K21,L,\\ 
-	 \phantom{a}\hspace{2.7cm} IMstabtype,IMstabmarg)}
+	 \phantom{a}\hspace{2.9cm} IMstabtype,IMstabmarg)}
      \end{quotation}
      \medskip
      where \texttt{Sys} contains the parameters of the plant, \texttt{freqsReal} contains the frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}.
@@ -614,7 +651,7 @@ The controllers are the following:
      \bigskip
      
 \item 
-The ``The reduced order observer-based robust controller'', for \emph{parabolic} PDE systems, especially convection-diffusion-reaction equations. The controller design is based on Galerkin approximations and model reduction via Balanced Truncation, and was introduced in the reference~\cite{PauPha20} (see also~\cite{PhaPau21} for systems with boundary control).\\[1ex]
+The ``The Reduced Order Observer Based Robust Controller'', for \emph{parabolic} PDE systems, especially convection-diffusion-reaction equations. The controller design is based on Galerkin approximations and model reduction via Balanced Truncation, and was introduced in the reference~\cite{PauPha20} (see also~\cite{PhaPau21} for systems with boundary control).\\[1ex]
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
        \hspace{-1cm}\texttt{ObserverBasedROMRC(freqsReal,sysApprox,alpha1,alpha2,\\ 
@@ -623,20 +660,20 @@ The ``The reduced order observer-based robust controller'', for \emph{parabolic}
      \medskip
      where \texttt{sysApprox} contains the parameters of the Galerkin approximation $(A^N,B^N,C^N,D)$ of the plant parameters $(A,B,C,D)$ (a struct with fields \texttt{sysApprox.AN}, \texttt{sysApprox.BN}, \texttt{sysApprox.CN}, \\ \texttt{sysApprox.D}), \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}.
 The parameters \texttt{alpha1}, \texttt{alpha2},
-\texttt{R1}, \texttt{R2}, \texttt{Q0}, \texttt{Q1N}, \texttt{Q2N} are parameters for the LQR/LQG-based stabilization of the closed-loop system (details below). Finally, \texttt{ROMorder} is the desired dimension of the reduced order ``observer-part'' of the controller. The final controller has dimension which is equal to the dimension of the internal model plus \texttt{ROMorder}.
+\texttt{R1}, \texttt{R2}, \texttt{Q0}, \texttt{Q1N}, \texttt{Q2N} are parameters for the LQR/LQG-based stabilization of the closed-loop system (details below). Finally, \texttt{ROMorder} is the desired dimension of the reduced order ``observer part'' of the controller. The final controller has dimension which is equal to the dimension of the internal model plus \texttt{ROMorder}.
 
-In particular, the parameters \texttt{alpha1} and \texttt{alpha2} correspond to $\ga_1,\ga_2\geq 0$ in~\citel{PauPha20}{Sec.~III.A}, and are used as design parameters to determine the closed-loop stability margin (the choice $\ga_1=\ga_2=0$ is possible). In particular, $(A+\ga_k I,B,C)$ should be exponentially stabilizable and detectable for $k=1,2$.
+The parameters \texttt{alpha1} and \texttt{alpha2} correspond to $\ga_1,\ga_2\geq 0$ in~\citel{PauPha20}{Sec.~III.A}, and are used as design parameters to determine the closed-loop stability margin (the choice $\ga_1=\ga_2=0$ is possible). In particular, $(A+\ga_k I,B,C)$ should be exponentially stabilizable and detectable for $k=1,2$.
 The parameters 
 \texttt{R1}, \texttt{R2}, and \texttt{Q0} correspond to $R_1\in \Lin(Y)$, $R_2\in \Lin(U)$, and $Q_0\in \R^{n_{IM}\times n_{IM}}$ (where $n_{IM}\in \N$ is the dimension of the internal model). All these matrices should be chosen to be invertible and positive definite, and for example choices $R_1=r_1 I$, $R_2=r_2 I$, $Q_0=q_0 I$ for some $r_1,r_2,q_0>0$ are possible
  (the dimension $n_{IM}$ of $Q_0$ can be computed with the routine \texttt{IMdim(freqsReal,p)}). Finally,
 \texttt{Q1N} and \texttt{Q2N} correspond to  the Galerkin approximations (compatible with \texttt{sysApprox}) of the parameters $Q_1\in \Lin(U_0,X)$ and $Q_2\in \Lin(X,Y_0)$ in~\citel{PauPha20}{Sec.~III.A}. They
 can be chosen to correspond to the Galerkin approximations of $Q_1=q_1 I$ and $Q_2=q_2 I$ for some  $q_1,q_2>0$.
 
-The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~\citel{PauPha20}{Sec.~III.A} and it determines the final reduced order dimension of the observer-part of the controller. The model reduction step can be skipped completely by setting \texttt{ROMorder=NaN}. The size of the parameter should be determined to be sufficiently high so that the closed-loop system is exponentially stable. The result~\citel{PauPha20}{Thm.~III.1} guarantees that closed-loop stability for the original PDE plant and the reduced order controller is achieved if both the Galerkin approximation order $N$ and the model reduction parameter $r\geq N$ are sufficiently high, but (at the moment) there are no concrete lower bounds for these values. Typically, if the decay of the Hankel singular values of $(A^N,B^N,C^N)$ are sufficiently fast, it is possible to achive the closed-loop stability with a fairly small model reduction parameter $r$.
+The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~\citel{PauPha20}{Sec.~III.A} and it determines the final reduced order dimension of the observer part of the controller. The model reduction step can be skipped completely by setting \texttt{ROMorder=NaN}. The size of the parameter should be determined to be sufficiently high so that the closed-loop system is exponentially stable. The result~\citel{PauPha20}{Thm.~III.1} guarantees that closed-loop stability for the original PDE plant and the reduced order controller is achieved if both the Galerkin approximation order $N$ and the model reduction parameter $r\geq N$ are sufficiently high, but (at the moment) there are no concrete lower bounds for these values. Typically, if the decay of the Hankel singular values of $(A^N,B^N,C^N)$ are sufficiently fast, it is possible to achive the closed-loop stability with a fairly small model reduction parameter $r$.
 
 	\bigskip
 
-  \item The ``dual observer-based robust controller'', based on references~\citel{Pau16a}{Sec. V},~\citel{Pau17b}{Sec. 4}. The closed-loop stability is achieved using a complementary controller structure that coincides with observer-based stabilization of the dual of the closed-loop system.\\[1ex]
+  \item The ``Dual Observer Based Robust Controller'', based on references~\citel{Pau16a}{Sec. V},~\citel{Pau17b}{Sec. 4}. The closed-loop stability is achieved using a complementary controller structure that coincides with observer based stabilization of the dual of the closed-loop system.\\[1ex]
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
        \texttt{DualObserverBasedRC(freqsReal,Sys,K2,L1,\\
@@ -650,22 +687,27 @@ The model reduction dimension parameter \texttt{ROMorder} corresponds to $r$ in~
 	\bigskip
 %\item \red{ADD: DUAL OBSERVER BASED ROM CONTROLLER}
 
-  \item The ``passive minimal controller'' based on~\citel{RebWei03}{Thm. 1.2},~\citel{Pau19}{Sec. 5.1},~\cite{PauLeG22}. For a strongly stable impedance passive system the closed-loop stability can be achieved using passive controller design and a \keyterm{power preserving interconnection} between the passive control system and the controller.\\[1ex]
+  \item The ``Passive (Minimal) Robust Controller'' based on~\citel{RebWei03}{Thm. 1.2},~\citel{Pau19}{Sec. 5.1},~\cite{PauLeG22}. 
+The controller can be used for \emph{impedance passive} linear systems which are either exponentially or strongly stable, or stabilizable with output feedback.
+The controller design is based on forming a \keyterm{power preserving interconnection} between the passive system and the controller  to achieve closed-loop stability.\\[1ex]
       Calling sequence for the construction:\\[-1ex]
      \begin{quotation}
 	 \texttt{PassiveRC(freqsReal,dimY,epsgain,Sys,Dc)}
      \end{quotation}
      \medskip
      where
-     \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}, \texttt{dimY} is the dimension of the output space $Y$ (i.e., the number of outputs of the system), and  \texttt{epsgain} is a scalar $\eps>0$ which controls the norm of $K$.
+     \texttt{freqsReal} contains the (real) frequencies $\set{\gw_k}_{k=0}^q$ of the signals $\yref(t)$ and $\wdist(t)$ in~\eqref{eq:yrefwdist}, \texttt{dimY} is the dimension of the output space $Y$ (i.e., the number of outputs of the system), and  \texttt{epsgain} is a scalar parameter $\eps>0$ which (linearly) scales the norms of $K$ and $G_2$.
 
 %     In addition, \texttt{Pvals} is a $(q+1)\times p\times m$ array containing the values $P(i\gw_k)=\CL R(i\gw_k,A)B+D\in \C^{p\times m}$ of the transfer function of~\eqref{eq:plantintro} at the complex frequencies $\set{i\gw_k}_{k=0}^q$ of the reference and disturbance signals in~\eqref{eq:yrefwdist}.
 
 The parameter \texttt{epsgain} can alternatively be a vector of length 2 providing minimal and maximal values for $\eps$. The controller construction has a naive functionality for finding an $\eps$ to optimize stability margin of the numerically approximated closed-loop system (simply by starting from the minimal value and increasing $\eps$ in steps). In this case, the parameter \texttt{Sys} (containing the parameters of the plant) is used for this optimization.
 
-The optional parameter \texttt{Dc}, which is either $\dim Y\times \dim Y$-matrix or a scalar, is an feedthrough term 
-for the controller. The closed-loop structure implies that a nonzero feedthrough term with \texttt{Dc} is equivalent to a ``prestabilizing'' output feedback to the system (plus an additional disturbance term). In particular, controllable unstable passive systems can be prestabilized 
-by setting a negative definite matrix \texttt{Dc}. If \texttt{Dc} is a scalar, it is
+The optional parameter \texttt{Dc}, which is either $\dim Y\times \dim Y$-matrix or a scalar, is the feedthrough matrix $D_c$ 
+for the controller. The closed-loop structure implies that a nonzero feedthrough term $D_c$ is equivalent to a 
+ ``preliminary'' output feedback  $u(t)=D_c y(t)+ \tilde{u}(t)$ to the system (plus an additional disturbance term). For unstable systems the parameter \texttt{Dc} should be an output feedback matrix which stabilizes the system either exponentially or strongly, and in particular,
+for exactly or approximately controllable unstable passive systems \texttt{Dc} can be any negative definite matrix.
+If \texttt{Dc} is not given, the controller will by default have zero feedthrough.
+If \texttt{Dc} is a scalar, the parameter is
 interpreted as ``\texttt{Dc} times identity''.
 
 It should be noted that the controller construction routine does not test passivity, and for a non-passive system the resulting closed-loop system will typically be unstable.
@@ -692,11 +734,24 @@ In the example cases we are mainly interested in finding an $\eps>0$ which achie
 
 The gain in the passive robust controller \texttt{PassiveRC} can analogously be adjusted with a choice of a parameter $\eps>0$ to optimize the closed-loop stability margin.
 
-\textbf{The transfer function values.} The controllers make use of the values $P(i\gw_k)$, $P_K(i\gw_k)$ and $P_L(i\gw_k)$ of the transfer functions associated to the original or stabilized versions of the PDE system.
-In the Python version of \RORname\ The \RORname\ class \texttt{LinearSystem} has the necessary routines for computing these values based on the matrices \texttt{A}, \texttt{B}, \texttt{C}, and \texttt{D}. However, using the same approximation of the PDE for both controller design and simulation corresponds to essentially controlling the approximation as a finite-dimensional system. If possible, to avoid unrealistically positive results, it is therefore better to use two different approximations for controller construction and simulation. This is especially the case if the validity of the approximation for the computation of the parameters can not be guaranteed with absolute certainty. However, there are of course cases, such Galerkin approximations of parabolic systems~\cite{Mor94}, where the values of the controller parameters can be shown to converge with the order of the approximation, and the above concerns are unnecessary.
-In the Matlab version, the Observer-Based controllers do not (at least currently) use the transfer functions for the construction of the controllers.
+\textbf{The transfer function values.} The controllers make use of the values  $P_{D_c}(i\gw_k)$ (or $P(i\gw_k)$)
+%, $P_K(i\gw_k)$ and $P_L(i\gw_k)$ 
+of the transfer functions associated to the original or stabilized versions of the PDE system.
+Once the system \texttt{Sys} is defined, the simplest (and most tempting) approach is to compute these values as
+\begin{quotation}
+\texttt{
+SysFB.C*((1i*wk*eye(dimX)-SysFB.A)$\setminus$SysFB.B) + SysFB.D
+}
+\end{quotation}
+where the approximation \texttt{SysFB} of $(A^{D_c},B^{D_c},C^{D_c},D^{D_c})$ is computed from \texttt{Sys} as an output feedback with \texttt{SysFB = SysOutputFeedback(Sys,Dc)}.
+%In the Python version of \RORname\ The \RORname\ class \texttt{LinearSystem} has the necessary routines for computing these values based on the matrices \texttt{A}, \texttt{B}, \texttt{C}, and \texttt{D}. 
+However, using the same approximation of the PDE for both controller design and simulation corresponds to essentially controlling the approximation as a finite-dimensional system. If possible, to avoid unrealistically positive results, it is therefore better to use two different approximations for controller construction and simulation. This is especially the case if the validity of the approximation for the computation of the parameters can not be guaranteed with absolute certainty. However, there are of course cases, such Galerkin approximations of parabolic systems~\cite{Mor94}, where the values of the controller parameters can be shown to converge with the order of the approximation, and the above concerns are unnecessary.
+In the Matlab version, the observer based controllers do not (at least currently) use the transfer functions for the construction of the controllers.
+For simplicity, several built-in examples in \RORname\ still use \texttt{Sys} for computing \texttt{Pvals}, and the user is encouraged to replace these computations with other approximation methods!
 
-For some special PDEs, such as 1D heat or wave equations with constant coefficients, the values $P(i\gw_k)$ may have explicit expressions, but these are very limited special cases. For PDEs with spatially varying parameters there are powerful computational methods that can be used to determine $P(i\gw_k)$, such as the \textbf{Chebfun} package (\href{https://chebfun.org/}{https://chebfun.org/}) employed in \texttt{Heat1DCase1\_Main.m} in Section~\ref{sec:Heat1D2} (``Case 2'').
+For some special PDEs, such as 1D heat or wave equations with constant coefficients, the values $P(i\gw_k)$ may have explicit expressions, but these are very limited special cases. 
+%But since the transfer functions of a PDE system can be obtained from solutions of a 
+ For PDEs with spatially varying parameters there are powerful computational methods that can be used to determine $P(i\gw_k)$, such as the \textbf{Chebfun} package (\href{https://chebfun.org/}{https://chebfun.org/}) employed in \texttt{Heat1DCase1\_Main.m} in Section~\ref{sec:Heat1D2} (``Case 2'').
 
 
 
@@ -704,15 +759,14 @@ For some special PDEs, such as 1D heat or wave equations with constant coefficie
 \label{sec:PDEcases}
 
 In this section we introduce the PDE models considered in the example cases and review their fundamental properties.
-
 The considered reference and disturbance signals are in each case combinations of trigonometric functions of the form~\eqref{eq:yrefwdist} with a given set of frequencies. The precise choices of the signals can be seen from the main files of the examples. Similarly, the chosen initial states are visible from the source files, and in several files alternative initial states are provided (these can be used by uncommenting the corresponding lines of code).
 
 \subsection{The 1D Heat Equations}
 
-This collection of examples consider 1D heat equations with spatially varying thermal diffusivity on $\Omega = [0,1]$ with different configurations of control inputs and measured outputs. The first two cases consider control, disturbance, and observation on the boundary, and the final example considers a system with two distributed inputs and outputs. In general, any combination of the above types of inputs and outputs is possible. 
-The main property from the point of view of robust output regulation is whether or not the uncontrolled system is exponentially stable (minimal low-gain controller can be used) or impedance passive (the passive robust controller can be used).
+This collection of examples consists of 1D heat equations with spatially varying thermal diffusivity on $\Omega = [0,1]$ with different configurations of control inputs and measured outputs. Cases 1, 2, 4, and 5 consider control, disturbance, and observation on the boundary, and Case 3 considers a system with two distributed inputs and outputs. In general, any combination of the above types of inputs and outputs is possible. 
+The main properties from the point of view of robust output regulation is whether or not the uncontrolled system is exponentially stable (the ``minimal'' Low-Gain Robust Controller can be used) or impedance passive (the Passive Robust Controller can be used).
 
-In each of the cases, the semidiscretization of the PDE is completed using Finite Differences.
+In each of the cases, the spatial discretization of the PDE is completed using Finite Differences.
 
 \medskip
 
@@ -753,16 +807,16 @@ The model on $\Omega = [0,1]$ is
       y(t) &= x(0,t),
     }
     where $c(\cdot)\geq c_0>0$ is the spatially varying thermal diffusivity of the material.
-The uncontrolled system is exponentially stable due to the homogeneous Dirichlet boundary condition at $\xi = 1$. The system is also impedance passive since the control input and measured output are collocated,  and because of this the robust output regulation problem can be solved using the Passive Robust Controller.
+The uncontrolled system is exponentially stable due to the homogeneous Dirichlet boundary condition at $\xi = 1$, and therefore the Low-Gain Robust Controller can be used. The system is also impedance passive since the control input and measured output are collocated,  and because of this the robust output regulation problem can alternatively be solved using the Passive Robust Controller.
 %    Since the control input $u(t)$ and output $y(t)$ are not collocated, the system can not be 
 
-In the example, the construction of the low-gain controller employs the \textbf{Chebfun} Matlab package in computing the required transfer function values $P(i\gw_k) = \CL R(i\gw_k,A)B+D$. This can be done by noting that for each $k$ the desired transfer function value is exactly $P(i\gw_k)=\hat{x}(0)$, where $\hat{x}(\cdot)$ is the (unique) solution of the boundary value problem
+In the example, the construction of the Low-Gain Robust Controller employs the \textbf{Chebfun} Matlab package in computing the required transfer function values $P(i\gw_k) = \CL R(i\gw_k,A)B+D$. This can be done by noting that for each $k$ the desired transfer function value is exactly $P(i\gw_k)=\hat{x}(0)$, where $\hat{x}(\cdot)$ is the (unique) solution of the boundary value problem
 \eq{
   i\gw_k\hat{x}(\xi) &-  \pdb{\xi}(c(\xi)\pd{\hat{x}}{\xi})(\xi)=0\\
       -\pd{\hat{x}}{\xi}(0) &= 1, \qquad 
       \hat{x}(1) = 0.
 }
-\textbf{Chebfun} excels in solving such equations with high accuracy, and therefore the use of this package yields very good estimates of $P(i\gw_k)$ for the original system. 
+\textbf{Chebfun} excels in solving such equations with high accuracy, and therefore the use of this package yields excellent estimates of $P(i\gw_k)$ for the original system. 
 
 \medskip
 
@@ -787,8 +841,8 @@ The model on $\Omega = [0,1]$ is
    b_2(\xi)=10\chi_{[.6,.7]}(\xi), \\
   c_1(\xi)&=10\chi_{[.1,.2]}(\xi), \quad c_2(\xi)=10\chi_{[.8,.9]}(\xi) .
 }
-    Here $\chi_{[a,b]}(\cdot)$ is the characteristic function on the interval $[a,b]\subset [0,1]$, and thus the control inputs act on the intervals $[0.3,0.4]$ and $[0.6,0.7]$, and the outputs measure the average temperatures on the intervals $[0.1,0.2]$ and $[0.8,0.9]$.
-The uncontrolled system is stable because of the homogeneous Dirichlet boundary condition at $\xi = 1$. 
+    Here $\chi_{[a,b]}(\cdot)$ is the characteristic function on the interval $[a,b]\subset [0,1]$, and thus the control inputs act on the intervals $[0.3,0.4]$ and $[0.6,0.7]$, and the outputs measure the average temperatures on the intervals $[0.1,0.2]$ and $[0.8,0.9]$ (alternative input and output locations can be set with parameters for the routine \texttt{ConstrHeat1DCase3}).
+The uncontrolled system is stable due to the homogeneous Dirichlet boundary condition at $\xi = 1$. 
 
 Figure~\ref{fig:1Dheat3} shows example results of the simulations including plots of the outputs and reference signals, norm of the regulation error, computed control signals, and the state of the controlled system as a function of $\xi$ and $t$.
 
@@ -862,13 +916,14 @@ The model on $\Omega = [0,1]$ is
 The uncontrolled system is stable because of the Dirichlet-type boundary condition at $\xi = 1$. The system, however, does not give rise to a wellposed or regular linear system on the natural state space $X=\Lp[2](0,1)$, but only on $X=H^{-1}(0,1)$.
 It does, however, give rise to a well-defined Boundary Control System~\cite{Sal87a,CheMor03,MalSta06} on $X=\Lp[2](0,1)$, and the use of the Low-Gain Robust Controller (\texttt{LowGainRC}) is justified by the theory presented in~\cite{HumPau18,HumKur19}.
 
-Other controller designs can be used in this simulation example, but as we do not cover the details on approximation of regular linear systems defined on $H^{-1}(0,1)$, 
+Other controller designs can be used in this simulation example, but as the authors of the software are not
+ familiar with the details on approximation of regular linear systems defined on $H^{-1}(0,1)$, 
  this simulation example 
 should be considered to be for experimentation purposes only. That is, \emph{use at your own risk!} \smiley{}
 
 \medskip
 
-\subsubsection*{Case 5: Neumann boundary inputs and input disturbances at $\xi = 0$ and $\xi=1$,  and collocated outputs}
+\subsubsection*{Case 5: Neumann boundary inputs and input disturbances at $\xi = 0$ and $\xi=1$,  and with collocated outputs}
 ~\\[-1ex]
 
   \noindent Main file name: \texttt{Heat1DCase5\_Main.m}
@@ -892,13 +947,12 @@ either the Observer-Based Robust Controller or Dual Observer-Based Robust Contro
 
 \subsection{The 2D Heat Equations on Rectangular Domains}
 
-These examples consider two-dimensional heat equations on $\Omega = [0,1]\times [0,1]$ with boundary input and output and boundary disturbances. The inputs and outputs act in an averaged sense on the boundaries.
-
+These examples consider two-dimensional heat equations on $\Omega = [0,1]\times [0,1]$ with boundary input and output and boundary disturbances. The inputs and outputs act in an averaged sense on parts of the boundaries.
 The reference and disturbance signals are again of the form~\eqref{eq:yrefwdist} and can be seen from the main files of the simulations.
 
 \medskip
 
-\subsubsection*{Case 1: Collocated input and output}
+\subsubsection*{Case 1: Collocated input and output, a prestabilized system}
 ~\\[-1ex]
 
 
@@ -928,9 +982,9 @@ The system on $\Omega = [0,1]\times [0,1]$ with two inputs $u(t)=(u_1(t),u_2(t))
 %  }
 %and $\abs{P(i\gw)\inv}=O(\abs{\sqrt{\gw}})$ for $\gw\in\R$ with large $\abs{\gw}$. 
 The uncontrolled system is unstable due to the eigenvalue $\gl=0$, but it can be stabilized exponentially with negative output feedback $u(t) = -\kappa y(t)$ for any $\kappa>0$.
-In this example we assume the system is pre-stabilized with $\kappa = 1$.
+In this example the constructed system is already pre-stabilized with $\kappa = 1$ (see ``Case 3'' for a version without prestabilization).
 
-In the simulations, the system is approximated using the eigenmodes of the Laplacian. The system can be controlled either with the low-gain minimal robust controller or the passive controller (with pre-stabilizing negative output feedback), or with one of the observer-based robust controllers.
+In the simulations, the system is approximated using the eigenmodes of the Laplacian. The system can be controlled either with the minimal Low-Gain Robust Controller or the Passive Controller (with pre-stabilizing negative output feedback), or with one of the Observer-Based Robust Controllers.
 
 
 \medskip
@@ -959,10 +1013,25 @@ rectangle $\Omega = [0,1]\times [0,1]$. The PDE system is defined as
   $\Gamma_2 = \setm{\xi=(\xi_1,1)}{0\leq \xi_1\leq 1}$, 
   $\Gamma_3 = \setm{\xi=(\xi_1,0)}{0\leq \xi_1\leq 1/2}$, 
   $\Gamma_0 = \partial \Omega \setminus (\Gamma_1 \cup \Gamma_2\cup \Gamma_3)$. By~\cite[Cor. 2]{ByrGil02} the heat equation defines a regular linear system with feedthrough $D=0$.
-The uncontrolled system is unstable due to the eigenvalue $\gl=0$. Since the system is unstable, the primary choices of the controllers are the Observer Based Robust Controller (\texttt{ObserverBasedRC}) and Dual Observer Based Robust Controller (\texttt{DualObserverBasedRC}). However, since the single unstable eigenvalue can be stabilized also by negative output feedback of the form $u(t)=-\gamma y(t)$, it is also possible to use the Low-Gain Robust Controller with a negative definite feedthrough term $D_c$ (given as the optional parameter \texttt{Dc}). The Low-Gain Robust Controller is by default commented out in the code in \texttt{Heat2DCase2\_Main.m}.
+The uncontrolled system is unstable due to the eigenvalue $\gl=0$. 
+
+Since the system is unstable, the primary choices of the controllers are the Observer Based Robust Controller (\texttt{ObserverBasedRC}) and Dual Observer Based Robust Controller (\texttt{DualObserverBasedRC}). However, since the single unstable eigenvalue can be stabilized also by negative output feedback of the form $u(t)=-\kappa y(t)$, it is also possible to use the Low-Gain Robust Controller with a negative definite feedthrough term $D_c = -\kappa I$ (given as the optional parameter \texttt{Dc}). The Low-Gain Robust Controller is by default commented out in the code in \texttt{Heat2DCase2\_Main.m}.
 
 In the simulations, the system is approximated using Finite Differences with a uniform grid. 
 
+
+\begin{figure}[h!]
+  \begin{minipage}{0.46\linewidth}
+    \includegraphics[width=0.95\linewidth]{H2D2outputs.pdf}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.52\linewidth}
+    \includegraphics[width=0.9\linewidth]{H2D2surf.png}
+  \end{minipage}
+%  \includegraphics{}
+\caption{Example output of the 2D Heat equation (``Case 2'').}
+  \label{fig:2Dheat2}
+\end{figure}
 
 \medskip
 
@@ -974,7 +1043,7 @@ In the simulations, the system is approximated using Finite Differences with a u
 
 \medskip
 
-The example is the same as ``Case 1'', but does not include prestabilization of the unstable eigenvalue at $\gl = 0$. Since the system is impedance passive, the controller design can be completed using the Passive Robust Controller in \texttt{ConstrPassiveRC}, but the controller requires the (otherwise optional) feedthrough term, which should be a negative definite $2\times 2$ matrix. Alternatively, the controller design can be completed using either the Observer-Based Robust Controller (\texttt{ConstrObsBasedRC}) or the Dual Observer-Based Robust Controller (\texttt{ConstrDualObsBasedRC}). In these cases, the required state feedback operator $K_{21}$ and and output injection operator $L$ for the exponential stabilization of the pairs $(A,B)$ and $(\CL,A)$ can be designed using collocated design, i.e., by choosing these as  $K_{21}=-\gamma_K B'$ and $L=-\gamma_L '$. Note that in the article~\cite{Pau16a} the stabilizing operators were assumed to be bounded, but the controller design can also be constructed with \emph{unbounded} operators due to the more general results in~\cite{Pau17b}.
+The example is the same as ``Case 1'', but does not include prestabilization of the unstable eigenvalue at $\gl = 0$. Since the system is impedance passive, the controller design can be completed using the Passive Robust Controller in \texttt{ConstrPassiveRC}, but the controller requires the (otherwise optional) feedthrough term, which should be a negative definite $2\times 2$ matrix. Alternatively, the controller design can be completed using either the Observer-Based Robust Controller (\texttt{ConstrObsBasedRC}) or the Dual Observer-Based Robust Controller (\texttt{ConstrDualObsBasedRC}). In these cases, the required state feedback operator $K_{21}$ and and output injection operator $L$ for the exponential stabilization of the pairs $(A,B)$ and $(\CL,A)$ can be designed using collocated design, i.e., by choosing these as  $K_{21}=-\kappa_K B^\ast$ and $L=-\kappa_L C^\ast$. Note that in the article~\cite{Pau16a} the stabilizing operators were assumed to be bounded, but the controller design can also be constructed with \emph{unbounded} operators due to the more general results in~\cite{Pau17b}.
 
 \subsection{The 1D Wave Equations}
 
@@ -982,7 +1051,7 @@ In these examples we consider  one-dimen\-sional undamped and damped wave equati
 
 \medskip
 
-\subsubsection*{Case 1: Non-collocated boundary input and output, disturbance near the output}
+\subsubsection*{Case 1: Non-collocated boundary input and output, boundary disturbance near the output}
 ~\\[-1ex]
 
   \noindent Main file name: \texttt{Wave1DCase1\_Main.m}
@@ -1000,13 +1069,14 @@ The model on $\Omega = [0,1]$ is
     The goal is to achieve tracking of the output $y(t)$. The additional measured output $y_m(t)$ is required to achieve closed-loop stability due to the fact that the system is not exponentially detectable with output $y(t)$ (because of the unobservability of the eigenvalue $\gl=0$).
 
     In the example case, the second output $y_m(t)$ is used to prestabilize eigenvalue $\gl=0$ of the system with preliminary output feedback of the form $u(t)=-\kappa_m y_m(t)+\tilde{u}(t)$ (where $\tilde{u}(t)$ is the new input of the system). There are also other (and better) ways to handle the situation, and these will be implemented in later versions of this example. 
-    The pairs $(A,B)$ and $(C,A)$ are stabilized using collocated designs, i.e., we choose $K=-\kappa B^\ast$ and $L=-\ell C^\ast$ to stabilize the pairs $A+BK$ and $A+LC$.
-    The main file contains the pre-stabilization gain $K_m>0$ and the gains $\kappa,\ell>0$ as design parameters.
+    The pairs $(A,B)$ and $(C,A)$ are stabilized using collocated designs, i.e., we choose $K=-\kappa_K B^\ast$ and $L=-\kappa_L C^\ast$ to stabilize the pairs $A+BK$ and $A+LC$.
+    The main file contains the pre-stabilization gain $K_m>0$ and the gains $\kappa_K,\kappa_L>0$ as design parameters.
 
     The example considers output tracking of the velocity $x_t(0,t)$ to arbitrary 2-periodic reference signals. This is achieved by including  frequencies of the form $k\pi$ for $k\in \List{q}$ in the internal model.  The reference signal is defined by defining its profile over one period in the  variable '\texttt{yref1per}'. Note that it is not necessary to compute the amplitudes of the frequency components of $\yref(t)$ (which would be equivalent to finding the Fourier series  expansion of the reference signal).
 
 In the simulations the system is approximated using the orthonormal eigenfunctions of the undamped wave operator.
-Figure~\ref{fig:1Dwave1} shows example results of the simulation for two different periodic reference signals --- a nonsmooth triangle signal and signal consisting of semicircles.
+%Figure~\ref{fig:1Dwave1} shows example results of the simulation for a smooth periodic reference signal.
+% for two different periodic reference signals --- a nonsmooth triangle signal and signal consisting of semicircles.
 
 
 %\subsubsection*{Example output}
@@ -1019,22 +1089,6 @@ Figure~\ref{fig:1Dwave1} shows example results of the simulation for two differe
 %  \item Initial state: $x_0(\xi)=30\xi^2(1-\xi)^2-1$, $x_1(\xi)\equiv 0$, controller initial state $=0$
 %\end{itemize}
 
-\begin{figure}[h!]
-  \centering
-  \begin{minipage}{0.43\linewidth}
-    \begin{flushleft}
-      \includegraphics[width=0.95\linewidth]{W1D2outputs.pdf}
-    \end{flushleft}
-  \end{minipage}
-  \begin{minipage}{0.55\linewidth}
-    \begin{flushright}
-      \includegraphics[width=\linewidth]{W1D2profile.png}
-    \end{flushright}
-  \end{minipage}
-
-    \caption{Example outputs of the periodic tracking for the 1D wave equation (``Case 2'').}
-  \label{fig:1Dwave1}
-\end{figure}
 
 %\begin{itemize}
 %  \item Boundary damping, exponentially stable system, spectral approximation.
@@ -1059,10 +1113,28 @@ x(\xi,0)&=x_0(\xi), \quad x_t(\xi,0)=x_1(\xi)\\
     }
     for some $b(\cdot),b_d(\cdot)\in \Lp[2](0,1;\R)$.
     The uncontrolled system is unstable due to the lack of damping. Since the input and output are distributed, it is also not exponentially stabilizable or detectable, but instead it is only strongly (or polynomially~\cite{BorTom10}) stabilizable provided that $\iprod{b(\cdot)}{\sin(k\pi \cdot)}_{\Lp[2]}\neq 0$ for all $k\in\N$.
-    Because of this, it is not possible to use the low-gain controller, and the two observer-based controller designs are not guaranteed to achieve closed-loop stability. However, since the system is impedance passive, the Passive Robust Controller can be used in achieving robust output regulation even in the absence of exponential stability as shown in~\citel{Pau19}{Sec. 5.1}.
+    Because of this, it is not possible to use the Low-Gain Robust Controller, and the two observer based controller designs are not guaranteed to achieve closed-loop stability. However, since the system is impedance passive, the Passive Robust Controller can be used in achieving robust output regulation even in the absence of exponential stability as shown in~\citel{Pau19}{Sec. 5.1}.
 Due to the sub-exponential closed-loop stability, the regulation error does not converge with any uniform convergence rate, but instead the rate depends on the initial state of the system. 
 
 In the simulations the system is approximated using the orthonormal eigenfunctions of the undamped wave operator.
+Figure~\ref{fig:1Dwave2} shows example results of the simulation for a smooth periodic reference signal with two frequencies $\pi$ and $2\pi$.
+
+\begin{figure}[h!]
+  \centering
+  \begin{minipage}{0.43\linewidth}
+    \begin{flushleft}
+      \includegraphics[width=0.95\linewidth]{W1D2outputs.pdf}
+    \end{flushleft}
+  \end{minipage}
+  \begin{minipage}{0.55\linewidth}
+    \begin{flushright}
+      \includegraphics[width=\linewidth]{W1D2profile.png}
+    \end{flushright}
+  \end{minipage}
+
+    \caption{Example outputs of the periodic tracking for the 1D wave equation (``Case 2'').}
+  \label{fig:1Dwave2}
+\end{figure}
 
 \medskip
 
@@ -1074,7 +1146,8 @@ In the simulations the system is approximated using the orthonormal eigenfunctio
 
   \medskip
 
-  The boundary controlled 2D wave equation we consider is of the form of the simulation example in~\cite{HumKur19}. In particular, 
+This simulation example of a boundary controlled 2D wave equation
+  is taken from the article~\cite{HumKur19}. In particular, 
   $\Omega\subset\R^n$ is a bounded domain (an open connected set) with a Lipschitz-continuous boundary $\partial\Omega$ split into two parts $\Gamma_0,\Gamma_1$ such that $\overline{\Gamma_0}\cup\overline{\Gamma_1}=\partial\Omega$, $\Gamma_0\cap\Gamma_1=\emptyset$, and $\partial\Gamma_0,\partial\Gamma_1$ both have surface measure zero. The wave equation is of the form
   %\begin{equation}\label{eq:waveintro}
   %  \left\{
@@ -1102,9 +1175,9 @@ The initial reference and disturbance signals in the example are given by
     w(\theta, t) & = \cos(\theta)\sin(2\pi t) + \sin(\theta)\sin(\pi t).
   }
   The real frequencies are then $\gw_1=\pi$, $ \gw_2=2\pi$.
-Because of of the technical challenges arising from the infinite-dimensional input and outputs spaces of the model, the example is not (at the moment) written completely in ``RORPack style''. In particular, the closed-loop construction is based on expressing the signals $\yref(t)$ and $\wdist(t)$ as outputs of an \emph{exosystem}, and the also the controller is constructed by hand in the main file of the simulation example. The controller is the ``Approximate internal model based controller'' introduced in the reference~\cite{HumKur19}, and it is not (yet) implemented in RORPack as a general controller construction routine.
+Because of of the technical challenges arising from the infinite-dimensional input and outputs spaces of the model, the example is not (at the moment) written completely in ``\RORname\ style''. In particular, the closed-loop construction is based on expressing the signals $\yref(t)$ and $\wdist(t)$ as outputs of an \emph{exosystem}, and the also the controller is constructed by hand in the main file of the simulation example. The controller is the ``Approximate internal model based controller'' introduced in the reference~\cite{HumKur19}, and it is not (yet) implemented in \RORname\ as a general controller construction routine.
 
-  The numerical approximation in the example is done using the spectral method based on the eigenvalues and eigenfunctions of the undamped wave equation on the annulus. The approximate controller includes the stabilizing term $D_c$ which corresponds to pre-stabilizing the system with negative output feedback. 
+  The numerical approximation in the example is done using the spectral method based on the eigenvalues and eigenfunctions of the undamped wave equation on the annulus. The approximate controller includes a negative definite feedthrough term $D_c$ which corresponds to pre-stabilizing the system with negative output feedback. 
   %The initial choice for the controller is the 
   %The system is passive
 
@@ -1163,6 +1236,7 @@ The following example study controller design for controlled beam equation model
 \medskip
 
 \subsubsection*{Example: An Euler--Bernoulli Beam with Kelvin--Voigt Damping}
+\label{sec:BeamKV}
 ~\\[-1ex]
 
 \noindent Main file name: \texttt{BeamKelvinVoigt\_Main.m}
@@ -1235,10 +1309,10 @@ single disturbance with a disturbance input profile
 $b_{d1}(\xi) = (\xi+1)^2(1-\xi)^2$.
 
 
-Because of the Kelvin--Voigt damping, the controlled PDE model satisfies the assumptions required for reduced order internal model based controller design in~\cite{PauPha20}.
-In this example, the PDE model is approximated using a spectral Galerkin method described in~\cite{She95}. This approximation scheme is used for two purposes, first of all to design the ``reduced order internal model based controller'' with the routine \texttt{ObserverBasedROMRC}, and in addition to approximate the controlled PDE system in the closed-loop simulation (with a higher order approximation).
+Because of the Kelvin--Voigt damping, the controlled PDE model satisfies the assumptions required for Reduced Order Internal Model Based Controller design in~\cite{PauPha20}.
+In this example, the PDE model is approximated using a spectral Galerkin method described in~\cite{She95}. This approximation scheme is used for two purposes, first of all to design the ``Reduced Order Observer Based Robust Controller'' with the routine \texttt{ObserverBasedROMRC}, and in addition to approximate the controlled PDE system in the closed-loop simulation (with a higher order approximation).
 
-With the chosen parameters of the beam model the controlled PDE system is in fact exponentially stable (but with a fairly small stability margin). Because of this, it is possible to alternatively use the ``low gain internal model based controller'' (\texttt{LowGainRC}) to achieve output tracking and disturbance rejection. Construction of this controller is included in the main file (code commented out). However, the small stability margin of the controlled PDE system also severely limits the size of the achievable closed-loop stability margin. On the other hand, in the simulation example the ``reduced order internal model based controller'' achieves a much higher closed-loop stability margin and convergence rate of the output while only having $4$ additional state variables than the low gain controller (whose order is \emph{minimal}), and with only very reasonable increase in the control input gain. For a more detailed comparison of the performances of the two controllers, you can see~\citel{PauPhaMTNS20}{Sec.~4}, and complete similar simulations by uncommenting the construction of the low gain controller in the main simulation file.
+With the chosen parameters of the beam model the controlled PDE system is in fact exponentially stable (but with a fairly small stability margin). Because of this, it is possible to alternatively use the ``Low-Gain Robust Controller'' (\texttt{LowGainRC}) to achieve output tracking and disturbance rejection. Construction of this controller is included in the main file (code commented out). However, the small stability margin of the controlled PDE system also severely limits the size of the achievable closed-loop stability margin. On the other hand, in the simulation example the ``Reduced Order Observer Based Controller'' achieves a much higher closed-loop stability margin and convergence rate of the output while only having $4$ additional state variables than the Low-Gain Robust Controller (whose order is \emph{minimal}), and with only very reasonable increase in the control input gain. For a more detailed comparison of the performances of the two controllers, you can see~\citel{PauPhaMTNS20}{Sec.~4}, and complete similar simulations by uncommenting the construction of the Low-Gain Robust Controller in the main simulation file.
 
 
 
@@ -1294,10 +1368,10 @@ d_\phi=2, \quad
 \eta = 0.2.
 }
 
-In this example, the PDE model is approximated with Finite Differences scheme. This scheme is very simple and easy to implement, but it should be noted that literature offers several more reliable and advanced numerical approximation methods for this class of PDEs, and some of these are able to, for example, preserve the \emph{port--Hamiltonian} structure of the control system.
+In this example, the PDE model is approximated with Finite Differences scheme. This scheme is very simple and easy to implement, but it should be noted that literature offers several more reliable and advanced numerical approximation methods for this class of hyperbolic PDEs, and some of these are able to, for example, preserve the \emph{port--Hamiltonian} structure of the control system.
 
-By default, the control design used in the example is the ``Passive minimal controller'', which is constructed using \texttt{PassiveRC} (this controller was used in~\cite{PauLeGLHMNC18}). This controller can be used because the system is both exponentially stable and impedance passive.
-Because the control system has bounded input and output operators, it is also possible to use other control design methods, for example the ``observer-based robust controller'' (\texttt{ObserverBasedRC}) or the ``dual observer-based robust controller'' (\texttt{DualObserverBasedRC}). The former is implemented (and commented out) in the code. For these alternative controller designs, the parameters $K_{21}$ and $L$ (the stabilizing state feedback and output injection gain) can be designed using ``collocated design'' as $K_{21} = -\kappa B^\ast$ and $L=-\ell C^\ast$ for some gain parameters $\kappa,\ell>0$.
+By default, the control design used in the example is the ``Passive Robust Controller'' (\texttt{PassiveRC}), which was also the controller of choice in~\cite{PauLeGLHMNC18}. This controller can be used because the system is both exponentially stable and impedance passive.
+Because the control system has bounded input and output operators, it is also possible to use other control design methods, for example the ``Observer Based Robust Controller'' (\texttt{ObserverBasedRC}) or the ``Dual Observer Based Robust Controller'' (\texttt{DualObserverBasedRC}). The former is implemented and commented out in the code. For these alternative controller designs, the parameters $K_{21}$ and $L$ (the stabilizing state feedback and output injection gain) can be designed using ``collocated design'' as $K_{21} = -\kappa_K B^\ast$ and $L=-\ell_L C^\ast$ for some gain parameters $\kappa_K,\kappa_L>0$.
 
 Figure~\ref{fig:BeamTim1} shows the outputs of the simulation example.
 

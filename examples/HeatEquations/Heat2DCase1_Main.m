@@ -8,8 +8,7 @@
 % with negative output feedback A-B*C. The system is also impedance passive 
 % (due to the collocated inputs and outputs).
 
-
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 31; 
 

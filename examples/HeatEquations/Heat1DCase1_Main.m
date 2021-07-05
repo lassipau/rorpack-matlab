@@ -7,7 +7,7 @@
 % Unstable system, stabilization by stabilizing the only unstable
 % eigenvalue =0
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 51; 
 

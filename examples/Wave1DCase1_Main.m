@@ -6,7 +6,7 @@
 % The system can be stabilized with output feedback, but the low-gain 
 % controller achieves a poor stability margin
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 60; 
 
@@ -114,17 +114,17 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 k_m = .3;
 Sys.A = Sys.A-k_m*Sys.B*Sys.Cm;
 
-kappa = .9;
-ell = .8;
-% K_S = -kappa*(Sys.B)'+K0;
-% K_S = -kappa*Kinf+K0;
-K_S = -kappa*Kinf;
+kappa_K = .9;
+kappa_L = .8;
+% K_S = -kappa_K*(Sys.B)'+K0;
+% K_S = -kappa_K*Kinf+K0;
+K_S = -kappa_K*Kinf;
 % PlotEigs(Sys.A+Sys.B*K_S,[-1.5, 0.1, NaN, NaN])
  
 
-% L = [zeros(dimX,1),-ell*(Sys.Cm)'+L0];
-% L = [L0,-ell*(Sys.Cm)'];
-L = -ell*Linf;
+% L = [zeros(dimX,1),-kappa_L*(Sys.Cm)'+L0];
+% L = [L0,-kappa_L*(Sys.Cm)'];
+L = -kappa_L*Linf;
 % L = L0;
 
 % PlotEigs(Sys.A+L*[Sys.C;Sys.Cm],[-1 0 -10 10])
