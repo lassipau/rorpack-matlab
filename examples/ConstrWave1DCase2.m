@@ -1,4 +1,13 @@
 function [Sys, x0, phin] = ConstrWave1DCase2(N, Bfun, Bdfun, w0fun, wd0fun)
+% Approximation of a 1D Wave equation with
+% Dirichlet boundary conditions at $x_i=0$ and $x_i=1$.
+% Usage: Can also be used solely for defining the initial state x0
+% Bfun = input profile, function handle
+% Bdfun = disturbance input profile, function handle
+% w0fun = initial displacement, function handle
+% wd0fun = initial velocity, function handle
+% sys = system parameters, (sys.A,sys.B,sys.Bd,sys.C,sys.D)
+% phin = Normalized eigenfunction of the Laplacian
 
 phin = @(x,n) diag(n>0)*sqrt(2)*sin(n*pi*x);
 

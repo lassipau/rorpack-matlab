@@ -1,9 +1,8 @@
-function [x0,Sys,phin,Kinf,Linf] = ConstrWave1DCase1(w0fun,wd0fun,N)
-% [x0,Sys,phin] = Constr1DWave(x0fun,N)
-% 
-% Modal approximation of a 1D Wave equation with Neumann boundary input (at x=1) and
-% disturbance (at x=0), and Dirichlet outputs y(t)=(w(1,t),w_t(1,t))^T
-% Usage: Can also use solely for defining the initial state x0
+function [x0,Sys,phin,Kinf,Linf] = ConstrWave1DCase1(w0fun,wd0fun,N) 
+% Modal approximation of a 1D Wave equation with Neumann boundary input
+% (at x=1) and disturbance (at x=0),
+% and Dirichlet outputs y(t)=(w(1,t),w_t(1,t))^T
+% Usage: Can also be used solely for defining the initial state x0
 % w0fun = initial displacement, function handle
 % wd0fun = initial velocity, function handle
 % sys = system parameters, (sys.A,sys.B,sys.Bd,sys.C,sys.D)
@@ -40,7 +39,8 @@ for n_val = 0:(N-1)
   Linf(indran) = [0;phin(0,n_val)];
 
   % Compute the approximation of the initial state
-  x0(indran) = [integral(@(x) w0fun(x).*conj(phin(x,n_val)),0,1);integral(@(x) wd0fun(x).*conj(phin(x,n_val)),0,1)];
+  x0(indran) = [integral(@(x) w0fun(x).*conj(phin(x,n_val)),0,1);...
+      integral(@(x) wd0fun(x).*conj(phin(x,n_val)),0,1)];
 end
 
 Sys.A = sparse(A);
@@ -62,6 +62,3 @@ Sys.Dm = 0;
 % Sys.C = C;
 % % Sys.C2 = C2;
 % Sys.D = 0;
-
-
-

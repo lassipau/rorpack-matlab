@@ -139,35 +139,37 @@ ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,R
 % [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys_Nlo);
 
 
-%% Closed-loop simulation
+%% Closed-loop construction and simulation
 
-
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
+
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
+xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
+
+% Set the simulation length and define the plotting grid
+Tend = 14;
+% Tend = 50; % A longer time-interval for the LOW-GAIN CONTROLLER
+tgrid = linspace(0,Tend,300);
+
+% Simulate the closed-loop system
+CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
+
+%% Visualization
 
 % Plot the eigenvalues of the (approximate) closed-loop system
 figure(1)
 PlotEigs(CLSys.Ae,[-20 .3 -150 150])
 
-%%
-
-
-% Initial state of the controller is set to zero
-xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
-
-% Time-interval for the simulation
-Tend = 14;
-% Tend = 50; % A longer time-interval for the LOW-GAIN CONTROLLER
-
-tgrid = linspace(0,Tend,300);
-
-
-CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
-
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -176,8 +178,6 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 set(gcf,'color','white')
-
-
 
 %% Plot the state of the controlled beam equation
 % Compute the values of the solution on the spatial grid tt_state

@@ -1,12 +1,15 @@
 %% Robust output tracking for a 1D wave equation
-% with distributed control and observation and possible distributed disturbance input.
+% with distributed control and observation and possible
+% distributed disturbance input.
 % Dirichlet boundary conditions at $x_i=0$ and $x_i=1$.
 % Since the control and observation are distributed,
 % the system is only strongly (and polynomially) stabilizable.
 % Because of this, the low-gain controller cannot be used,
-% and the observer-based controller designs do not guarantee closed-loop stability.
+% and the observer-based controller designs
+% do not guarantee closed-loop stability.
 % However, since the system is passive,
-% the Passive Robust Controller can be used in achieving robust output regulation.
+% the Passive Robust Controller can be used
+% in achieving robust output regulation.
 
 % addpath(genpath('../RORPack/'))
 
@@ -23,7 +26,6 @@ w0fun = @(x) zeros(size(x));
 wd0fun = @(x) zeros(size(x));
 
 [Sys, x0, phin] = ConstrWave1DCase2(N, Bfun, Bdfun, w0fun, wd0fun);
-
 
 % Define the reference and disturbance signals:
 % Note that the system has an invariant zero at s=0, and therefore the
@@ -66,7 +68,6 @@ freqsReal = [pi 2*pi];
 % Include frequencies pi*k that are required in tracking 2-periodic signals
 % freqsReal = pi*(1:9);
 
-
 % Check that the system, the reference and disturbance signals, and the
 % frequencies are defined in a consistent way.
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
@@ -93,26 +94,28 @@ epsgain = [0.01, 0.3];
 [ContrSys, epsgain] = PassiveRC(freqsReal, dimY, epsgain, Sys, Dc);
 epsgain
 
-
-%% Closed-loop simulation and visualization of the results
+%% Closed-loop construction and simulation
 
 % Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
-
 
 % Simulate the closed-loop system. 
 % The initial state z0 of the controller is chosen to be zero by default.
 z0 = zeros(size(ContrSys.G1,1),1);
 xe0 = [x0;z0];
 
+% Set the simulation length and define the plotting grid
 Tend = 24;
 % Tend = 14;
 tgrid = linspace(0, Tend, 601);
 
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+%% Visualization
 
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
@@ -127,6 +130,7 @@ subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% Plot the state of the controlled system
+
 figure(3)
 colormap jet
 surf_plotskip = 2;
@@ -135,15 +139,16 @@ Plot1DWaveSurf(CLsim.xesol(1:2*N,1:surf_plotskip:end),phin,spgrid,tgrid(1:surf_p
 % Plot1DWaveSurf(CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-4 4])
 set(gca,'ztick',-8:4:8);
 
+%% Animate the state of the controlled system
 
-%% Plot the reference signal
 figure(4)
-tt = linspace(0,16,500);
-plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
-set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-
-%% Animation
-figure(5)
 colormap jet
 % No movie recording
 [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
+
+%% Plot the reference signal
+
+figure(5)
+tt = linspace(0,16,500);
+plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
+set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')

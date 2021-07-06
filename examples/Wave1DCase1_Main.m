@@ -25,6 +25,9 @@ wd0fun = @(x) zeros(size(x));
 
 [~,Sys,phin,Kinf,Linf] = ConstrWave1DCase1(w0fun,wd0fun,N);
 
+% Define the reference and disturbance signals, and list the
+% required frequencies in 'freqsReal'
+
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
 %yref = @(t) ones(size(t));
@@ -138,50 +141,46 @@ L = -kappa_L*Linf;
 % [ContrSys,K21] = DualObserverBasedRC(freqsReal,Sys,K_S,L,'LQR',3);
 % [ContrSys,K21] = DualObserverBasedRC(freqsReal,Sys,K_S,L,'poleplacement',3);
 
+%% Closed-loop construction and simulation
+
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
-% PlotEigs(full(CLSys.Ae),[-2 NaN NaN NaN])
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
-%%
-
-% w0fun = @(x) zeros(size(x));
-% w0fun = @(x) 1+cos(3*pi*x)+cos(6*x);
-% w0fun = @(x) -cos(2*pi*x);
-w0fun = @(x) 30*x.^2.*(1-x).^2-1;
-wd0fun = @(x) zeros(size(x));
-%x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
-% x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
-%x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1;
-%x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1/2;
-%x0fun = @(x,y) 1*(1-x).^2.*(3-2*(1-x))-1;
-%x0fun = @(x,y) .5*(1-x).^2.*(3-2*(1-x))-.5;
-%x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
-%x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
-
+% Initial state of the plant
 x0 = ConstrWave1DCase1(w0fun,wd0fun,N);
 
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 20;
 tgrid = linspace(0,Tend,401);
 
-
-
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+%% Visualization
+
+% Plot the (approximate) eigenvalues of the closed-loop system
+figure(1)
+PlotEigs(full(CLSys.Ae),[-2 NaN NaN NaN])
 
 % Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
-figure(1)
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
+figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
-
 
 % Plots for additional analysis
 % q = length(freqsReal);
@@ -190,32 +189,27 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 % dimU = size(ContrSys.K,1);
 % K1full = [ContrSys.K(:,1:dimZ), zeros(dimU,dimX)];
 % K2full = [zeros(dimU,dimZ) ContrSys.K(:,(dimZ+1):end)];
-% figure(5)
+% figure(6)
 % plot(tgrid,[CLsim.control;K1full*CLsim.xesol((2*N+1):end,:);K2full*CLsim.xesol((2*N+1):end,:)],'Linewidth',2);
 % obserror = sum((CLsim.xesol(1:2:(2*N),:)-CLsim.xesol(dimX+dimZ+(1:2:(2*N)),:)).^2,1);
-% figure(6)
+% figure(7)
 % plot(tgrid,obserror,'Linewidth',2);
 % title('Observer error in the controller.')
 
-figure(4)
+%% State of the controlled PDE
+
+figure(3)
 colormap jet
-%PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
 spgrid = linspace(0,1,N);
 Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
 % Plot1DWaveSurf(CLsim.xesol(1:2*N,:)-CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-9 9])
 % Plot1DWaveSurf(CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-4 4])
 % set(gca,'ztick',-8:4:8);
-%colormap jet
-
-% figure(5)
-% tt = linspace(0,16,500)
-% plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
-% set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
+% colormap jet
 
 %% Animation
 
-
-figure(5)
+figure(4)
 colormap jet
 % No movie recording
 [~,zlims] = Anim1DWaveSpectral(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid,0.03,0);
@@ -226,6 +220,13 @@ colormap jet
 
 %movie(MovAnim)
 
+%% The reference signal
+
+figure(5)
+tt = linspace(0,16,500);
+plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
+title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
+set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 
 %% Export movie to AVI
 
@@ -243,5 +244,3 @@ colormap jet
 % open(AnimExport);
 % writeVideo(AnimExport,MovAnim);
 % close(AnimExport);
-
-

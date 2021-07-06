@@ -1,4 +1,5 @@
 function [Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = ConstrWave2DCase1(Nvals,Mvals)
+% Approximation of a 2D wave equation on an annulus.
 
 % eigenvalues and -functions
 % m = index of the angular mode

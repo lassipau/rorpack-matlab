@@ -60,10 +60,7 @@ freqsReal = [1, 2];
 % frequencies are defined in a consistent way.
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
-
-
 %% Controller construction
-
 
 % Simple passive robust controller, used in the original Timoshenko beam
 % example in the LHMNC 2018 conference paper (simulation not included in
@@ -91,26 +88,36 @@ epsgain = [10,50];
 % 
 % ContrSys = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg);
 
+%% Closed-loop construction and simulation
 
-
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
-figure(1)
-PlotEigs(full(CLSys.Ae))
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 16;
 tgrid = linspace(0,Tend,300);
 
-
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+%% Visualization
+
+% Plot the (approximate) eigenvalues of the closed-loop system
+figure(1)
+PlotEigs(full(CLSys.Ae))
 
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -119,34 +126,17 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
+%% State of the controlled PDE
 
 figure(3)
 plotskip = 2;
 PlotLHMNCSurf(CLsim.xesol(:,1:plotskip:end),spgrid,tgrid(:,1:plotskip:end),[-9 9])
 set(gca,'ztick',-8:4:8);
 
-% 
-% figure(1)
-% subplot(2,1,1)
-% hold off
-% cla
-% hold on
-% plot(tgrid,yref(tgrid),'Color',1.1*[0 0.447 0.741],'Linewidth',2);
-% plot(tgrid,CLsim.output,'Color', [0.85 0.325 0.098],'Linewidth',2);
-% title('Output $y(t)$ (red) and the reference $y_{ref}(t)$ (blue)','Interpreter','latex','Fontsize',16)
-% set(gca,'xgrid','off','tickdir','out','box','off')
-% subplot(2,1,2)
-% hold off
-% cla
-% plot(tgrid,CLsim.error,'Linewidth',2);
-% set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-% title('Tracking  error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
-% %set(gcf,'color',1/255*[252 247 255])
-% 
+%% The reference signal
 
-
-% figure(4)
-% tt = linspace(0,16,500)
-% plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
-% set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-
+figure(4)
+tt = linspace(0,16,500);
+plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
+title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
+set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
