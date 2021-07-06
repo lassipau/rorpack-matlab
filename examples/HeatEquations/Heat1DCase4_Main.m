@@ -109,30 +109,36 @@ epsgain
 % % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',4);
 % % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',4);
 
-%% Closed-loop simulation and visualization of the results
+%% Closed-loop construction and simulation
 
 % Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
-figure(1)
-PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
-
-
-% Simulate the closed-loop system
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 14;
 tgrid = linspace(0,Tend,300);
 
-
-
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
+
+%% Visualization
+
+% Plot the (approximate) eigenvalues of the closed-loop system
+figure(1)
+PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
 
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -141,8 +147,7 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
-%%
-
+%% State of the controlled PDE
 
 % In plotting and animating the state,
 % fill in the Dirichlet boundary condition x(1,t)=u(t) at x=1
@@ -155,7 +160,8 @@ figure(3)
 colormap jet
 Plot1DHeatSurf(state_plot,spgrid_plot,tgrid,BCtype)
 
-%%
+%% Animation of the state of the controlled PDE
+
 figure(4)
 % No movie recording
 [~,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,0);
@@ -164,8 +170,7 @@ figure(4)
 % [MovAnim,zlims] = Anim1DHeat(state_plot,spgrid_plot,tgrid,BCtype,0.03,1);
 %movie(MovAnim)
 
-%%
-
+%% The reference signal
 
 figure(5)
 tt = linspace(0,16,500);

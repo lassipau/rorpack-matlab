@@ -1,9 +1,10 @@
 function [x0,spgrid,sys] = ConstrHeat2DCase2(N,M,x0fun,cval)
-% [x0,spgrid,sys] = ConstrHeat2Dtest1(c,x0fun,N)
-% Usage: Can also use solely for defining the initial state x0
-% x0 = initial state
-% spgrid = spatial grid of the domain
-% sys = system parameters, (sys.A,sys.B,sys.Bd,sys.C,sys.D)
+% Construct the system operators for the 2D heat equation example "Case 2".
+% The model is similar to “Case 1”, but the inputs and outputs of the
+% system are not collocated.
+% Instead, the control input, the disturbance input, and
+% the measured output act on distinct parts of the boundary of
+% the rectangle.
 
 xx = linspace(0,1,N);
 yy = linspace(0,1,M);

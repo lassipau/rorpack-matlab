@@ -110,15 +110,18 @@ ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR', 0.45);
 % Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
-PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
-
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 14;
 tgrid = linspace(0,Tend,300);
 
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
 %% Visualization
@@ -126,9 +129,13 @@ CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 % Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
-% Plot the output with the reference signal, reference error and control
-% signal
+% Plot the (approximate) eigenvalues of the closed-loop system
 figure(1)
+PlotEigs(CLSys.Ae,[-20 .3 -6 6])
+
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
+figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
@@ -138,13 +145,13 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% State of the controlled PDE
 
-figure(2)
+figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
 %% Animation of the state of the controlled PDE
 
-figure(3)
+figure(4)
 % No movie recording
 [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype,0.03,0);
 
@@ -155,7 +162,7 @@ figure(3)
 
 %% The reference signal
 
-figure(4)
+figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)

@@ -133,28 +133,34 @@ epsgain
 
 %% Closed-loop construction and simulation
 
-
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
+% Print an approximate stability margin of the closed-loop system
 stabmarg = CLStabMargin(CLSys)
 
-figure(1)
-PlotEigs(CLSys.Ae,[-20 .3 -6 6])
-
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 14;
 tgrid = linspace(0,Tend,300);
 
-
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
 %% Visualization
 
+% Plot the (approximate) eigenvalues of the closed-loop system
+figure(1)
+PlotEigs(CLSys.Ae,[-20 .3 -6 6])
+
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
-% Plot the output, reference error and control
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)

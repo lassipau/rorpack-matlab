@@ -27,6 +27,9 @@ x0fun = @(x,y) zeros(size(x));
 % Construct the system.
 [x0,spgrid,Sys] = ConstrHeat2DCase1(1,x0fun,N);
 
+% Define the reference and disturbance signals, and list the
+% required frequencies in 'freqsReal'
+
 % Case 1:
 yref = @(t) [(-1) * ones(size(t));cos(pi*t)];
 wdist = @(t) zeros(size(t));
@@ -61,31 +64,37 @@ epsgain = [0.01,4];
 [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
 epsgain
 
-
-CLSys = ConstrCLSys(Sys,ContrSys);
-
-stabmarg = CLStabMargin(CLSys)
-
-figure(1)
-PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
-
-% PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
 %% Closed-loop construction and simulation
 
+% Construct the closed-loop system
+CLSys = ConstrCLSys(Sys,ContrSys);
+
+% Print an approximate stability margin of the closed-loop system
+stabmarg = CLStabMargin(CLSys)
+
+% Define the initial state of the closed-loop system
+% (the controller has zero initial state by default).
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
+% Set the simulation length and define the plotting grid
 Tend = 16;
 tgrid = linspace(0,Tend,300);
 
+% Simulate the closed-loop system
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
 %% Visualization
 
+% Plot the (approximate) eigenvalues of the closed-loop system
+figure(1)
+PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
+% PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
+
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
-% Plot the output with the reference signal, reference error and control
-% signal
+% Plot the controlled outputs, the tracking error norm, and 
+% the control inputs
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -94,9 +103,17 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
-%% 
 
-figure(3)
+%% State of the controlled PDE
+
+% figure(3)
+% colormap jet
+% % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
+% PlotHeat2DSurf(x0,spgrid,zlims)
+
+%% Animation of the state of the controlled PDE
+
+figure(4)
 colormap jet
 % No movie recording
 [~,zlims] = AnimHeat2DCase1(CLsim,spgrid,tgrid,0.03,0);
@@ -106,14 +123,7 @@ colormap jet
 
 %movie(MovAnim)
 
-%% 
-
-% figure(4)
-% colormap jet
-% % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-% PlotHeat2DSurf(x0,spgrid,zlims)
-
-%%
+%% The reference signal
 
 figure(5)
 tt = linspace(0,16,500);

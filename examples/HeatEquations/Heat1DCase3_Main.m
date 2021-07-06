@@ -196,7 +196,8 @@ figure(3)
 colormap jet
 surf_t_plotskip = 1;
 surf_n_plotskip = 2;
-Plot1DHeatSurf(CLsim.xesol(1:surf_n_plotskip:N,1:surf_t_plotskip:end),spgrid_plot(1:surf_n_plotskip:end),tgrid(1:surf_t_plotskip:end),BCtype)
+Plot1DHeatSurf(CLsim.xesol(1:surf_n_plotskip:N,1:surf_t_plotskip:end),...
+    spgrid_plot(1:surf_n_plotskip:end),tgrid(1:surf_t_plotskip:end),BCtype)
 
 %% Animation of the state of the controlled PDE
 
