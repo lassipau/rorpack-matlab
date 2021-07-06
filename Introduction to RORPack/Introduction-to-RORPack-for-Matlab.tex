@@ -360,9 +360,9 @@ The other controller structures also use knowledge of the parameters $(A,B,C,D)$
 
 The \texttt{rorpack} Matlab library can be installed for Matlab R2019a and later\footnote{Various earlier versions should be fine too, but these have not been tested.} as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
 
-The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases are included in the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m} and are documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab the constructor routine used in the main simulation is in its own separate Matlab function file.
+The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases are included in the files \texttt{Heat1DCase3\_Main.m} and \texttt{ConstrHeat1DCase3.m} and are documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab the constructor routine used in the main simulation is in its own separate Matlab function file.
 
-Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: The file \texttt{Heat1DCase3.m} begins with general comment lines.
+Contents of the files \texttt{Heat1DCase3\_Main.m} and \texttt{ConstrHeat1DCase3.m}: The file \texttt{Heat1DCase3\_Main.m} begins with general comment lines.
 % and adding the ``RORPack'' folder to the top of the search path for the current Matlab session.
 
 \begin{lstlisting}
@@ -379,7 +379,7 @@ Contents of the files \texttt{Heat1DCase3.m} and \texttt{Constr1DHeatCase3.m}: T
 % 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
 \end{lstlisting}
 
-The next part defines the parameters $N$, \texttt{cfun} and \texttt{x0fun} used in the construction of the system $(A,B,B_d,C,D,D_d)$ with routine \texttt{Constr1DHeatCase3} (detailed below). The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material. \texttt{x0fun} describes the initial heat profile of the plant.
+The next part defines the parameters $N$, \texttt{cfun} and \texttt{x0fun} used in the construction of the system $(A,B,B_d,C,D,D_d)$ with routine \texttt{ConstrHeat1DCase3.m} (detailed below). The parameter $N$ is the size of the approximation and \texttt{cfun} is a function describing the spatially varying thermal diffusivity of the material. \texttt{x0fun} describes the initial heat profile of the plant.
 In this example, the parameters \texttt{IB1} and \texttt{IB2} describe the two intervals where the control is applied to the heat equation, and \texttt{IC1} and \texttt{IC2} describe the internvals of the measurements from the heat equation.
 
 \begin{lstlisting}
@@ -398,10 +398,10 @@ cfun = @(xi) 0.3-0.6*xi.*(1-xi);
 
 IB1 = [.3, .4];  IB2 = [.6, .7];  IC1 = [.1, .2];  IC2 = [.8, .9];
 
-[x0,Sys,spgrid,BCtype] = Constr1DHeatCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2);
+[x0,Sys,spgrid,BCtype] = ConstrHeat1DCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2);
  \end{lstlisting}
 
-The function \texttt{Constr1DHeatCase3} used in constructing the approximation of the PDE system begins with comment lines, checking if \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are given as parameters (or if these should be set to default values), and a consistency check for the parameters.
+The function \texttt{ConstrHeat1DCase3.m} used in constructing the approximation of the PDE system begins with comment lines, checking if \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are given as parameters (or if these should be set to default values), and a consistency check for the parameters.
 % approximate the system begins with comments describing this particular approximation along with argument checking since the inputs \texttt{IB1}, \texttt{IB2}, \texttt{IC1} and \texttt{IC2} are not explicitly required to construct the approximation.
 
 \begin{lstlisting}
