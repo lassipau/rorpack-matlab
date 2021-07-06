@@ -1,5 +1,5 @@
 function [MovAnim,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,Tpause,record)
-% function AnimHeat2Dtest1(CLsim,tgrid)
+% function AnimHeat2Dtest2(CLsim,tgrid)
 %
 % Animate the solution of the 2D Heat equation
 % CLsim = simulated state of the closed-loop system 

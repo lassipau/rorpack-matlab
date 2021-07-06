@@ -1,4 +1,7 @@
-function normalized2DData = normalizeHeat2DData(N, data, xgrid, ygrid)
+function normalized2DData = NormalizeHeat2DData(N, data, xgrid, ygrid)
+% Normalize the data (solutions of the controlled PDE) used in plotting and
+% animating the state of the 2D heat equation
+
 nn = 0:N-1;
 mm = 0:N-1;
 te = size(data,2);

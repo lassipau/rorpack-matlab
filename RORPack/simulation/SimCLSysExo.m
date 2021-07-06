@@ -1,4 +1,5 @@
 function CLsim = SimCLSysExo(CLsys,xe0,exosys,v0,tgrid,opts)
+% currently unused in the given example files
 % sol = SimCLSys(CLsys,xe0,exosys,v0,tspan,opts)
 % Simulate the closed-loop system
 % sol = CL+exo state and regulation error, CL.xasol, CLsim.error

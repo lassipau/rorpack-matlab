@@ -1,7 +1,7 @@
 function [MovAnim,zlims] = Anim1DHeat(state,spgrid,tgrid,BCtype,Tpause,record,zlims)
 % function [MovAnim,zlims] = Anim1DHeat(state,spgrid,tgrid,BCtype,Tpause,record,zlims)
 %
-% Plot the solution (displacement w) of the controlled 1D Wave equation
+% Plot the solution of the controlled 1D Heat equation
 % state = state of the closed-loop system at times 'tgrid'
 % spgrid = spatial grid
 % tgrid = grid for time

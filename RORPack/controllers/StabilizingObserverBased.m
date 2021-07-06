@@ -13,7 +13,7 @@ function ContrSys = StabilizingObserverBased(Sys,K,L)
 %
 % Outputs:
 %   ContrSys : [struct with fields G1,G2,K] observer-based output feedback 
-% controller stabilizing the closed-loop system.
+%   controller stabilizing the closed-loop system.
 
 
 ContrSys.G1 = Sys.A+L*Sys.C+Sys.B*K;
