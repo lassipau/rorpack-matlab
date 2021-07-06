@@ -1,23 +1,21 @@
-%% Robust control of a 2D heat equation with either the dual observer based
-% robust controller (DOBRC) or the observer based robust controller (OBRC). 
-% Neumann boundary control and Dirichlet boundary observation 
-% Approximation with a Finite differences scheme 
+%% Robust control of a 2D heat equation on a rectangle with boundary control 
+% The system has two boundary inputs and two collocated boundary outputs,
+% as well as an additional boundary disturbance input. The system is
+% unstable, but its only unstable eigenvalue 0 can be stabilized with
+% negative output feedback. The system is also impedance passive (due to
+% the collocated inputs and outputs).
+% The example is similar to the 2D heat equation example "Case 1", but 
+% the unstable eigenvalue 0 of the system is not prestabilized.
 
-% The system is unstable with a single unstable eigenvalue s=0.
 
 % addpath(genpath('../RORPack/'))
 
-
-cval = 1;
-N = 16; 
-M = N; % WARNING: The approximation currently only works correctly with M=N.
-
+N = 31; 
 
 % Initial state of the plant
-%x0fun = @(x,y) zeros(size(x));
+x0fun = @(x,y) zeros(size(x));
 %x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
-%x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
-x0fun = @(x,y) cos(pi*(1-x));
+% x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x,y) 1*(1-x).^2.*(3-2*(1-x))-1;
@@ -25,69 +23,40 @@ x0fun = @(x,y) cos(pi*(1-x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
-[x0,spgrid,Sys] = ConstrHeat2DCase2(N,M,x0fun,cval);
+[x0,spgrid,Sys] = ConstrHeat2DCase3(1,x0fun,N);
 
-%yref = @(t) sin(2*t)+.1*cos(6*t);
-%yref = @(t) sin(2*t)+.2*cos(3*t);
-%yref = @(t) ones(size(t));
-
-%wdist = @(t) ones(size(t));
-%wdist = @(t) sin(t);
-%wdist = @(t) zeros(size(t));
 
 % Case 1:
-yref = @(t) sin(2*t)+0.1*cos(3*t);
-%wdist = @(t) zeros(size(t));
-%wdist = @(t) sin(2*t);
+yref = @(t) [(-1) * ones(size(t));cos(pi*t)];
+wdist = @(t) zeros(size(t));
+freqsReal = [0, pi];
 
 % Case 2:
 % yref = @(t) ones(size(t));
 % wdist = @(t) ones(size(t));
+% freqsReal = 0;
 
 % Case 3:
 % yref = @(t) sin(2*t)+.1*cos(6*t);
-wdist = @(t) sin(t);
+% wdist = @(t) sin(t);
+% freqsReal = [0,1,2,6];
 
-freqsReal = [0 1 2 3];
-
-% if max(abs(real(freqs)))>0 && max(abs(imag(freqs)))>0
-%   error('nonzero real parts in frequencies!')
-% elseif max(abs(imag(freqs)))>0
-%   freqsReal = unique(abs(freqs));
-% end
-
-%% Construct the controller 
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 
-% Observer-based robust controller
+%% Construct the controller
 
-% Requires the construction of the stabilizing operators K21 and L to
-% stabilize the single unstable eigenvalue s=0.
-%
-% 1 for interior points, 1/4 for corner points and 1/2 for other boundary
-% points
-K21 = -ones(1,N*M);
-K21(1, 1:M) = K21(1, 1:M) / 2;
-K21(1, (N-1)*M+1:end) = K21(1, (N-1)*M+1:end) / 2;
-K21(1, 1:N:end) = K21(1, 1:N:end) / 2;
-K21(1, M:N:end) = K21(1, M:N:end) / 2;
-L = K21' * 10;
-IMstabmarg = 0.5;
-IMstabtype = 'LQR';
-% IMstabtype = 'poleplacement';
-
-ContrSys = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg);
-
-
-% % A Low-Gain 'Minimal' Robust Controller
+% % A Low-Gain 'Minimal' Robust Controller 
 % %
-% % Even though the system is not impedance passive, the single unstable
-% % eigenvalue s=0 can be stabilized with negative output feedback
-% % u(t)=-kappa_S*y(t). This can be used in the design of the Low Gain Robust
-% % Controller with a feedthrough operator -kappa_S*eye(dimY) (here dimY=1).
+% % Since the system is not impedance passive, the unstable eigenvalue s=0 
+% % can be stabilized with negative output feedback u(t)=-kappa_S*y(t). This 
+% % can be used in the design of the Low Gain Robust Controller with a 
+% % feedthrough operator -kappa_S*eye(dimY) (here dimY=2).
 % 
 % % Stabilizing output feedback gain
-% kappa_S = -4;
+% kappa_S = -2.5;
+% % Controller feedthrough term 
 % Dc = kappa_S*eye(size(Sys.C,1));
 % 
 % % Since the controller has a feedthrough term, the Pvals need to be
@@ -110,28 +79,63 @@ ContrSys = ObserverBasedRC(freqsReal,Sys,K21,L,IMstabtype,IMstabmarg);
 %     end
 % end
 % 
-% epsgain = [0.01,2];
-% 
-% % Construct the Low-Gain Robust Controller with a feedthrough term Dc.
+% epsgain = [0.01,4];
+% % epsgain = .5;
 % [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc);
 % epsgain
 
+
+% A Passive Robust Controller
+%
+% Since the system is unstable, requires prestabilization with a
+% controller feedthrough term.
+
+% Negative feedback gain for output stabilization
+kappa_S = -2.5;
+
+dimY = size(Sys.C,1);
+epsgain = [0.01,3];
+% epsgain = .1;
+[ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys,kappa_S*eye(dimY));
+epsgain
+
+% % An Observer-Based Robust Controller or a Dual Observer-Based Robust Controller
+% %
+% % Stabilizing state feedback and output injection operators K and L
+% % These are chosen based on collocated design to stabilize the single 
+% % unstable eigenvalue s=0.
+% K_gain = 2.5;
+% L_gain = 3;
+% 
+% K = -K_gain*Sys.B';
+% % PlotEigs(full(Sys.A+Sys.B*K),[-20 .1 -.3 .3])
+% L = -L_gain*Sys.C';
+% % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
+% 
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
+% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1.5);
+ 
+
+%% Construct the closed-loop system
 
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
 figure(1)
-% PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
+PlotEigs(CLSys.Ae,[-20 .3 NaN NaN]);
 
-PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
-%%
+
+%% Closed-loop simulation
 
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
-Tend = 8;
+Tend = 16;
 tgrid = linspace(0,Tend,300);
+
 
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
@@ -146,26 +150,26 @@ subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
-set(gcf,'color','white')
 
-%% Animation (DOES NOT WORK YET)
+%%
+
 
 figure(3)
 colormap jet
 % No movie recording
-[~,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0.03,0);
+[~,zlims] = AnimHeat2DCase1(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
-% [MovAnim,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0,1);
+% [MovAnim,zlims] = AnimHeat2DCase1(CLsim,spgrid,tgrid,0,1);
 
 %movie(MovAnim)
 
 %%
 
-figure(4)
+% figure(4)
+% colormap jet
 % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-plotind = 155;
-PlotHeat2DSurf(CLsim.xesol(1:N*M,plotind),spgrid)
+% PlotHeat2DSurf(x0,spgrid,zlims)
 
 figure(5)
 tt = linspace(0,16,500);

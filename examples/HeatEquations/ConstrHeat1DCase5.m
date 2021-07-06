@@ -1,4 +1,4 @@
-function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N)
+function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N,Bd_profile)
 % [x0,Sys,spgrid] = Constr1DHeatCase5(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
@@ -19,6 +19,22 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N)
 %
 % Case 3: Neumann boundary disturbance at x=0, 2 distributed controls and 
 % two distributed measurements regulated output y(t) 
+%
+% Case 4: Dirichlet boundary control at x=1, regulated output y(t) and a 
+% Neumann boundary disturbance at x=0. The system is exponentially stable,
+% but does not define a "wellposed" or "regular linear system" on the
+% natural state space X=L^2(0,1). Since the current theory does not
+% guarantee that the controller designs would work, these are simulations
+% are only for experimentation purposes. That is, PROCEED WITH CAUTION! ;)
+%
+% Case 5: Similar to Case 1, but with two boundary inputs and outputs: 
+% Neumann boundary control u_1(t) at x=0, and u_2(t) at x=1. Pointwise
+% temperature measurements y_1(t) at x=0, and y_2(t) at x=1. Two input
+% disturbances w_{dist,1}(t) at x=0 and w_{dist,2}(t) at x=1, and a third
+% distributed disturbance with profile "Bd_profile" (function). The system 
+% is unstable (eigenvalue at 0), but is impedance passive and can be
+% stabilized with negative output feedback.
+
 
 spgrid = linspace(0,1,N);
 h = 1/(N-1);
@@ -27,36 +43,27 @@ BCtype = 'NN';
 
 [A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
-% Petteri's parameters: cval = 1, gamma = pi^2+1
-gamma = pi^2+1;
-
-A = A + gamma*spdiags(ones(N,1),0,N,N);
-
 
 % Neumann boundary input at x=0 (input u_1(t)) and x=1 (input u_2(t)) 
 % Signs are based on the _outwards_ normal derivatives
-B = [[2*cfun(0)/h;zeros(N-1,1)],[zeros(N-1,1);-2*cfun(1)/h]]; 
+B = [[2*cfun(0)/h;zeros(N-1,1)],[zeros(N-1,1);2*cfun(1)/h]]; 
 
+% Two input disturbances and a thrid
+Bd_distr = Bd_profile(spgrid(:));
+Bd = sparse([B,Bd_distr]);
 
-IC1 = [.0, .25];
-IC2 = [.5, .75];
+% Measured temperatures at x=0 (y_1(t)) and x=1 (y_2(t))
+C = sparse([1, zeros(1,N-1);zeros(1,N-1), 1]); 
 
-% Two distributed outputs on the intervals IC1 and IC2
-weights = [1/2,ones(1,N-2),1/2];
-C1 = h/(IC1(2)-IC1(1))*(spgrid>=IC1(1) & spgrid<=IC1(2)).*weights;
-C2 = h/(IC2(2)-IC2(1))*(spgrid>=IC2(1) & spgrid<=IC2(2)).*weights;
-
-C = [C1;C2];
 
 x0 = x0fun(spgrid).';
 
-
 Sys.A = A;
 Sys.B = B;
-Sys.Bd = zeros(N,1);
+Sys.Bd = Bd;
 Sys.C = C;
 Sys.D = zeros(2,2);
-Sys.Dd = zeros(2,1);
+Sys.Dd = zeros(2,3);
 
 
 

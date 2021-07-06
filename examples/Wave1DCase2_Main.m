@@ -8,7 +8,7 @@
 % However, since the system is passive,
 % the Passive Robust Controller can be used in achieving robust output regulation.
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 % Parameters for this example.
 N = 40;
@@ -24,14 +24,6 @@ wd0fun = @(x) zeros(size(x));
 
 [Sys, x0, phin] = ConstrWave1DCase2(N, Bfun, Bdfun, w0fun, wd0fun);
 
-% Stabilizing output feedback gain
-kappa_S = 1;
-
-% TODO TODO TODO TODO
-% % Analyse the properties of the stabilized system
-% stabSys = sys.output_feedback(-np.atleast_2d(kappa_S))
-% plot_spectrum(stab_sys.A, [-1.5, 0.1])
-% print(stability_margin(stab_sys.A))
 
 % Define the reference and disturbance signals:
 % Note that the system has an invariant zero at s=0, and therefore the
@@ -81,53 +73,43 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 %% Construct the controller
 
-% TODO: Check if this works, or if controller feedthrough should be used
-% instead
-% In this example, we prestabilize the system with negative output feedback
-% u(t) = -kappa_S*y(t) + u_new(t)
-% (Alternatively, this can be done using an additional feedthrough term in 
-% the contoller).
+% A Passive Robust Controller
+%
+% Since the system is unstable, requires prestabilization with a
+% controller feedthrough term 'Dc'. The passivity of the system implies
+% that we can use negative output feedback (with any negative definite Dc),
+% but the resulting closed-loop system is not exponentially stable, but 
+% only strongly (and sometimes polynomially) stable.
 
-% Stabilizing output feedback gain
-kappa_S = 1;
+dimY = size(Sys.C,1);
 
-% Sys = SysOutputFeedback(Sys, -kappa_S*eye(size(Sys.C,1)));
+% Negative feedback gain for output stabilization
+kappa_S = -1;
+Dc = kappa_S*eye(dimY);
 
-
-% Passive Robust Controller
 epsgain = [0.01, 0.3];
 % epsgain = 0.3;
 
-Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
-Pvals = cell(1,length(freqsReal));
-for ind = 1:length(freqsReal)
-  Pvals{ind} = Pappr(freqsReal(ind));
-end
-
-[ContrSys, epsgain] = PassiveRC(freqsReal, Pvals, epsgain, Sys);
+[ContrSys, epsgain] = PassiveRC(freqsReal, dimY, epsgain, Sys, Dc);
 epsgain
-% Sys = outputFeedbackStab(Sys, -kappa_S);
+
 
 %% Closed-loop simulation and visualization of the results
-% Construct the closed-loop system.
-% CLSys = ConstrCLSys(Sys,ContrSys);
-% CLSys_FB = ConstrCLSysWithFeedback(ContrSys,Sys,-kappa_S);
 
-ContrSys.Dc = -kappa_S*eye(size(Sys.C,1));
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
-
-%%
-
 
 stabmarg = CLStabMargin(CLSys)
 
-% Simulate the closed-loop system. Initial state x0 is chosen earlier.
-% the initial state z0 of the controller is chosen to be zero by default.
+
+% Simulate the closed-loop system. 
+% The initial state z0 of the controller is chosen to be zero by default.
 z0 = zeros(size(ContrSys.G1,1),1);
 xe0 = [x0;z0];
 
 Tend = 24;
-tgrid = linspace(0, Tend, 501);
+% Tend = 14;
+tgrid = linspace(0, Tend, 601);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
@@ -137,15 +119,18 @@ PrintFigureTitles = true;
 spgrid = linspace(0,1,N);
 
 figure(1)
-subplot(2,1,1)
+subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
-subplot(2,1,2)
+subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% Plot the state of the controlled system
 figure(3)
 colormap jet
-Plot1DWaveSurf(CLsim.xesol(1:2*N,:),phin,spgrid,tgrid)
+surf_plotskip = 2;
+Plot1DWaveSurf(CLsim.xesol(1:2*N,1:surf_plotskip:end),phin,spgrid,tgrid(1:surf_plotskip:end))
 % Plot1DWaveSurf(CLsim.xesol(1:2*N,:)-CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-9 9])
 % Plot1DWaveSurf(CLsim.xesol(dimX+dimZ+(1:(2*N)),:),phin,spgrid,tgrid,[-4 4])
 set(gca,'ztick',-8:4:8);

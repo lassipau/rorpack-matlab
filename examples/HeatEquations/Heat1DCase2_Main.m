@@ -7,7 +7,7 @@
 % Unstable system, stabilization by stabilizing the only unstable
 % eigenvalue =0
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 50;
 
@@ -105,32 +105,14 @@ epsgainrange = [0.01,3];
 [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
 epsgain
 
-% A Passive Robust Controller
 
-% Compute the required transfer function values P(iw_k) using Chebfun: This
-% can be done by solving a boundary value problem related to each
-% frequency, and evaluating the solution at x=0.
-Pvals = cell(1,length(freqsReal));
-for ind = 1:length(freqsReal)
-    s = freqsReal(ind);
-    cb_A = chebop(0,1);
-    cb_A.op = @(x,w) 1i*s*w-diff(cfun(x)*diff(w));
-    cb_A.lbc = @(w) diff(w)+1;
-    cb_A.rbc = @(w) w;
-    w = cb_A\0;
-    
-    Pvals{ind} = w(0);
-end
-Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
-Pvals = cell(1,length(freqsReal));
-for ind = 1:length(freqsReal)
-   Pvals{ind} = Pappr(1i*freqsReal(ind));
-end
-
-epsgainrange = [0.01,3];
-% epsgain = .1;
-[ContrSys,epsgain] = PassiveRC(freqsReal,Pvals,epsgainrange,Sys);
-epsgain
+% % A Passive Robust Controller
+% 
+% dimY = size(Sys.C,1);
+% epsgainrange = [0.01,3];
+% % epsgain = .1;
+% [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgainrange,Sys,-2.5*eye(dimY));
+% epsgain
 
 % An observer-based robust controller or
 % a dual observer-based robust controller

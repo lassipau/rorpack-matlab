@@ -1,14 +1,13 @@
-%% Approximate robust output regulation of boundary control systems
-% example case from the paper "Approximate robust output regulation of
-% boundary control systems" by Jukka-Pekka Humaloja, Mikael Kurula and
-% Lassi Paunonen
+%% A boundary controlled 2D wave equation on an annulus
+% The example case from the paper "Approximate robust output regulation of
+% boundary control systems" by J.-P. Humaloja, M. Kurula and L. Paunonen.
 % based on the code from https://codeocean.com/capsule/5706891/tree/v1
 
 Nvals = 8;
 Mvals = 12; % from 0 to Mvals-1
 
-% construction of the 2D Wave approximation 
-[Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = ConstrWave2D(Nvals,Mvals);
+% Construction of the 2D wave equation model
+[Sys,svals,sfvals,phinm1,phinm2,phiRnm,psiTHm1,psiTHm2,Q] = ConstrWave2DCase1(Nvals,Mvals);
 P = @(s) Sys.C*((s*eye(2*Nvals*(2*Mvals-1))-Sys.A)\Sys.B); % transfer function approx.
 
 %% exosystem, controller, closed-loop system
@@ -138,7 +137,7 @@ sol = ode15s(odefun, tspan, xe0, options);
 
 %% regulation error, output profile
 th2 = linspace(0,2*pi,50);
-Nt = 50;
+Nt = 30;
 tt = linspace(tspan(1),tspan(2),Nt*tspan(2));
 xe = deval(sol,tt);
 e = zeros(dimU, numel(tt));
@@ -175,10 +174,10 @@ for s = 1:numel(tt)-Nt
 end
 Y = real(Y); % neglect imaginary part (should be zero)
 
-%% variables for visuallization
+%% variables for visualization
 % annular grid
 Nr = 50;
-Nth = 100;
+Nth = 50;
 [rrg,thg] = meshgrid(linspace(1,2,Nr),linspace(0,2*pi,Nth));
 rr = rrg(:).';
 th = thg(:).';
@@ -201,51 +200,63 @@ end
 
 %% visualizations
 % regulation error
+figure(1)
 del = 0.01; % approximate tracking tolerance
-semilogy(tt(1:numel(tt)-Nt), real(ent), 'linewidth', 1.5)
+semilogy(tt(1:numel(tt)-Nt), real(ent), 'linewidth', 2)
 xlim([0, tspan(2)-1])
 hold on
 semilogy([0, tspan(2)-1], del*norm(v0)^2*[1 1],'--k', 'linewidth', 1.5)
 xlabel('$t$', 'interpreter', 'latex', 'fontsize', 13)
-ylabel('$\int_t^{t+1}\|e(s)\|^2ds$', ...
+ylabel('Tracking errors $\int_t^{t+1}\|e(s)\|^2ds$', ...
     'interpreter', 'latex', 'fontsize', 13)
 hold off
+title('The regulation error.','interpreter', 'latex', 'fontsize', 15)
 % print -dpng /results/error
 
 % output profile
+figure(2)
 surf(tt, th2, Y)
 xlabel('$t$', 'interpreter', 'latex', 'fontsize', 13)
 ylabel('$\theta$', 'interpreter', 'latex', 'fontsize', 13)
 zlabel('$y$', 'interpreter', 'latex', 'fontsize', 13, 'rotation', 0)
 xlim([0, 10])
+title('The output profile.','interpreter', 'latex', 'fontsize', 15)
 % print -dpng /results/output
 
 % reference profile
+figure(3)
 surf(tt, th2, ref)
 xlabel('$t$', 'interpreter', 'latex', 'fontsize', 13)
 ylabel('$\theta$', 'interpreter', 'latex', 'fontsize', 13)
 zlabel('$y_{ref}$', 'interpreter', 'latex', 'fontsize', 13, 'rotation', 0)
 xlim([0, 10])
+title('The reference profile.','interpreter', 'latex', 'fontsize', 15)
 % print -dpng /results/reference
 
 % distubance profile
+figure(4)
 surf(tt, th2, d)
 xlabel('$t$', 'interpreter', 'latex', 'fontsize', 13)
 ylabel('$\theta$', 'interpreter', 'latex', 'fontsize', 13)
 zlabel('$d$', 'interpreter', 'latex', 'fontsize', 13, 'rotation', 0)
 xlim([0 6])
+title('The disturbance profile.','interpreter', 'latex', 'fontsize', 15)
 % print -dpng /results/disturbance
 
-% state at t = 9
+% state at a specific time t
+figure(5)
 ind = 9*Nt+1;
+ind = 10*Nt+1;
+tt(ind)
 zzvalmat = xe(1:2:2*Nvals*(2*Mvals-1),ind).'*pnvals;
 surf(xxg,yyg,reshape(real(zzvalmat),Nth,Nr));
 xlabel('$\zeta_1$', 'interpreter', 'latex', 'fontsize', 13)
 ylabel('$\zeta_2$', 'interpreter', 'latex', 'fontsize', 13)
 zlabel('$w$', 'interpreter', 'latex', 'fontsize', 13, 'rotation', 0)
+title(['The state of the system at $t=' num2str(round(tt(ind),1)) '$.'],'interpreter', 'latex', 'fontsize', 15);
 % print -dpng /results/state9
 
-%% simulation
+%% Animation
 % compute the wave profile
 zzvalmat = zeros(numel(tt),Nth*Nr);
 for ind = 1:numel(tt)
@@ -253,7 +264,8 @@ for ind = 1:numel(tt)
 end
 zzvalmat = real(zzvalmat);
 
-% simulate
+% Animate
+figure(6)
 zlims =  [min(zzvalmat(:)) max(zzvalmat(:))];
 axlims = [-2 2 -2 2 zlims];
 obj = VideoWriter('wave.avi');

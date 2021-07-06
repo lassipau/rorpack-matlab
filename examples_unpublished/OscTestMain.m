@@ -1,6 +1,6 @@
 %% Harmonic oscillator, unstable system
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 Sys.A = [0, 1;-1,-1];
 Sys.B = [0;1];

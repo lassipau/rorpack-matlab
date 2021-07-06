@@ -51,6 +51,11 @@ Christopher~I. Byrnes, Istv{\'a}n~G. Lauk{\'o}, David~S. Gilliam, and Victor~I.
 \newblock Output regulation problem for linear distributed parameter systems.
 \newblock {\em IEEE Trans. Automat. Control}, 45(12):2236--2252, 2000.
 
+\bibitem{CheMor03}
+Ada Cheng and Kirsten Morris.
+\newblock Well-posedness of boundary control systems.
+\newblock {\em SIAM J. Control Optim.}, 42(4):1244--1265, 2003.
+
 \bibitem{CurZwa95book}
 Ruth~F. Curtain and Hans~J. Zwart.
 \newblock {\em An Introduction to Infinite-Dimensional Linear Systems Theory}.
@@ -170,6 +175,11 @@ Hartmut Logemann and Stuart Townley.
   systems.
 \newblock {\em SIAM J. Control Optim.}, 41(6):1722--1732, 2003.
 
+\bibitem{MalSta06}
+Jarmo Malinen and Olof~J. Staffans.
+\newblock Conservative boundary control systems.
+\newblock {\em J. Differential Equations}, 231(1):290--312, 2006.
+
 \bibitem{Mor94}
 Kirsten Morris.
 \newblock Design of finite-dimensional controllers for infinite-dimensional
@@ -205,10 +215,10 @@ Lassi Paunonen.
   infinite-dimensional exosystems.
 \newblock {\em SIAM J. Control Optim.}, 55(3):1567--1597, 2017.
 
-\bibitem{Pau17carxiv}
+\bibitem{Pau19}
 Lassi Paunonen.
-\newblock {Stability and Robust Regulation of Passive Linear Systems}.
-\newblock {\em ArXiv e-prints (https://arxiv.org/abs/1706.03224)}, June 2017.
+\newblock Stability and robust regulation of passive linear systems.
+\newblock {\em SIAM J. Control Optim.}, 57(6):3827--3856, 2019.
 
 \bibitem{PauLeGLHMNC18}
 Lassi Paunonen, Yann~Le Gorrec, and H\'{e}ctor Ram{\'{\i}}rez.
@@ -269,6 +279,12 @@ Richard Rebarber and George Weiss.
 \newblock Internal model based tracking and disturbance rejection for stable
   well-posed systems.
 \newblock {\em Automatica J. IFAC}, 39(9):1555--1569, 2003.
+
+\bibitem{Sal87a}
+Dietmar Salamon.
+\newblock Infinite-dimensional linear systems with unbounded control and
+  observation: {A} functional analytic approach.
+\newblock {\em Trans. Amer. Math. Soc.}, 300(2):383--431, 1987.
 
 \bibitem{Sch83b}
 J.~M. Schumacher.

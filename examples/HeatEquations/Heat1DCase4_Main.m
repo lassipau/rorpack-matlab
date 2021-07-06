@@ -1,13 +1,20 @@
 %% Heat equation on the interval [0,1] with 
-% Neumann boundary control and Dirichlet boundary observation 
-% Approximation with a Finite differences scheme 
+% Dirichlet boundary control at x=1. Dirichlet boundary observation and
+% Neumann boundary disturbance at x=0.
+% Approximation with a Finite differences scheme.
 
-% Case 1: Neumann boundary control at x=0, regulated output y(t) and a 
-% Neumann boundary disturbance at x=1
-% Unstable system, stabilization by stabilizing the only unstable
-% eigenvalue =0
+% Case 4: Dirichlet boundary control at x=1, regulated output y(t) and a 
+% Neumann boundary disturbance at x=0. The system is exponentially stable,
+% but does not define a "wellposed" or "regular linear system" on the
+% natural state space X=L^2(0,1), but instead a "Boundary Control System".
+% The Low-Gain Robust Controller can be used due to the theory in the
+% references Humaloja-Paunonen IEEE TAC 2018 and Humaloja-Kurula-Paunonen
+% IEEE TAC 2019. Also other controllers can be constructed, but since the 
+% current theory does not guarantee that the controller designs would work, 
+% these are simulations are only for experimentation purposes. 
+% That is, PROCEED WITH CAUTION! ;)
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 50; 
 
@@ -63,12 +70,7 @@ wdist = @(t) zeros(size(t));
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 % wdist = @(t) sin(t);
 
-freqsReal = [0, 1, 2, 3, 6];
-
-% Sys.A = Sys.A+2*pi^2*Sys.B*Sys.Cm;
-% PlotEigs(full(Sys.A),[-20 1 -.3 .3])
-
-% eig(full(Sys.A))
+freqsReal = [0, 2];
 
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
@@ -77,45 +79,48 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 % A Low-Gain 'Minimal' Robust Controller
 
-% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+Pvals = cell(1,length(freqsReal));
+for ind = 1:length(freqsReal)
+  Pvals{ind} = Pappr(freqsReal(ind));
+end
+
+epsgain = [0.05,3];
+% epsgain = 1;
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
+epsgain
+
+% % An observer-based robust controller
+% % DISCLAIMER: THE EXISTING THEORY DOES NOT GUARANTEE THAT THESE 
+% % CONTROLLER WOULD WORK FOR THIS SYSTEM 
+% % Stabilizing state feedback and output injection operators K and L
+% % The plant is already stable, but stability margin can be improved.
+% K = -7*[1, zeros(1,N-1)];
+% %K = zeros(1,N);
+% %K = -ones(1,N);
+% %PlotEigs(full(Sys.A+Sys.B*K),[-20 1 -.3 .3])
 % 
-% Pvals = cell(1,length(freqs));
-% for ind = 1:length(freqs)
-%   Pvals{ind} = Pappr(freqs(ind));
-% end
+% L = -20*[zeros(N-1,1);2*(N-1)];
+% % L = zeros(N,1);
+% % PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 % 
-% epsgainrange = [0.01,3];
-% epsgain = .1;
-%[ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
+% % ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',4);
+% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',4);
+% % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',4);
+% % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',4);
 
-% An observer-based robust controller
-% Stabilizing state feedback and output injection operators K and L
-% These are chosen based on collocated design. The plant is already stable,
-% but stability margin can be improved.
-K = -7*[1, zeros(1,N-1)];
-%K = zeros(1,N);
-%K = -ones(1,N);
-%PlotEigs(full(Sys.A+Sys.B*K),[-20 1 -.3 .3])
+%% Closed-loop simulation and visualization of the results
 
-L = -20*[zeros(N-1,1);2*(N-1)];
-% L = zeros(N,1);
-% PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
-
-% ContrSys = ObserverBasedRC(freqs,Sys,K,L,'LQR',4);
-ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',4);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',4);
-% ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',4);
-
-%% Closed-loop simulation
+% Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
 
 stabmarg = CLStabMargin(CLSys)
 
 figure(1)
 PlotEigs(CLSys.Ae,[-20 .3 -6 6]);
-%%
 
 
+% Simulate the closed-loop system
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 14;

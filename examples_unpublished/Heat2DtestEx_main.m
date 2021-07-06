@@ -2,10 +2,9 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Unstable system, stabilization by stabilizing the only unstable
-% eigenvalue =0
+%The system is unstable with a single unstable eigenvalue s=0.
 
-addpath(genpath('../RORPack/'))
+% addpath(genpath('../RORPack/'))
 
 N = 16; 
 
