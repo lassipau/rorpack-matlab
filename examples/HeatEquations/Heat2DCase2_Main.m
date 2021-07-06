@@ -121,10 +121,10 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% Animation (DOES NOT WORK YET)
 
-% figure(3)
-% colormap jet
-% % No movie recording
-% [~,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0.03,0);
+figure(3)
+colormap jet
+% No movie recording
+[~,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0.03,0);
 
 % Movie recording
 % [MovAnim,zlims] = AnimHeat2DCase2(CLsim,spgrid,tgrid,0,1);

@@ -1,28 +1,24 @@
 function [Dop,spgrid] = DiffOp1d(cfun,spgrid,BCtype)
-
 % Sparse discrete 1D diffusion operator A defined by (Au)(x)=(c(x)*u'(x))' 
 % with Dirichlet or Neumann boundary conditions.
+% Inputs:
+%   spgrid : The discretized (uniform) spatial grid on the interval [0,L]
+%   so that spgrid(1)=0 and spgrid(end)=L, 
+%
+%   cfun : [1x1 function_handle] Defines the spatially
+%   dependent coefficient function c(x)
+%
+%   BCtype : string Boundary condition configuration, either
+%   'DD' for Dirichlet at x=0, Dirichlet at x=1
+%   'DN' for Dirichlet at x=0, Neumann at x=1
+%   'ND' for Neumann at x=0, Dirichlet at x=1
+%   'NN' for Neumann at x=0, Neumann at x=1
 % 
-%     Parameters:
-%     ---------
-%     spgrid : 
-%         The discretized (uniform) spatial grid on the interval [0,L] so that
-%         spgrid(1)=0 and spgrid(end)=L, 
-%     cfun : function
-%         Defines the spatially dependent coefficient function c(x)
-%     BCtype : string
-%         Boundary condition configuration, either
-%         'DD' for Dirichlet at x=0, Dirichlet at x=1
-%         'DN' for Dirichlet at x=0, Neumann at x=1
-%         'ND' for Neumann at x=0, Dirichlet at x=1
-%         'NN' for Neumann at x=0, Neumann at x=1
-% 
-%     Returns
-%     ---------
-%     Dop : sparse matrix
-%         The square matrix representing the diffusion operator.
-%     spgrid :
-%         An adjusted spatial grid:
+% Outputs:
+%   Dop : [sparse matrix] The square matrix representing
+%   the diffusion operator.
+%
+%   spgrid : An adjusted spatial grid
 
 N = size(spgrid,2);
 assert(N > 0);

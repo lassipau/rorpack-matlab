@@ -2,6 +2,7 @@
 
 addpath(genpath('../RORPack/'))
 
+% Parameters for this example.
 N = 31; 
 
 % Initial state of the plant
@@ -15,8 +16,8 @@ x0fun = @(x,y) zeros(size(x));
 %x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
 %x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
 
+% Construct the system.
 [x0,spgrid,Sys] = ConstrHeat2DCase1(1,x0fun,N);
-
 
 % Case 1:
 yref = @(t) [(-1) * ones(size(t));cos(pi*t)];
@@ -35,7 +36,6 @@ freqsReal = [0, pi];
 
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
-
 
 %% Construct the controller
 
@@ -62,21 +62,22 @@ figure(1)
 PlotEigs(CLSys.Ae,[-1 .3 -4 4]);
 
 % PlotEigs(CLSys.Ae,[-2 .3 -6 6]);
-%%
-
+%% Closed-loop construction and simulation
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
 Tend = 16;
 tgrid = linspace(0,Tend,300);
 
-
-
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
+
+%% Visualization
 
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the output with the reference signal, reference error and control
+% signal
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -85,8 +86,7 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
-%%
-
+%% 
 
 figure(3)
 colormap jet
@@ -98,12 +98,14 @@ colormap jet
 
 %movie(MovAnim)
 
-%%
+%% 
 
 % figure(4)
 % colormap jet
-% PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
+% % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
 % PlotHeat2DSurf(x0,spgrid,zlims)
+
+%%
 
 figure(5)
 tt = linspace(0,16,500);

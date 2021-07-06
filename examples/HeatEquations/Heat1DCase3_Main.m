@@ -39,8 +39,8 @@ IB2 = [.6, .7];
 IC1 = [.1, .2];
 IC2 = [.8, .9];
 
+% Construct the system.
 [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2);
-
 
 % Model = ss(Sys.A,Sys.B,Sys.C,Sys.D);
 % tt=linspace(0,4);
@@ -81,7 +81,6 @@ freqsReal = [1 2 3 6];
 
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
-
 
 %% Construct the controller
 
@@ -166,6 +165,7 @@ PlotEigs(CLSys.Ae,[-30 .3 -6 6])
 % Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the output, reference error and control
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -173,6 +173,8 @@ subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
+
+%% State of the controlled PDE
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
@@ -182,7 +184,8 @@ figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
-%%
+%% Animation of the state of the controlled PDE
+
 figure(4)
 % No movie recording
 [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype,0.03,0);
@@ -192,7 +195,8 @@ figure(4)
 
 %movie(MovAnim)
 
-%%
+%% The reference signal
+
 figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);

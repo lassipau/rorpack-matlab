@@ -9,7 +9,8 @@
 
 addpath(genpath('../RORPack/'))
 
-N = 51; 
+% Parameters for this example.
+N = 51;
 
 % Initial state of the plant
 %x0fun = @(x) zeros(size(x));
@@ -29,6 +30,7 @@ x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % cfun = @(t) 0.3-0.6*t.*(1-t);
 
+% Construct the system.
 [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase1(cfun,x0fun,N);
 
 % Model = ss(Sys.A,Sys.B,Sys.Cm,Sys.D);
@@ -37,8 +39,8 @@ cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % plot(spgrid,xx(end,:))
 % plot(tt,(xx(:,2)-xx(:,1))*(N-1))
 
-%%
-
+% Define the reference and disturbance signals, and list the
+% required frequencies in 'freqsReal'
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -71,7 +73,6 @@ freqsReal = [1 2 3 6];
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
-
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
@@ -89,7 +90,7 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
 
 % An observer-based robust controller or
-% a dual observere-based robust controller
+% a dual observer-based robust controller
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
@@ -104,7 +105,7 @@ ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR', 0.45);
 % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'LQR',0.45);
 % ContrSys = DualObserverBasedRC(freqs,Sys,K,L,'poleplacement',0.45);
 
-%% Closed-loop simulation and visualization of the results
+%% Closed-loop construction and simulation
 
 % Construct the closed-loop system
 CLSys = ConstrCLSys(Sys,ContrSys);
@@ -120,10 +121,13 @@ tgrid = linspace(0,Tend,300);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+%% Visualization
 
 % Choose whether or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the output with the reference signal, reference error and control
+% signal
 figure(1)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -132,15 +136,13 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
-%%
-
+%% State of the controlled PDE
 
 figure(2)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid,tgrid,BCtype)
 
-%%
-
+%% Animation of the state of the controlled PDE
 
 figure(3)
 % No movie recording
@@ -151,8 +153,7 @@ figure(3)
 
 %movie(MovAnim)
 
-%%
-
+%% The reference signal
 
 figure(4)
 tt = linspace(0,16,500);

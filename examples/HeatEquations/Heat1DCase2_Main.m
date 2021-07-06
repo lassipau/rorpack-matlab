@@ -38,7 +38,8 @@ cfun = @(t) 1+0.5*cos(5/2*pi*t);
 % % plot(tt,(xx(:,2)-xx(:,1))*(N-1))
 % surf(linspace(0,1,50),tt,xx)
 
-%%
+% Define the reference and disturbance signals, and list the
+% required frequencies in 'freqsReal'
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -72,7 +73,6 @@ freqsReal = [0 1 2 3 6];
 
 % Check the consistency of the system definition
 Sys = SysConsistent(Sys,yref,wdist,freqsReal);
-
 
 %% Construct the controller
 
@@ -133,7 +133,7 @@ epsgainrange = [0.01,3];
 epsgain
 
 % An observer-based robust controller or
-% a dual observere-based robust controller
+% a dual observer-based robust controller
 % Stabilizing state feedback and output injection operators K and L
 % These are chosen based on collocated design. Only the single unstable
 % eigenvalue at s=0 needs to be stabilized
@@ -149,7 +149,7 @@ epsgain
 % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',0.5);
 % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',0.5);
 
-%% Closed-loop simulation
+%% Closed-loop construction and simulation
 
 
 CLSys = ConstrCLSys(Sys,ContrSys);
@@ -158,7 +158,6 @@ stabmarg = CLStabMargin(CLSys)
 
 figure(1)
 PlotEigs(CLSys.Ae,[-20 .3 -6 6])
-%%
 
 xe0 = [x0;zeros(size(ContrSys.G1,1),1)];
 
@@ -168,9 +167,12 @@ tgrid = linspace(0,Tend,300);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+%% Visualization
+
 % Choose whther or not to print titles of the figures
 PrintFigureTitles = true;
 
+% Plot the output, reference error and control
 figure(2)
 subplot(3,1,1)
 PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
@@ -179,8 +181,7 @@ PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
 
-%%
-
+%% State of the controlled PDE
 
 % In plotting and animating the state,
 % fill in the homogeneous Dirichlet boundary condition at x=1
@@ -190,7 +191,8 @@ figure(3)
 colormap jet
 Plot1DHeatSurf(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype)
 
-%%
+%% Animation of the state of the controlled PDE
+
 figure(4)
 % No movie recording
 [~,zlims] = Anim1DHeat(CLsim.xesol(1:N,:),spgrid_plot,tgrid,BCtype,0.03,0);
@@ -200,15 +202,13 @@ figure(4)
 
 %movie(MovAnim)
 
-%%
-
+%% The reference signal
 
 figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)
 set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
-
 
 %% Export movie to AVI
 

@@ -4,10 +4,27 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase3(...
 % with a Neumann boundary condition at x=0
 % and a Dirichlet condition at x=1
 % Usage: Can also use solely for defining the initial state x0
-% cfun = spatially varying thermal diffusivity of the material
-% x0fun = initial heat profile, function handle
-% N = dimension of the approximated system which
-% (does not include point x=1)
+% Inputs:
+%   cfun : [1x1 function_handle] spatially varying
+%   thermal diffusivity of the material
+%
+%   x0fun : [1x1 function_handle] initial heat profile
+%
+%   N : [integer] Dimension of the approximated system
+%
+%   IB1,IB2,IC1,IC2 : [1x2 matrix] control and measurement intervals
+%   (optional)
+%
+% Outputs:
+%   x0 : [Nx1 matrix] initial state of the plant
+%
+%   Sys : [struct with fields (at least) A,B,C,D] approximation of the
+%   system to be controlled
+%
+%   spgrid : [1xN matrix] spatial grid of the case
+%
+%   BCtype : [string] Boundary control type for the case, one of 'NN',
+%   'ND', 'DN' or 'DD'.
 
 % Case 3: Neumann boundary disturbance at x=0,
 % 2 distributed controls and 
@@ -47,6 +64,7 @@ h = 1/N;
 % and a Dirichlet condition at x=1
 BCtype = 'ND';
 
+% modify A and the spatial grid in accordance with the thermal diffusivity
 [A,spgrid] = DiffOp1d(cfun,spgrid,BCtype);
 
 % Two distributed inputs on the intervals IB1 and IB2
