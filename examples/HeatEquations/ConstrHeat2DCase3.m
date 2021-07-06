@@ -33,13 +33,13 @@ b24part(2:2:end) = -b24part(2:2:end);
 b24 = (2*sin(nn(2:size(nn,1),:)*(pi/2))./(nn(2:size(nn,1),:)*pi)) * b24part;
 b2 = [b21 b22;b23 b24];
 
+Sys.A = A0;
 B = [b1(:) b2(:)];
 Sys.B = B;
 C = 2*B';
 Sys.C = C;
 Sys.D = zeros(size(C,1),size(B,2));
 Sys.Bd = zeros(N*M,1);
-Sys.A = A0;
-
+Sys.Dd = zeros(size(C,1),1);
 
 end

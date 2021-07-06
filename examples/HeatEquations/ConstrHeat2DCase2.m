@@ -1,4 +1,4 @@
-function [x0,spgrid,sys] = ConstrHeat2DCase2(N,M,x0fun,cval)
+function [x0,spgrid,Sys] = ConstrHeat2DCase2(N,M,x0fun,cval)
 % Construct the system operators for the 2D heat equation example "Case 2".
 % The model is similar to “Case 1”, but the inputs and outputs of the
 % system are not collocated.
@@ -64,11 +64,11 @@ if nargout > 2
   % x=0 and 0<=y<1/2 (corresponds to "first column" of x in grid form
   Bd = reshape(2/dx*[[ones(floor(N/2),1); zeros(N-floor(N/2),1)] zeros(N,M-1)],N*M,1);
 
-  sys.A = A;
-  sys.B = B;
-  sys.Bd = Bd;
-  sys.C = C;
-  sys.D = D;
-  
+  Sys.A = A;
+  Sys.B = B;
+  Sys.Bd = Bd;
+  Sys.C = C;
+  Sys.D = D;
+  Sys.Dd = zeros(size(Sys.C,1),size(Sys.Bd,2));
 end
 

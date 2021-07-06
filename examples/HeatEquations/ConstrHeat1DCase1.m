@@ -1,8 +1,6 @@
 function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase1(cfun,x0fun,N)
 % Finite Differences approximation of a 1D Heat equation with different
-% types of boundary control
-% with Neumann boundary input (at x=0) and
-% disturbance and measured temperature output (at x=1)
+% types of distributed or boundary control and observation.
 %
 % Case 1: Neumann boundary control at x=0, regulated output y(t) and a 
 % Neumann boundary disturbance at x=1. Additional measured output at x=0

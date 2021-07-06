@@ -130,6 +130,15 @@ ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,R
 % freqs = [pi*(0:5)];
 % q=5;
 % 
+% Compute the transfer function values in 'Pvals'. Since the controller
+% feedthrough will be set to zero (Dc=0), the elements in Pvals are the
+% values P(1i*w_k) of the transfer function of (A,B,C,D) where w_k are the
+% frequencies in 'freqsReal'. Here we also use a lower order approximation
+% 'Sys_Nlow' for the controller construction.
+%
+% Nlow = 40;
+% [~,Sys_Nlow,~] = ConstrBeamKelvinVoigt(E,I,d_KV,d_v,b1,b2,xi1,xi2,bd1,v0,v0dot,Nlow);
+%
 % Pvals = cell(length(freqs),1);
 % for ind = 1:length(freqs)
 %   Pvals{ind} = Sys_Nlo.C*((1i*freqs(ind)*eye(size(Sys_Nlo.A))-Sys_Nlo.A)\Sys_Nlo.B);

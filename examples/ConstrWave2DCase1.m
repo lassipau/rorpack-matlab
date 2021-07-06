@@ -105,9 +105,12 @@ for indn = 1:Nvals
     end
   end
 end
-Q = 3; % output feedback gain
-As = A-Q*B*C; % stabilized operator A
+Q = 3; % The output feedback gain for the prestabilization
+As = A-Q*B*C; % The prestabilized operator A
 
 Sys.A = As;
 Sys.B = B;
 Sys.C = C;
+Sys.D = zeros(size(Sys.C,1),size(Sys.B,2));
+Sys.Bd = zeros(size(Sys.A,1),1);
+Sys.Dd = zeros(size(Sys.C,1),size(Sys.Bd,2));

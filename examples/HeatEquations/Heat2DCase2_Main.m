@@ -1,7 +1,8 @@
-%% Robust control of a 2D heat equation with either the dual observer based
-% robust controller (DOBRC) or the observer based robust controller (OBRC). 
-% Neumann boundary control and Dirichlet boundary observation 
-% Approximation with a Finite differences scheme 
+%% Robust control of a 2D heat equation with either the Observer Based
+% Robust Controller (ObsBasedRC) or the Dual Observer Based Robust 
+% Controller (DualObsBasedRC). 
+% Neumann boundary control and Dirichlet boundary observation.
+% Approximation with a Finite differences scheme.
 
 % The system is unstable with a single unstable eigenvalue s=0.
 
@@ -51,19 +52,13 @@ yref = @(t) sin(2*t)+0.1*cos(3*t);
 % yref = @(t) sin(2*t)+.1*cos(6*t);
 wdist = @(t) sin(t);
 
-freqsReal = [0 1 2 3];
+freqsReal = [0, 1, 2, 3];
 
-% if max(abs(real(freqs)))>0 && max(abs(imag(freqs)))>0
-%   error('nonzero real parts in frequencies!')
-% elseif max(abs(imag(freqs)))>0
-%   freqsReal = unique(abs(freqs));
-% end
 
 %% Construct the controller 
 
-
 % Observer-based robust controller
-
+%
 % Requires the construction of the stabilizing operators K21 and L to
 % stabilize the single unstable eigenvalue s=0.
 %
