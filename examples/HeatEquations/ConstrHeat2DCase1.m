@@ -1,4 +1,4 @@
-function [x0,spgrid,sys] = ConstrHeat2DCase1(cval,x0fun,N)
+function [x0,spgrid,Sys] = ConstrHeat2DCase1(cval,x0fun,N)
 % Construct the system operators for the 2D heat equation example "Case 1".
 % The system has 2 boundary inputs and 2 collocated boundary outputs, and
 % an additional boundary disturbance input. The system is impedance
@@ -16,8 +16,8 @@ x0 = reshape(x0fun(xxg,yyg),N^2,1);
 
 % Construct the system using modal approximation
 M = N;
-nn = [0:N-1].';
-mm = [0:M-1];
+nn = (0:N-1).';
+mm = (0:M-1);
 nnmm = nn*ones(1,M) + ones(N,1)*mm;
 glnm = reshape(-nnmm.^2 * pi^2,1,N*M)';
 A0 = diag(glnm);
@@ -37,12 +37,14 @@ b24 = (2*sin(nn(2:size(nn,1),:)*(pi/2))./(nn(2:size(nn,1),:)*pi)) * b24part;
 b2 = [b21 b22;b23 b24];
 
 B = [b1(:) b2(:)];
-sys.B = B;
+Sys.B = B;
 C = 2*B';
-sys.C = C;
-sys.D = zeros(size(C,1),size(B,2));
-sys.Bd = zeros(N*M,1);
-% Exponential stabilization with negative output feedback.
-sys.A = A0 - B*C;
+Sys.C = C;
+Sys.D = zeros(size(C,1),size(B,2));
+Sys.Bd = zeros(N*M,1);
+Sys.Dd = zeros(size(C,1),1);
+
+% Exponential prestabilization with negative output feedback.
+Sys.A = A0 - B*C;
 
 end

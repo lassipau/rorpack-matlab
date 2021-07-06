@@ -2,9 +2,15 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase4(cfun,x0fun,N)
 % [x0,Sys,spgrid] = Constr1DHeatCase2(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
-% types of boundary control 
-% with Neumann boundary input (at x=0) and
-% disturbance and measured temperature output (at x=1)
+% types of distributed or boundary control and observation.
+%
+% Case 4: Dirichlet boundary control at x=1, regulated output y(t) and a 
+% Neumann boundary disturbance at x=0. The system is exponentially stable,
+% but does not define a "wellposed" or "regular linear system" on the
+% natural state space X=L^2(0,1). Since the current theory does not
+% guarantee that the controller designs would work, these are simulations
+% are only for experimentation purposes. That is, PROCEED WITH CAUTION! ;)
+%
 % Usage: Can also use solely for defining the initial state x0
 % cfun = spatially variying thermal diffusivity of the material
 % x0fun = initial heat profile, function handle

@@ -1,7 +1,7 @@
 %% Robust output tracking for a 1D wave equation
-% with distributed control and observation and possible
+% with distributed control and observation and a possible
 % distributed disturbance input.
-% Dirichlet boundary conditions at $x_i=0$ and $x_i=1$.
+% Dirichlet boundary conditions at $xi=0$ and $xi=1$.
 % Since the control and observation are distributed,
 % the system is only strongly (and polynomially) stabilizable.
 % Because of this, the low-gain controller cannot be used,
@@ -17,13 +17,13 @@
 N = 40;
 % Construct the system and define the initial state. 
 % Input and disturbance input profiles
-Bfun = @(x) 10 * (1 - x);
-Bdfun = @(x) 5 * x .* (1 - x);
+Bfun = @(xi) 10*(1-xi);
+Bdfun = @(xi) 5*xi.*(1-xi);
 % ('w0' = initial profile, 'wd0' = initial velocity)
-w0fun = @(x) zeros(size(x));
-% w0fun = @(x) 1 + cos(3 * pi * x) + cos(6*x);
-% w0fun = @(x) x .* (x - 1) .* (2 - 5 * x);
-wd0fun = @(x) zeros(size(x));
+w0fun = @(xi) zeros(size(xi));
+% w0fun = @(xi) 1 + cos(3*pi*xi) + cos(6*xi);
+% w0fun = @(xi) xi.*(xi-1).*(2-5*xi);
+wd0fun = @(xi) zeros(size(xi));
 
 [Sys, x0, phin] = ConstrWave1DCase2(N, Bfun, Bdfun, w0fun, wd0fun);
 
@@ -34,12 +34,12 @@ wd0fun = @(x) zeros(size(x));
 % Case 1:
 % yref = @(t) sin(pi*t) + 0.25*cos(2*pi*t);
 % wdist = @(t) sin(6*pi*t);
-% freqsReal = [pi 2*pi 6*pi];
+% freqsReal = [pi, 2*pi, 6*pi];
 
 % Case 2:
 yref = @(t) sin(pi*t) + 0.25*cos(2*pi*t);
 wdist = @(t) zeros(size(t));
-freqsReal = [pi 2*pi];
+freqsReal = [pi, 2*pi];
 
 % Alternative: Tracking of general 2-periodic reference signals
 % Tracking of an arbitrary (nonsmooth) 2-periodic signal (no disturbance input)

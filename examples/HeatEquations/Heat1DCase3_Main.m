@@ -144,8 +144,7 @@ R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 % Size of the final reduced-order observer part of the controller
 ROMorder = 3;
 
-ContrSys = ObserverBasedROMRC(...
-    freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 
 %% Closed-loop construction and simulation
@@ -180,11 +179,11 @@ PrintFigureTitles = true;
 % the control inputs
 figure(2)
 subplot(3,1,1)
-plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 subplot(3,1,2)
-plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
-plotControl(tgrid,CLsim,ContrSys,N,PrintFigureTitles)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% State of the controlled PDE
 
