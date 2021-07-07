@@ -366,7 +366,7 @@ The other controller structures also use knowledge of the parameters $(A,B,C,D)$
 \section{Using the Software (Matlab version)}
 \label{sec:Usage}
 
-The \texttt{rorpack} Matlab library can be installed for Matlab R2019a and later\footnote{Earlier versions should be fine, but have not been tested. Let us know if issues arise!} as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
+The \texttt{rorpack} Matlab library can be installed for Matlab R2019a and later\footnote{Earlier versions should be fine, but have not been tested. Let us know of any issues!} as instructed in the \texttt{README.md} file included in the software package (this mainly involves copying the package on your hard drive and adding the ``RORPack'' folder and its subfolders to the Matlab PATH). The subdirectory \texttt{examples/} contains the included PDE examples and simulation files (documented in detail in Section~\ref{sec:PDEcases}).
 
 The following commented example file explains the typical structure and workflow of the controller construction and simulation with \RORname. The considered example cases are included in the files \texttt{Heat1DCase3\_Main.m} and \texttt{ConstrHeat1DCase3.m} and are documented in Section~\ref{sec:Heat1D3}. Due to the properties of Matlab the constructor routine used in the main simulation file is in its own separate Matlab function file with the prefix ``\texttt{Constr}''.
 
