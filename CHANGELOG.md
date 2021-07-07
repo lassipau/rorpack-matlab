@@ -8,39 +8,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added 
 
-- something
+- 
 
 ### Changed
 
-- something
+- 
 
 ### Removed
 
-- something
+- 
 
 ### Fixed
 
-- something
+- 
 
-## [0.5] - 2021-06-29
+## [v0.9.0] - 2021-07-07
 
 ### Added 
 
-- something
-
-### Changed
-
-- something
-
-### Removed
-
-- something
-
-### Fixed
-
-- something
+- RORPack for Matlab. RORPack is a software package for controller design and simulation of robust output tracking and disturbance rejection for linear partial diﬀerential equation (PDE) models.
+- Examples that make use of RORPack and illustrate its functionality. These examples include 1-dimensional heat, wave and beam equations as well as 2-dimensional heat and wave equations.
+- Documentation that gives some background on the theory that RORPack is used to approximate and simulate. Also includes descriptions of the typical structure of an example case, of the implemented controllers and of all the example cases.
 
 
 [unreleased]: https://github.com/lassipau/rorpack-matlab/compare/v0.1...HEAD
-[0.5]: https://github.com/lassipau/rorpack-matlab/releases/tag/v0.5
+[v0.9.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v0.9.0
 
