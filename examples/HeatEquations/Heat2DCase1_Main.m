@@ -106,10 +106,9 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% State of the controlled PDE
 
-% figure(3)
-% colormap jet
-% % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
-% PlotHeat2DSurf(x0,spgrid,zlims)
+figure(3)
+colormap jet
+PlotHeat2DSurfCase1(CLsim,spgrid,tgrid)
 
 %% Animation of the state of the controlled PDE
 
