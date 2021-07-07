@@ -2,8 +2,8 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase3(cfun,x0fun,N,IB1,IB2,IC1,IC2
 % Finite Differences approximation of a 1D Heat equation with different
 % types of distributed or boundary control and observation.
 %
-% Case 3: Neumann boundary disturbance at x=0, two distributed controls and 
-% two distributed outputs y(t). The controls affect the intervals 
+% Case 3: Two distributed control inputs and two distributed outputs y(t), 
+% Neumann boundary disturbance at x=0. The controls affect the intervals 
 % 'IB1' = [a_1,b_1] and 'IB2' = [a_2,b_2], and the measurements are
 % the averages of the temperatures on the intervals 'IC1' = [c_1,d_1] and 
 % 'IC2' = [c_2,d_2]. If these parameters are not given, then default 

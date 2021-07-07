@@ -2,13 +2,11 @@
 % Neumann boundary control and Dirichlet boundary observation 
 % Approximation with a Finite differences scheme 
 
-% Neumann boundary disturbance at x=0,
-% two distributed controls and
-% two distributed measurement regulated outputs. The controls act 
-% on the intervals 'IB1' and 'IB2' (Default 'IB1' = [0.3,0.4] and 
-% 'IB2' = [0.6,0.7]) and the measurements are the average 
-% temperatures on the intervals 'IC1'  and 'IC2' (Default 
-% 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
+% Two distributed control inputs and two distributed outputs y(t), Neumann
+% boundary disturbance at x=0. The controls act on the intervals 
+% 'IB1' and 'IB2' (Default 'IB1' = [0.3,0.4] and 'IB2' = [0.6,0.7]) 
+% and the measurements are the average temperatures on the intervals 'IC1'  
+% and 'IC2' (Default 'IC1' = [0.1,0.2] and 'IC2' = [0.8,0.9]).
 
 % addpath(genpath('../RORPack/'))
 
@@ -73,7 +71,7 @@ IC2 = [.8, .9];
 % wdist = @(t) zeros(size(t));
 yref = @(t) [2*ones(size(t));2*cos(3*t)+sin(2*t)];
 wdist = @(t) 6*cos(t);
-freqsReal = [1 2 3 6];
+freqsReal = [0,1, 2, 3, 6];
 
 % Sys.A = Sys.A-Sys.B*Sys.B';
 % PlotEigs(full(Sys.A),[-20 1 -.3 .3])
@@ -116,7 +114,7 @@ L = -10*Sys.C';
 % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
 % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
 
-% A reduced order observer-based robust controller
+% A Reduced Order Observer Based Robust Controller
 %
 % The construction of the controller uses a Galerkin approximation
 % of the heat system:
@@ -184,6 +182,7 @@ subplot(3,1,2)
 PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 subplot(3,1,3)
 PlotControl(tgrid,CLsim,PrintFigureTitles)
+set(gcf,'color','white')
 
 %% State of the controlled PDE
 
