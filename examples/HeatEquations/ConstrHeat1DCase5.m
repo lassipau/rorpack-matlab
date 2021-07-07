@@ -2,9 +2,16 @@ function [x0,Sys,spgrid,BCtype] = ConstrHeat1DCase5(cfun,x0fun,N,Bd_profile)
 % [x0,Sys,spgrid] = Constr1DHeatCase5(x0fun,N)
 % 
 % Finite Differences approximation of a 1D Heat equation with different
-% types of boundary control 
-% with Neumann boundary input (at x=0) and
-% disturbance and measured temperature output (at x=1)
+% types of distributed or boundary control and observation.
+%
+% Case 5: Similar to Case 1, but with two boundary inputs and outputs: 
+% Neumann boundary control u_1(t) at x=0, and u_2(t) at x=1. Pointwise
+% temperature measurements y_1(t) at x=0, and y_2(t) at x=1. Two input
+% disturbances w_{dist,1}(t) at x=0 and w_{dist,2}(t) at x=1, and a third
+% distributed disturbance with profile "Bd_profile" (function). The system 
+% is unstable (eigenvalue at 0), but is impedance passive and can be
+% stabilized with negative output feedback.
+%
 % Usage: Can also use solely for defining the initial state x0
 % cfun = spatially variying thermal diffusivity of the material
 % x0fun = initial heat profile, function handle

@@ -93,6 +93,7 @@ Sys.B = B;
 Sys.C = C;
 Sys.D = D;
 Sys.Bd = Bd;
+Sys.Dd = zeros(size(Sys.C,1),size(Sys.Bd,2));
 
 
 % Define an (N-1)x(N+1) conversion matrix Q_coeff such that

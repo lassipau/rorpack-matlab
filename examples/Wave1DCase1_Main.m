@@ -83,16 +83,13 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
-
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
-% 
-% for ind = 1:length(freqsReal)
-%   if cond(Pappr(freqs(ind)))>1e6
-%     warning(['The matrix P(iw_k) for k=' num2str(ind) ' is nearly singular!'])
-%   end
-% end
-% 
+%
+% Compute the transfer function values in 'Pvals'. Since the controller
+% feedthrough will be set to zero (Dc=0), the elements in Pvals are the
+% values P(1i*w_k) of the transfer function of (A,B,C,D) where w_k are the
+% frequencies in 'freqsReal'.
+%
+% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 % Pvals = cell(1,length(freqs));
 % for ind = 1:length(freqs)
 %   Pvals{ind} = Pappr(freqs(ind));

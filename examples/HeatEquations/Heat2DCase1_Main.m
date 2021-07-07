@@ -52,8 +52,11 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 % A Low-Gain 'Minimal' Robust Controller
 %
+% Compute the transfer function values in 'Pvals'. Since the controller
+% feedthrough will be set to zero (Dc=0), the elements in Pvals are the
+% values P(1i*w_k) of the transfer function of (A,B,C,D) where w_k are the
+% frequencies in 'freqsReal'.
 Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
-
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
   Pvals{ind} = Pappr(freqsReal(ind));

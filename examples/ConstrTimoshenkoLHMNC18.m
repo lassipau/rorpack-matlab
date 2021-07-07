@@ -1,4 +1,4 @@
-function [x0,spgrid,sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
+function [x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
 % [x0,spgrid,sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
 %
 % Construct the Timoshenko beam model from the conference article by
@@ -30,8 +30,6 @@ ee = ones(N,1);
 P012 = 1/h*spdiags([-ee ee],-1:0,N,N);
 P021 = 1/h*spdiags([-ee ee],0:1,N,N);
 
-
-
 A11 = [sparse(N,N) P012;P021 -bw*speye(N,N)];
 A22 = [sparse(N,N) P012;P021 -bphi*speye(N,N)];
 
@@ -46,17 +44,17 @@ A21 = [ZN ZN;P141 ZN];
 A = [A11 A12;A21 A22];
 
 
-% Control and observation on [4/5 1], both on the element x4
-
+% Control and observation on [4/5 1], both on the state variable x_4(t)
 B = [zeros(3*N,1);(xis(2:end)>=.8)];
 C = h*B.';
 
 
-sys.A = A;
-sys.B = B;
-sys.Bd = sparse(4*N,1);
-sys.C = C;
-sys.D = 0;
+Sys.A = A;
+Sys.B = B;
+Sys.Bd = sparse(4*N,1);
+Sys.C = C;
+Sys.D = 0;
+Sys.Dd = zeros(size(Sys.C,1),size(Sys.Bd,2));
 
 spgrid = xis;
 x0 = [x10fun(xis(1:(end-1)));x20fun(xis(2:end));x30fun(xis(1:(end-1)));x40fun(xis(2:end))];

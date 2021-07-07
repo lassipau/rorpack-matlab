@@ -50,15 +50,11 @@ Sys.C = C;
 % Sys.Cm = C2;
 Sys.D = 0;
 % Sys.Dm = 0;
+Sys.Dd = zeros(size(Sys.C,1),size(Sys.Bd,2));
+
 
 % Cm = measure the average displacement on the wave profile, used in
 % prestabilization of the eigenvalue \lambda=0
 Sys.Cm = [[1,0],zeros(1,2*(N-1))];
 Sys.Dm = 0;
 
-%  Sys.A = A-1/2*B*C2;
-% Sys.B = B;
-%Sys.A = A-1/2*B*(C+C2);
-% Sys.C = C;
-% % Sys.C2 = C2;
-% Sys.D = 0;

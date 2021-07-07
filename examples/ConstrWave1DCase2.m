@@ -15,8 +15,6 @@ A = zeros(2*N, 2*N);
 B = zeros(2*N, 1);
 Bd = zeros(2*N, 1);
 C = zeros(1, 2*N);
-% Kinf = zeros(1, 2*N);
-% Linf = zeros(2*N, 1);
 x0 = zeros(2*N, 1);
 
 
