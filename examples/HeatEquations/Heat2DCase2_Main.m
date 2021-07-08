@@ -10,8 +10,8 @@
 
 
 cval = 1;
-N = 16; 
-M = N; % WARNING: The approximation currently only works correctly with M=N.
+N = 15; 
+M = 16; % WARNING: The approximation currently only works correctly with M=N.
 
 
 % Initial state of the plant
@@ -54,6 +54,8 @@ wdist = @(t) sin(t);
 
 freqsReal = [0, 1, 2, 3];
 
+% Check the consistency of the system definition
+Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 %% Construct the controller 
 
@@ -159,10 +161,9 @@ set(gcf,'color','white')
 figure(3)
 % PlotHeat2DSurf(x0,spgrid,[-1.4,1.4])
 plotind = 155;
-PlotHeat2DSurf(CLsim.xesol(1:N*M,plotind),spgrid)
+PlotHeat2DSurfCase2(CLsim,spgrid,tgrid,plotind)
 
 %% Animation of the state of the controlled PDE
-% (DOES NOT WORK FOR N =/= M YET)
 
 figure(4)
 colormap jet

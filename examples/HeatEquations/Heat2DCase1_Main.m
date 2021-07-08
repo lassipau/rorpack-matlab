@@ -111,7 +111,8 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 figure(3)
 colormap jet
-PlotHeat2DSurfCase1(CLsim,spgrid,tgrid)
+plotind = 150;
+PlotHeat2DSurfCase1(CLsim,spgrid,tgrid,plotind)
 
 %% Animation of the state of the controlled PDE
 

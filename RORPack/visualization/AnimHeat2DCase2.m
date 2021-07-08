@@ -37,7 +37,7 @@ if record == 1
   
   for ind = 1:length(tgrid)
     
-    surf(xx,yy,reshape(zz(:,ind),N,M));
+    surf(xx,yy,reshape(zz(:,ind),M,N).');
     axis(axlims)
     caxis(zlims)
     xlabel('$x$','Interpreter','latex','Fontsize',20)
@@ -55,7 +55,7 @@ else
   MovAnim = [];
   for ind = 1:length(tgrid)
     
-    surf(xx,yy,reshape(zz(:,ind),N,M).');
+    surf(xx,yy,reshape(zz(:,ind),M,N).');
     axis(axlims)
     caxis(zlims)
     xlabel('$x$','Interpreter','latex','Fontsize',20)
