@@ -183,6 +183,25 @@ if ~isnan(ROMorder)
         BLr = Br_full(:,1:dimU);
         Lr = Br_full(:,(dimU+1):end);
         K2r = rsys.C;
+        
+%         % Alternative: Complete the balanced truncation using MORLAB (if
+%         % available)
+%         ml_opts = ml_morlabopts('ml_ct_ss_bt');
+%         ml_opts.Order = ROMorder;
+%         ml_opts.OrderComputation = 'order';
+%         ml_opts.Method = 'bfsr';
+%         
+%         tic
+%         [rsys,rom_info] = ml_ct_ss_bt(AN+L*CN,[BN+L*D,L],K2N,zeros(dimU,dimU+dimY),ml_opts);
+%         fprintf(['Model reduction using MORLAB took ' num2str(round(toc,1)) ' seconds.\n'])
+% 
+%         ALr = rsys.Ar;
+%         Br_full = rsys.Br;
+%         BLr = Br_full(:,1:dimU);
+%         Lr = Br_full(:,(dimU+1):end);
+%         K2r = rsys.Cr;
+   
+        
     catch
         warning(['Model reduction step failed! Modify "ROMorder", or check that "balred" is available. ', ...
             'Proceeding without model reduction (with option "ROMorder=NaN")']);
