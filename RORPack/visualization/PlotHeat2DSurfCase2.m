@@ -1,4 +1,4 @@
-function PlotHeat2DSurfCase1(CLsim,spgrid,tgrid,plotind,zlims)
+function PlotHeat2DSurfCase2(CLsim,spgrid,tgrid,plotind,zlims)
 %
 % Plot the solution of the 2D Heat equation
 % CLsim = simulated state of the closed-loop system
@@ -7,15 +7,15 @@ function PlotHeat2DSurfCase1(CLsim,spgrid,tgrid,plotind,zlims)
 % plotind = tgrid(plotind) is the time t at which the solution is plotted
 % zlims = limits for the z-axis (optional)
 
+
 xx = spgrid.xx;
 yy = spgrid.yy;
 
-% size of the state space X_N is N^2, here the grid has is N x N
+% size of the state space X_N is N*M, here the grid has is N x M
 N = size(xx,1);
+M = size(xx,2);
 
-xesol = NormalizeHeat2DData(N, deval(CLsim.solstruct,tgrid), xx, yy);
-
-zz = xesol(1:N^2,:);
+zz = CLsim.xesol(1:N*M,plotind);
 
 if max(max(abs(imag(zz)))) > 1e-8
   warning('Solution may contain imaginary parts that are ignored in the animation.')
@@ -30,7 +30,7 @@ end
 axlims = [xx(1,1) xx(1,end) yy(1,1) yy(end,1) zlims];
 
 % state at time tgrid(plotind)
-surf(xx,yy,reshape(zz(:,plotind),N,N));
+surf(xx,yy,reshape(zz,M,N).');
 axis(axlims)
 caxis(zlims)
 ylabel('$y$','Interpreter','latex','Fontsize',20)
