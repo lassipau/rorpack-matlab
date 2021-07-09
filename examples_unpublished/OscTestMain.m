@@ -68,8 +68,18 @@ tgrid = linspace(0,Tend,300);
 
 CLsim = SimCLSys(CLSys,xe0,yref,wdist,tgrid,[]);
 
+
+% Choose whther or not to print titles of the figures
+PrintFigureTitles = true;
+
 figure(1)
-plotBasics(tgrid,yref,CLsim)
+subplot(3,1,1)
+PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+subplot(3,1,2)
+PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+subplot(3,1,3)
+PlotControl(tgrid,CLsim,PrintFigureTitles)
+
 
 %%
 
