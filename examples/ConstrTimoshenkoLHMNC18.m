@@ -1,4 +1,5 @@
-function [x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
+function [x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(w0fun,wd0fun,phi0fun,phid0fun,N)
+% function [x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
 % [x0,spgrid,sys] = ConstrLHMNC18(x10fun,x20fun,x30fun,x40fun,N)
 %
 % Construct the Timoshenko beam model from the conference article by
@@ -15,15 +16,25 @@ bw = 2;
 bphi = 2;
 xis = (0:h:1).';
 
+% The simulation uses values \rho=1 and I_\rho=1 (hard-coded in operators
+% A, B, C).
+rho = 1;
+I_rho = 1;
 
+% State variables: 
+% x1 = w_z-phi, x2 = rho*w_t
+% x3 = phi_z, x4 = I_rho*phi_t
+
+% Boundary conditions:
+% x_1(1)=x_3(1)=0
+% x_2(0)=x_4(0)=0
+
+% The spatial grids for the approximations of the state variables:
 % xi_0 = 0, xi_N = 1
 % x1 = x_1(0) ... x_1((N-1)h)
 % x3 = x_3(0) ... x_3((N-1)h)
 % x2 = x_2(h) ... x_2(Nh)
 % x4 = x_4(h) ... x_4(Nh)
-
-% x_1(1)=x_3(1)=0
-% x_2(0)=x_4(0)=0
 
 ee = ones(N,1);
 
@@ -57,5 +68,6 @@ Sys.D = 0;
 Sys.Dd = zeros(size(Sys.C,1),size(Sys.Bd,2));
 
 spgrid = xis;
-x0 = [x10fun(xis(1:(end-1)));x20fun(xis(2:end));x30fun(xis(1:(end-1)));x40fun(xis(2:end))];
 
+% Compute the initial state based on w0fun, wd0fun, phi0, and phid0
+x0 = [diff(w0fun(xis))/h-phi0fun(xis(1:(end-1)));rho*wd0fun(xis(2:end));diff(phi0fun(xis))/h;I_rho*phid0fun(xis(2:end))];

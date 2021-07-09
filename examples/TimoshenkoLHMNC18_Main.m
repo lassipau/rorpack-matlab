@@ -16,21 +16,25 @@
 N = 50; 
 
 % Initial state of the plant (the state has four components, x_1, ... x_4)
-x10fun = @(x) zeros(size(x));
-x20fun = @(x) zeros(size(x));
-x30fun = @(x) zeros(size(x));
-x40fun = @(x) zeros(size(x));
-%x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
-% x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
-%x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1;
-%x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1/2;
-%x0fun = @(x,y) 1*(1-x).^2.*(3-2*(1-x))-1;
-%x0fun = @(x,y) .5*(1-x).^2.*(3-2*(1-x))-.5;
-%x0fun = @(x,y) 1/4*(x.^3-1.5*x.^2)-1/4;
-%x0fun = @(x,y) .2*x.^2.*(3-2*x)-.5;
+% The initial state is based on the initial data for w(xi,t) and phi(xi,t),
+% namely w0fun (initial deflection), wd0fun (initial velocity), 
+% phi0fun (initial angular displacement), phid0fun (initial angular
+% velocity)
+
+w0fun = @(x) cos(pi*x);
+% wd0fun = @(x) zeros(size(x));
+wd0fun = @(x) 5*sin(pi*x);
+phi0fun = @(x) zeros(size(x));
+phid0fun = @(x) zeros(size(x));
 
 
-[x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(x10fun,x20fun,x30fun,x40fun,N);
+[x0,spgrid,Sys] = ConstrTimoshenkoLHMNC18(w0fun,wd0fun,phi0fun,phid0fun,N);
+
+
+% Define the reference and disturbance signals
+% NOTE: The system has a transmission zero at s=0, and thus the tracking 
+% and rejection of signal parts with this frequency is not possible! (i.e.,
+% freqsReal should not contain 0).
 
 %yref = @(t) sin(2*t)+.1*cos(6*t);
 %yref = @(t) sin(2*t)+.2*cos(3*t);
@@ -67,10 +71,10 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 % the paper).
 
 dimY = size(Sys.C,1);
-epsgain = [10,50];
+epsgain = [3,7];
 % epsgain = 13;
 [ContrSys,epsgain] = PassiveRC(freqsReal,dimY,epsgain,Sys);
-
+epsgain
 
 % % Alternative controller:
 % % An observer-based robust controller
@@ -128,10 +132,23 @@ PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 %% State of the controlled PDE
 
+% In order to visualize the behaviour of the beam, we need to compute the
+% deflection profile w(xi,t) based on the state variable x_2(t) =
+% \rho*\dot{w}(\xi,t) by numerical integration. 
+% We use a denser grid for 't' for the numerical integration
+tt_int = linspace(0,Tend,601);
+xe_int = deval(CLsim.solstruct,tt_int);
+% In this example rho=1
+rho = 1;
+profile_int = 1/rho*(w0fun(spgrid)*ones(1,length(tt_int))+[zeros(1,length(tt_int));cumtrapz(tt_int(2)-tt_int(1),xe_int((N+1):(2*N),:),2)]);
+% Interpolate the data to the plotting grid
+profile = interp1(tt_int.',profile_int.',tgrid(:)).';
+
+
 figure(3)
 plotskip = 2;
-PlotLHMNCSurf(CLsim.xesol(:,1:plotskip:end),spgrid,tgrid(:,1:plotskip:end),[-9 9])
-set(gca,'ztick',-8:4:8);
+PlotLHMNCSurf(profile(:,1:plotskip:end),spgrid,tgrid(:,1:plotskip:end))
+
 
 %% The reference signal
 
