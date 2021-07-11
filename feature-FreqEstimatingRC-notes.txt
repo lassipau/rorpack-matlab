@@ -1,0 +1,15 @@
+Notes for the new feature "Frequency Estimating Robust Controller":
+
+Add a new controller "paradigm", where the "missing" frequencies are estimated from the tracking error signal (as mentioned in the introduction of the AfsPau-manuscript".
+
+In particular: 
+ - The controller is first set up with an internal model of the _known_ frequencies (basically, 0 + the frequencies of yref). 
+ - The controller is used for certain period of time T_0 during which error e(t) is analysed by a frequency estimator which extracts the frequencies of its non-decaying part. 
+ - The time T_0 is either set explicitly, or (more challenging?) determined during the simulation based on the changes of the estimated frequencies and a tolerance parameter etc. 
+ 
+
+General comments and properties:
+ - This could be a "controller platform" in the sense that it can use any IM-based controller as the main controller structure (just by calling the implemented routines).
+ - This probably requires a parallel implementation for simulating the CL-system (which then also includes the simulation of the frequency estimator, if it is of a dynamic type). 
+ - Could consider if there are some parameters which do not need to be recomputed in the controllers when the IM is changed (e.g., the estimator parts L in LQG etc)
+ - Could add different frequency estimator types, e.g., the ones that are already implemented, by CarAst08, VedVed20arxiv), as well as FFT.
