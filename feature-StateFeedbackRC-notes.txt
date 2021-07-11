@@ -1,0 +1,3 @@
+Implement the internal model based controller which uses state feedback in closed-loop stabilization.
+
+The stabilization of the extened plant can be done either with LQR or with given K21, and using the block-diagonalisation approach (plus LQR/pole placement).
