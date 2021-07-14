@@ -140,7 +140,9 @@ tt_int = linspace(0,Tend,601);
 xe_int = deval(CLsim.solstruct,tt_int);
 % In this example rho=1
 rho = 1;
-profile_int = 1/rho*(w0fun(spgrid)*ones(1,length(tt_int))+[zeros(1,length(tt_int));cumtrapz(tt_int(2)-tt_int(1),xe_int((N+1):(2*N),:),2)]);
+profile_int = 1/rho*(w0fun(spgrid)*ones(1,length(tt_int))+...
+    [zeros(1,length(tt_int));...
+    cumtrapz(tt_int(2)-tt_int(1),xe_int((N+1):(2*N),:),2)]);
 % Interpolate the data to the plotting grid
 profile = interp1(tt_int.',profile_int.',tgrid(:)).';
 
@@ -149,10 +151,14 @@ figure(3)
 plotskip = 2;
 PlotLHMNCSurf(profile(:,1:plotskip:end),spgrid,tgrid(:,1:plotskip:end))
 
+%% Animate the solution of the controlled PDE
+
+figure(4)
+AnimLHMNC(profile,spgrid,tgrid,0.02,0)
 
 %% The reference signal
 
-figure(4)
+figure(5)
 tt = linspace(0,16,500);
 plot(tt,yref(tt),'Color',1.1*[0 0.447 0.741],'Linewidth',3);
 title('Reference signal $y_{ref}$','Interpreter','latex','Fontsize',16)

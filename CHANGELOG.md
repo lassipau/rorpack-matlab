@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added 
 
+- Animation of the solution of the controlled PDE for the Timoshenko beam example case.
 - 
 
 ### Changed
@@ -20,6 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
+- Heat2DCase2 animation works for M != N now.
 - 
 
 ## [v0.9.0] - 2021-07-07

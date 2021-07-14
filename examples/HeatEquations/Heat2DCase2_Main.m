@@ -11,7 +11,7 @@
 
 cval = 1;
 N = 15; 
-M = 16; % WARNING: The approximation currently only works correctly with M=N.
+M = 16;
 
 
 % Initial state of the plant
