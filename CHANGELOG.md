@@ -43,6 +43,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 
 [unreleased]: https://github.com/lassipau/rorpack-matlab/compare/v0.1...HEAD
-[v.1.0.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v1.0.0
+[v1.0.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v1.0.0
 [v0.9.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v0.9.0
 
