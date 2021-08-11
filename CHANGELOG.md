@@ -42,7 +42,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Documentation that gives some background on the theory that RORPack is used to approximate and simulate. Also includes descriptions of the typical structure of an example case, of the implemented controllers and of all the example cases.
 
 
-[unreleased]: https://github.com/lassipau/rorpack-matlab/compare/v0.1...HEAD
+[unreleased]: https://github.com/lassipau/rorpack-matlab/tree/dev
 [v1.0.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v1.0.0
 [v0.9.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v0.9.0
 
