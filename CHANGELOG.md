@@ -8,8 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added 
 
-- Animation of the solution of the controlled PDE for the Timoshenko beam example case.
-- 
+-  
 
 ### Changed
 
@@ -21,8 +20,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
-- Heat2DCase2 animation works for M != N now.
 - 
+
+## [v1.0.0] - 2021-11-08
+
+### Added 
+
+- Animation of the solution of the controlled PDE for the Timoshenko beam example case.
+
+### Fixed
+
+- Heat2DCase2 animation works for M != N now.
+- Small fix to ObserverBasedROMRC.
 
 ## [v0.9.0] - 2021-07-07
 
@@ -34,5 +43,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 
 [unreleased]: https://github.com/lassipau/rorpack-matlab/compare/v0.1...HEAD
+[v.1.0.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v1.0.0
 [v0.9.0]: https://github.com/lassipau/rorpack-matlab/releases/tag/v0.9.0
 
