@@ -143,7 +143,6 @@ R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 ROMorder = 3;
 
 ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
-ContrSys.G1
 
 
 %% Closed-loop construction and simulation
