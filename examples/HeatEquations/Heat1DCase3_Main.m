@@ -16,9 +16,9 @@ N = 100;
 
 % Initial state of the plant
 %x0fun = @(x) zeros(size(x));
-x0fun = @(x) 1*(1+cos(pi*(1-x)));
+%x0fun = @(x) 1*(1+cos(pi*(1-x)));
 %x0fun = @(x) 3*(1-x)+x;
-%x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
+x0fun = @(x) 0.5*(1+cos(pi*(1-x)));
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x) 1*(1-x).^2.*(3-2*(1-x))-1;
@@ -30,8 +30,8 @@ x0fun = @(x) 1*(1+cos(pi*(1-x)));
 % cfun = @(xi) ones(size(xi));
 % cfun = @(xi) 1+xi;
 % cfun = @(xi) 1-2*xi.*(1-2*xi);
-% cfun = @(xi) 1+0.5*cos(5/2*pi*xi);
-cfun = @(xi) 0.3-0.6*xi.*(1-xi);
+cfun = @(xi) 1+0.5*cos(5/2*pi*xi);
+% cfun = @(xi) 0.3-0.6*xi.*(1-xi);
 
 IB1 = [.3, .4];
 IB2 = [.6, .7];
@@ -143,6 +143,7 @@ R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
 ROMorder = 3;
 
 ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+ContrSys.G1
 
 
 %% Closed-loop construction and simulation

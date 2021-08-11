@@ -175,6 +175,7 @@ K2N = K(:,(dimZ0+1):end);
 if ~isnan(ROMorder)
     try
         tic
+        % opts = balredOptions('StateElimMethod','Truncate');
         rsys = balred(ss(AN+L*CN,[BN+L*D,L],K2N,zeros(dimU,dimU+dimY)),ROMorder);
         fprintf(['Model reduction step took ' num2str(round(toc,1)) ' seconds.\n'])
         
@@ -186,6 +187,11 @@ if ~isnan(ROMorder)
     catch
         warning(['Model reduction step failed! Modify "ROMorder", or check that "balred" is available. ', ...
             'Proceeding without model reduction (with option "ROMorder=NaN")']);
+        
+        ALr = AN+L*CN;
+        BLr = BN+L*D;
+        Lr = L;
+        K2r = K2N;
     end
 end
 
