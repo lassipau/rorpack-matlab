@@ -38,9 +38,9 @@ dimX = size(A,1);
 dimY = size(C,1);
 dimU = size(B,2);
 
-if dimY ~= dimU
-  error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
-end
+% if dimY ~= dimU
+%   error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
+% end
 
 q = length(freqsReal);
 
@@ -55,6 +55,8 @@ end
 
 % Construct the internal model
 [G1,G2] = ConstrIM(freqsReal,dimY);
+
+% TO IMPROVE: This choice only works if dimU=dimY
 K = G2.';
 
 dimZ = size(G1,1);
@@ -63,10 +65,10 @@ dimZ = size(G1,1);
 H = sylvester(-(A+L1*C),G1,(B+L1*D)*K);
 C1 = C*H+D*K;
 
-% Stabilization of the internal model, choose K1 so that G1+G2*L1 is
+% Stabilization of the internal model, choose G2 so that G1+G2*C1 is
 % exponentially stable
 if isequal(IMstabtype,'LQR')
-  G2 = conj(-lqr(conj(G1).'+IMstabmarg*eye(dimZ),conj(C1).',100*eye(dimZ),0.001*eye(dimU),zeros(dimZ,dimU))).';
+  G2 = conj(-lqr(conj(G1).'+IMstabmarg*eye(dimZ),conj(C1).',100*eye(dimZ),0.001*eye(dimY),zeros(dimZ,dimY))).';
 elseif isequal(IMstabtype,'poleplacement')
   if freqsReal(1)==0
     target_eigs = ones(2*length(freqsReal)-1,1)*linspace(-1.1*IMstabmarg,-IMstabmarg,dimY)...
@@ -83,11 +85,11 @@ else
   error('Unknown stabilization type for the Internal Model')
 end
 
-L1 = L1+H*G2;
+L = L1+H*G2;
 
 % Construct the controller parameters
-ContrSys.G1 = [G1 G2*(C+D*K2); zeros(dimX,dimZ) A+B*K2+L1*(C+D*K2)];
-ContrSys.G2 = [G2;L1];
+ContrSys.G1 = [G1 G2*(C+D*K2); zeros(dimX,dimZ) A+B*K2+L*(C+D*K2)];
+ContrSys.G2 = [G2;L];
 ContrSys.K = [K, -K2];
 ContrSys.Dc = zeros(dimU,dimY);
 
