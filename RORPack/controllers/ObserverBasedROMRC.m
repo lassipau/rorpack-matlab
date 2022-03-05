@@ -123,7 +123,7 @@ if verLessThan('matlab','R2019a')
     % Stabilize the pair (As+alpha2,Bs)
     tic
     Bs_ext = [Bs,zeros(dimZ0+dimX)];
-    Ss_ext = [zeros(dimZ0+dimX,dimY),Qs'];
+    Ss_ext = [zeros(dimZ0+dimX,dimU),Qs'];
     R2_ext = blkdiag(R2,-eye(dimZ0+dimX));
     [~,evals,K_ext] = care(As+alpha2*eye(dimZ0+dimX),Bs_ext,0,R2_ext,Ss_ext);
     K = -K_ext(1:dimU,:);
@@ -151,7 +151,7 @@ else
     % Stabilize the pair (As+alpha2,Bs)
     tic
     Bs_ext = [Bs,zeros(dimZ0+dimX)];
-    Ss_ext = [zeros(dimZ0+dimX,dimY),Qs'];
+    Ss_ext = [zeros(dimZ0+dimX,dimU),Qs'];
     R2_ext = blkdiag(R2,-eye(dimZ0+dimX));
     [~,K_ext,evals] = icare(As+alpha2*eye(dimZ0+dimX),Bs_ext,0,R2_ext,Ss_ext,[],[]);
     K = -K_ext(1:dimU,:);
