@@ -72,9 +72,9 @@ if isequal(IMstabtype,'full_K')
     
 else
     
-    if dimY ~= dimU
-      error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed (in this form).')
-    end
+%     if dimY ~= dimU
+%       error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed (in this form).')
+%     end
 
     % Find H as the solution of G1*H=H*(A+B*K21)+G2*(C+D*K21) and define B1
     H = sylvester(G1,-(A+B*K21),G2*(C+D*K21));

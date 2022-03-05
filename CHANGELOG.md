@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added 
 
--  
+- A new stabilization option 'full_K' in ObserverBasedRC
 
 ### Changed
 
@@ -20,7 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed
 
-- 
+- ObserverBasedROMRC: A mistake in the stabilization parameter dimensions.
 
 ## [v1.0.0] - 2021-11-08
 
