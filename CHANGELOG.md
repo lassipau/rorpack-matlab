@@ -8,11 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Added 
 
-- A new stabilization option 'full_K' in ObserverBasedRC
+-
 
 ### Changed
 
-- 
+- A new stabilization option 'full_K' in ObserverBasedRC
+- Both DualObserverBasedRC and ObserverBasedRC can now be used also for systems with more inputs than outputs, i.e., dimU > dimY.
 
 ### Removed
 

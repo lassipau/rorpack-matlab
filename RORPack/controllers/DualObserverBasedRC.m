@@ -38,32 +38,58 @@ dimX = size(A,1);
 dimY = size(C,1);
 dimU = size(B,2);
 
-% if dimY ~= dimU
-%   error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
-% end
-
 q = length(freqsReal);
 
 
 PLappr = @(s) C*((s*eye(dimX)-(A+L1*C))\(B+L1*D))+D;
 for ind = 1:q
-  if cond(PLappr(1i*freqsReal(ind)))>1e6
-    warning(['The matrix P_L(iw_k) for l=' num2str(ind) ' is nearly singular!'])
+  if rank(PLappr(1i*freqsReal(ind)),1e-6)<dimY
+    warning(['The matrix P_L(iw_k) for l=' num2str(ind) ' is (at least nearly) non-surjective!'])
   end
+  if max(max(abs(conj(PLappr(1i*freqsReal(ind)))-PLappr(-1i*freqsReal(ind)))))>1e-4
+    warning('The controller design is only guaranteed to work for systems satisfying P(-iw_k)=conj(P(-iw_k))!')
+  end
+
 end
 
 
 % Construct the internal model
 [G1,G2] = ConstrIM(freqsReal,dimY);
-
-% TO IMPROVE: This choice only works if dimU=dimY
-K = G2.';
-
 dimZ = size(G1,1);
 
+
+if dimY == dimU
+    %   error('The system has an unequal number of inputs and outputs, the observer-based controller design cannot be completed.')
+    % If the number of inputs and outputs are the same, choose K using
+    % blocks of identity and zero matrices
+    K1 = G2.';
+else 
+    % Otherwise choose parts K1_k of K1 in such a way that P_L(iw_k)K1_k are
+    % invertible. These choices are based on the approximate values of the
+    % transfer function P_L(s) at iw_k. Note that using approximations is valid
+    % in this part of the controller construction, since the purpose is
+    % only to guarantee the stabilizability of the pair (C_1,G_1).
+    
+    K1 = zeros(dimU,dimZ);
+    
+    if freqsReal(1)==0
+        K1(:,1:dimY) = pinv(PLappr(0));
+        ind_offset = 1;
+    else
+        ind_offset = 0;
+    end
+    
+    for ind = (ind_offset+1):q
+        PLpinv = pinv(PLappr(1i*freqsReal(ind)));
+        K1(:,(2*(ind-1-ind_offset)+ind_offset)*dimY+(1:(2*dimY))) = [real(PLpinv),imag(PLpinv)];
+    end
+end
+
+
+
 % Find H as the solution of H*G1=(A+L1*C)*H+(B+L1*D)*K and define C1
-H = sylvester(-(A+L1*C),G1,(B+L1*D)*K);
-C1 = C*H+D*K;
+H = sylvester(-(A+L1*C),G1,(B+L1*D)*K1);
+C1 = C*H+D*K1;
 
 % Stabilization of the internal model, choose G2 so that G1+G2*C1 is
 % exponentially stable
@@ -90,7 +116,7 @@ L = L1+H*G2;
 % Construct the controller parameters
 ContrSys.G1 = [G1 G2*(C+D*K2); zeros(dimX,dimZ) A+B*K2+L*(C+D*K2)];
 ContrSys.G2 = [G2;L];
-ContrSys.K = [K, -K2];
+ContrSys.K = [K1, -K2];
 ContrSys.Dc = zeros(dimU,dimY);
 
 if issparse(A)
