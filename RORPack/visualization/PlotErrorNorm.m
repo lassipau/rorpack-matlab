@@ -1,4 +1,4 @@
-function plotErrorNorm(tgrid,CLsim,PrintFigureTitles)
+function PlotErrorNorm(tgrid,CLsim,PrintFigureTitles)
 
 % Plot the regulation error
 hold off
@@ -9,4 +9,4 @@ set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 if PrintFigureTitles == true
     title('Regulation error $y(t)-y_{ref}(t)$','Interpreter','latex','Fontsize',16)
 end
-set(gcf,'color',1/255*[252 247 255])
+% set(gcf,'color',1/255*[252 247 255])

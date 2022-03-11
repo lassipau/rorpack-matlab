@@ -1,4 +1,4 @@
-function plotOutput(tgrid,yref,CLsim,PrintFigureTitles)
+function PlotOutput(tgrid,yref,CLsim,PrintFigureTitles)
 
 % Plot the output with the reference signal
 hold off

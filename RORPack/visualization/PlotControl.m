@@ -1,4 +1,4 @@
-function plotControl(tgrid,CLsim,PrintFigureTitles)
+function PlotControl(tgrid,CLsim,PrintFigureTitles)
 
 % Plot the control input, this is saved in the CLsim structure
 plot(tgrid,CLsim.control,'Linewidth',2);
