@@ -6,5 +6,4 @@ set(gca,'xgrid','on','ygrid','on','tickdir','out','box','off')
 if PrintFigureTitles == true
     title('Control input $u(t)$','Interpreter','latex','Fontsize',16)
 end
-set(gcf,'color',1/255*[252 247 255])
-end
+% set(gcf,'color',1/255*[252 247 255])
