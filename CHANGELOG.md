@@ -23,6 +23,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - ObserverBasedROMRC: A mistake in the stabilization parameter dimensions.
 
+### Bugs found
+
+- The approximate transfer function values used by LowGainRC in some of the examples are computed at P(w_k) instead of at P(iw_k)
+- Computation of the initial state is not incorrectly in ConstrHeat2DCase1, ConstrHeat2DCase2, and ConstrHeat2DCase3.
+
 ## [v1.0.0] - 2021-11-08
 
 ### Added 
