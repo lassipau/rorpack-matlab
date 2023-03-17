@@ -85,64 +85,71 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 % A Low-Gain 'Minimal' Robust Controller
 
-% Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+dimX = size(Sys.A,1);
+dimY = size(Sys.C,1);
+Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+Dc = 0; % Prestabilization with negative output feedback
+
+% Approximate the transfer function values of the system under the negative
+% output feedback. 
+Pvals = cell(1,length(freqsReal));
+for ind = 1:length(freqsReal)
+    Ptmp = Pappr(1i*freqsReal(ind));
+    Pvals{ind} = (eye(dimY)-Ptmp*Dc)\Ptmp;
+end
+
+epsgain = [0.3,2];
+% epsgain = .1;
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc);
+epsgain
+
+
+% % An observer-based robust controller
+% % Stabilizing state feedback and output injection operators K and L
+% % These are chosen based on collocated design. Only the single unstable
+% % eigenvalue at s=0 needs to be stabilized
+% K = -Sys.B';
+% % K = zeros(2,N);
+% % PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
 % 
-% Pvals = cell(1,length(freqsReal));
-% for ind = 1:length(freqsReal)
-%   Pvals{ind} = Pappr(freqsReal(ind));
-% end
+% %
+% L = -10*Sys.C';
+% %  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
 % 
-% epsgainrange = [0.01,6];
-% % epsgain = .1;
-% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgainrange,Sys);
-% epsgain
-
-% An observer-based robust controller
-% Stabilizing state feedback and output injection operators K and L
-% These are chosen based on collocated design. Only the single unstable
-% eigenvalue at s=0 needs to be stabilized
-K = -Sys.B';
-% K = zeros(2,N);
-% PlotEigs(full(Sys.A+Sys.B*K),[NaN .1 -.3 .3])
-
-%
-L = -10*Sys.C';
-%  PlotEigs(full(Sys.A+L*Sys.C),[-20 1 -.3 .3])
-
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
-% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
-% ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
-
-% A Reduced Order Observer Based Robust Controller
-%
-% The construction of the controller uses a Galerkin approximation
-% of the heat system:
-% The Galerkin approximation used in the controller
-% design is a lower dimensional numerical approximation
-% of the PDE model.
-Nlow = 50;
-[~,Sys_Nlow,~,~] = ConstrHeat1DCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
-
-% Store the numerical approximation in "SysApprox".
-SysApprox.AN = Sys_Nlow.A;
-SysApprox.BN = Sys_Nlow.B;
-SysApprox.CN = Sys_Nlow.C;
-SysApprox.D = Sys_Nlow.D;
-
-% Parameters for the stabilization step of the controller design
-alpha1 = 1.5;
-alpha2 = 1;
-Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
-Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
-Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
-R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
-R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
-
-% Size of the final reduced-order observer part of the controller
-ROMorder = 3;
-
-ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = ObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'LQR',1);
+% % ContrSys = DualObserverBasedRC(freqsReal,Sys,K,L,'poleplacement',1);
+% 
+% % A Reduced Order Observer Based Robust Controller
+% %
+% % The construction of the controller uses a Galerkin approximation
+% % of the heat system:
+% % The Galerkin approximation used in the controller
+% % design is a lower dimensional numerical approximation
+% % of the PDE model.
+% Nlow = 50;
+% [~,Sys_Nlow,~,~] = ConstrHeat1DCase3(cfun,x0fun,Nlow,IB1,IB2,IC1,IC2);
+% 
+% % Store the numerical approximation in "SysApprox".
+% SysApprox.AN = Sys_Nlow.A;
+% SysApprox.BN = Sys_Nlow.B;
+% SysApprox.CN = Sys_Nlow.C;
+% SysApprox.D = Sys_Nlow.D;
+% 
+% % Parameters for the stabilization step of the controller design
+% alpha1 = 1.5;
+% alpha2 = 1;
+% Q0 = eye(IMdim(freqsReal,size(SysApprox.CN,1))); % Size = dimension of the IM 
+% Q1 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+% Q2 = eye(size(SysApprox.AN,1)); % Size = dim(V_N)
+% R1 = eye(size(SysApprox.CN,1)); % Size = dim(Y)
+% R2 = eye(size(SysApprox.BN,2)); % Size = dim(U)
+% 
+% % Size of the final reduced-order observer part of the controller
+% ROMorder = 3;
+% 
+% ContrSys = ObserverBasedROMRC(freqsReal,SysApprox,alpha1,alpha2,R1,R2,Q0,Q1,Q2,ROMorder);
 
 
 %% Closed-loop construction and simulation

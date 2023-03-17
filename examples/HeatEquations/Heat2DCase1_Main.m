@@ -59,7 +59,7 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
-  Pvals{ind} = Pappr(freqsReal(ind));
+  Pvals{ind} = Pappr(1i*freqsReal(ind));
 end
 
 epsgain = [0.01,4];

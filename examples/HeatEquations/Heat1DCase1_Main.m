@@ -75,19 +75,26 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 
 %% Construct the controller
 
-% A Low-Gain 'Minimal' Robust Controller
-
-% dimX = size(Sys.A,1);
-% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% % A Low-Gain 'Minimal' Robust Controller
 % 
-% Pvals = cell(1,length(freqs));
-% for ind = 1:length(freqs)
-%   Pvals{ind} = Pappr(freqs(ind));
+% dimX = size(Sys.A,1);
+% dimY = size(Sys.C,1);
+% Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+% Dc = -2; % Prestabilization with negative output feedback
+% 
+% % Approximate the transfer function values of the system under the negative
+% % output feedback. NOTE: If zero frequency is considered, then the transfer
+% % function at \lambda=0 has to be done using a different approach!
+% Pvals = cell(1,length(freqsReal));
+% for ind = 1:length(freqsReal)
+%     Ptmp = Pappr(1i*freqsReal(ind));
+%     Pvals{ind} = (eye(dimY)-Ptmp*Dc)\Ptmp;
 % end
 % 
-% epsgainrange = [0.01,3];
-% epsgain = .1;
-% [ContrSys,epsgain] = LowGainRC(freqs,Pvals,epsgain,Sys);
+% epsgain = [0.3,2];
+% % epsgain = .1;
+% [ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc);
+% epsgain
 
 % An observer-based robust controller or
 % a dual observer-based robust controller

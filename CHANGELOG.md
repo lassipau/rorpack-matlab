@@ -22,6 +22,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### Fixed
 
 - ObserverBasedROMRC: A mistake in the stabilization parameter dimensions.
+- Fixed typos in the example files using LowGainRC (added missing complex unit to computation of Pvals)
 
 ### Bugs found
 

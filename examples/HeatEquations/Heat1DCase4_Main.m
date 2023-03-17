@@ -78,20 +78,23 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 %% Construct the controller
 
 % A Low-Gain 'Minimal' Robust Controller
-%
-% Compute the transfer function values in 'Pvals'. Since the controller
-% feedthrough will be set to zero (Dc=0), the elements in Pvals are the
-% values P(1i*w_k) of the transfer function of (A,B,C,D) where w_k are the
-% frequencies in 'freqsReal'.
-Pappr = @(s) Sys.C*((s*eye(size(Sys.A,1))-Sys.A)\Sys.B)+Sys.D;
+
+dimX = size(Sys.A,1);
+dimY = size(Sys.C,1);
+Pappr = @(s) Sys.C*((s*eye(dimX)-Sys.A)\Sys.B)+Sys.D;
+Dc = 0; % Prestabilization with negative output feedback
+
+% Approximate the transfer function values of the system under the negative
+% output feedback. 
 Pvals = cell(1,length(freqsReal));
 for ind = 1:length(freqsReal)
-  Pvals{ind} = Pappr(freqsReal(ind));
+    Ptmp = Pappr(1i*freqsReal(ind));
+    Pvals{ind} = (eye(dimY)-Ptmp*Dc)\Ptmp;
 end
 
-epsgain = [0.05,3];
-% epsgain = 1;
-[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys);
+epsgain = [0.3,2];
+% epsgain = .1;
+[ContrSys,epsgain] = LowGainRC(freqsReal,Pvals,epsgain,Sys,Dc);
 epsgain
 
 % % An observer-based robust controller

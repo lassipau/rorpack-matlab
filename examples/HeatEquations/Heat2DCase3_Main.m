@@ -75,7 +75,7 @@ Sys = SysConsistent(Sys,yref,wdist,freqsReal);
 %     if freqsReal(ind)==0
 %         Pvals{ind} = Sys.C*((-Sys.A-Sys.B*Dc*Sys.C)\Sys.B)+Sys.D;
 %     else
-%         Pval_nominal = Pappr(freqsReal(ind));
+%         Pval_nominal = Pappr(1i*freqsReal(ind));
 %         Pvals{ind} = (eye(dimY)-Pval_nominal*Dc)\Pval_nominal;
 %     end
 % end
