@@ -1074,8 +1074,8 @@ In these examples we consider  one-dimen\-sional undamped and damped wave equati
 The model on $\Omega = [0,1]$ is
 \eq{
   x_{tt}(\xi,t) &=  x_{\xi\xi}(\xi,t), \qquad x(\xi,0)=x_0(\xi), \quad x_t(\xi,0)=x_1(\xi)\\
-      -\pd{x}{\xi}(0,t) &= \wdist(t), \qquad 
-      \pd{x}{\xi}(1,t) = u(t), \\
+      -x_\xi(0,t) &= \wdist(t), \qquad 
+      x_\xi(1,t) = u(t), \\
       y(t) &= x_t(0,t), \qquad y_m(t) = \int_0^1 x(\xi,t)dt
     }
     The uncontrolled system is unstable due to lack of damping. It also cannot be stabilized with output feedback due to the non-collocated configuration of the inputs and outputs.
@@ -1151,6 +1151,33 @@ Figure~\ref{fig:1Dwave2} shows example results of the simulation for a smooth pe
 
 \medskip
 
+
+\subsubsection*{Case 3: Viscous damping, boundary input and pointwise measurement}
+~\\[-1ex]
+
+  \noindent Main file name: \texttt{Wave1DCase3\_Main.m}
+
+  \medskip
+
+The model on $\Omega = [0,1]$ is
+\eq{
+  x_{tt}(\xi,t) &=  x_{\xi\xi}(\xi,t) - d(\xi)x_t(\xi,t)\\
+      -x_\xi(0,t) &= u(t) + \wdist(t), \qquad 
+      x(1,t) = 0 \\
+x(\xi,0)&=x_0(\xi), \quad x_t(\xi,0)=x_1(\xi)\\
+      y(t) &= \pmat{x(\xi_0,t)\\x_t(\xi_0,t)} ,
+    }
+where $\xi_0\in\Omega$ and $d$ is a continuous function representing the location and strength of the viscous damping.
+The uncontrolled system is exponentially stable due to the viscous damping. 
+%Since the input and output are distributed, it is also not exponentially stabilizable or detectable, but instead it is only strongly (or polynomially~\cite{BorTom10}) stabilizable provided that $\iprod{b(\cdot)}{\sin(k\pi \cdot)}_{\Lp[2]}\neq 0$ for all $k\in\N$.
+In the output regulation problem, we choose one of the outputs to be the regulated output (the choice can be made using the variable \texttt{p\_ind}.
+It is possible to use the Low-Gain Robust Controller, or one of the two observer based controller designs. 
+With the choice $\xi_0=0$ and the second output, the system is also impedance passive, and it's possible to use the 
+ Passive Robust Controller (\texttt{PassiveRC})
+
+In the simulations the system is approximated using the orthonormal eigenfunctions of the undamped wave operator.
+
+\medskip
 
 \subsection{The 2D Wave Equation on an Annulus}
 ~\\[-1ex]

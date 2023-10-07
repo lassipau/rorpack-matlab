@@ -125,7 +125,7 @@ Konsta Huhtala, Lassi Paunonen, and Weiwei Hu.
   2020.
 
 \bibitem{HumKur19}
-J.~{Humaloja}, M.~{Kurula}, and L.~{Paunonen}.
+J.-P. {Humaloja}, M.~{Kurula}, and L.~{Paunonen}.
 \newblock Approximate robust output regulation of boundary control systems.
 \newblock {\em IEEE Trans. Automat. Control}, 64(6):2210--2223, June 2019.
 
@@ -153,7 +153,7 @@ Eero Immonen and Seppo Pohjolainen.
 \newblock {\em SIAM J. Control Optim.}, 45(5):1714--1735, 2006.
 
 \bibitem{ItoMor98}
-Kazufumi Ito and K.~A. Morris.
+Kazufumi Ito and Kirsten Morris.
 \newblock An approximation theory of solutions to operator {R}iccati equations
   for {$H^\infty$} control.
 \newblock {\em SIAM J. Control Optim.}, 36(1):82--99, 1998.
@@ -191,12 +191,6 @@ V.~Natarajan, D.S. Gilliam, and G.~Weiss.
 \newblock The state feedback regulator problem for regular linear systems.
 \newblock {\em IEEE Trans. Automat. Control}, 59(10):2708--2723, 2014.
 
-\bibitem{PauPha20}
-L.~{Paunonen} and D.~{Phan}.
-\newblock Reduced order controller design for robust output regulation of
-  parabolic systems.
-\newblock {\em IEEE Trans. Automat. Control}, 65(6):2480--2493, 2020.
-
 \bibitem{Pau11phd}
 Lassi Paunonen.
 \newblock {\em Output Regulation Theory for Linear Systems with
@@ -226,6 +220,12 @@ Lassi Paunonen, Yann~Le Gorrec, and H\'{e}ctor Ram{\'{\i}}rez.
 \newblock In {\em Proceedings of the 6th IFAC Workshop on Lagrangian and
   Hamiltonian Methods for Nonlinear Control}, pages 92--96, Valparaiso, Chile,
   May 1--4 2018.
+
+\bibitem{PauPha20}
+Lassi {Paunonen} and Duy {Phan}.
+\newblock Reduced order controller design for robust output regulation of
+  parabolic systems.
+\newblock {\em IEEE Trans. Automat. Control}, 65(6):2480--2493, 2020.
 
 \bibitem{PauPhaMTNS20}
 Lassi Paunonen and Duy Phan.
@@ -293,7 +293,7 @@ Jie Shen.
 \newblock {\em SIAM J. Sci. Comput.}, 16(1):74--87, 1995.
 
 \bibitem{TucWei09book}
-M.~Tucsnak and G.~Weiss.
+Marius Tucsnak and George Weiss.
 \newblock {\em Observation and Control for Operator Semigroups}.
 \newblock Birkh\"auser Basel, 2009.
 
