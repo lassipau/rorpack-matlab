@@ -42,7 +42,7 @@ if record == 1
     xlabel('$x$','Interpreter','latex','Fontsize',20)
     ylabel('$y$','Interpreter','latex','Fontsize',20)
     title(['Time $=\; ' num2str(tgrid(ind),'%.1f') '$'],'Interpreter','latex','Fontsize',20)
-    set(gcf,'color',1/255*[252 247 255])
+    % set(gcf,'color',1/255*[252 247 255])
     drawnow
     MovAnim(ind) = getframe(gcf);
     pause(Tpause)
@@ -60,7 +60,7 @@ else
     xlabel('$x$','Interpreter','latex','Fontsize',20)
     ylabel('$y$','Interpreter','latex','Fontsize',20)
     title(['Time $=\; ' num2str(tgrid(ind),'%.1f') '$'],'Interpreter','latex','Fontsize',20)
-    set(gcf,'color',1/255*[252 247 255])
+    % set(gcf,'color',1/255*[252 247 255])
     drawnow
     pause(Tpause)
     

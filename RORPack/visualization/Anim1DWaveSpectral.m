@@ -49,7 +49,7 @@ if record == 1
 %     caxis(zlims)
     title(['Time $=\; ' num2str(tgrid(ind),'%.1f') '$'],'Interpreter','latex','Fontsize',20)
     xlabel('$\xi$','Interpreter','latex','Fontsize',20)
-    set(gcf,'color',1/255*[252 247 255])
+    % set(gcf,'color',1/255*[252 247 255])
     drawnow
     MovAnim(ind) = getframe(gcf);
     pause(Tpause)
@@ -67,7 +67,7 @@ else
 %     caxis(zlims)
     title(['Time $=\; ' num2str(tgrid(ind),'%.1f') '$'],'Interpreter','latex','Fontsize',20)
     xlabel('$\xi$','Interpreter','latex','Fontsize',20)
-    set(gcf,'color',1/255*[252 247 255])
+    % set(gcf,'color',1/255*[252 247 255])
     drawnow
     pause(Tpause)
     
