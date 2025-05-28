@@ -9,13 +9,22 @@ yy = xx;
 spgrid.xx = xxg;
 spgrid.yy = yyg;
 
-x0 = reshape(x0fun(xxg,yyg),N^2,1);
 
 % Construct the system using modal approximation
 M = N;
-nn = [0:N-1].';
-mm = [0:M-1];
+nn = (0:N-1).';
+mm = (0:M-1);
 nnmm = nn*ones(1,M) + ones(N,1)*mm;
+
+% x0 = reshape(x0fun(xxg,yyg),N^2,1);
+x0 = zeros(N);
+for ind1 = 1:N
+    for ind2 = 1:M
+        x0(ind1,ind2) = integral2(@(x,y) phinm(x,y,ind1-1,ind2-1).*x0fun(x,y) ,0,1,0,1);
+    end
+end
+x0 = x0(:);
+
 glnm = reshape(-nnmm.^2 * pi^2,1,N*M)';
 A0 = diag(glnm);
 
@@ -33,13 +42,27 @@ b24part(2:2:end) = -b24part(2:2:end);
 b24 = (2*sin(nn(2:size(nn,1),:)*(pi/2))./(nn(2:size(nn,1),:)*pi)) * b24part;
 b2 = [b21 b22;b23 b24];
 
-Sys.A = A0;
 B = [b1(:) b2(:)];
 Sys.B = B;
-C = 2*B';
+C = B';
 Sys.C = C;
 Sys.D = zeros(size(C,1),size(B,2));
 Sys.Bd = zeros(N*M,1);
 Sys.Dd = zeros(size(C,1),1);
 
+end
+
+function eigFun = phinm(x1, x2, n, m)
+if n == 0 && m == 0
+    eigFun = ones(size(x1));
+end
+if n == 0 && m >= 1
+    eigFun = sqrt(2) * cos(pi * m * x2);
+end
+if n >= 1 && m == 0
+    eigFun = sqrt(2) * cos(pi * n * x1);
+end
+if n >= 1 && m >= 1
+    eigFun = 2 * cos(pi * n * x1) .* cos(pi * m * x2);
+end
 end

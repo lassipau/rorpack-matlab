@@ -16,9 +16,9 @@ M = 16;
 
 % Initial state of the plant
 %x0fun = @(x,y) zeros(size(x));
-%x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
+x0fun = @(x,y) 0.5*(1+cos(pi*(1-x))).*(1-1/4*cos(2*pi*y));
 %x0fun = @(x,y) 0.5*(1+cos(pi*(1-x)));
-x0fun = @(x,y) cos(pi*(1-x));
+%x0fun = @(x,y) cos(pi*(1-x));
 %x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1;
 %x0fun = @(x,y) 1/2*x.^2.*(3-2*x)-1/2;
 %x0fun = @(x,y) 1*(1-x).^2.*(3-2*(1-x))-1;
