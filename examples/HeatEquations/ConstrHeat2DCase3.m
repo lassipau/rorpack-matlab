@@ -50,6 +50,8 @@ Sys.D = zeros(size(C,1),size(B,2));
 Sys.Bd = zeros(N*M,1);
 Sys.Dd = zeros(size(C,1),1);
 
+Sys.A = A0;
+
 end
 
 function eigFun = phinm(x1, x2, n, m)
