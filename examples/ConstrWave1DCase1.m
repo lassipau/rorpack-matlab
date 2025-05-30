@@ -1,7 +1,10 @@
 function [x0,Sys,phin,Kinf,Linf] = ConstrWave1DCase1(w0fun,wd0fun,N) 
 % Modal approximation of a 1D Wave equation with Neumann boundary input
-% (at x=1) and disturbance (at x=0),
-% and Dirichlet outputs y(t)=(w(1,t),w_t(1,t))^T
+% (at x=1) and disturbance (at x=0), and Dirichlet velocity 
+% output y(t)=w_t(0,t)^T. The additional measured output 
+% y_m(t) = \int_0^1 y(xi,t) dxi can be used in stabilising the zero 
+% eigenvalue of the system.
+%
 % Usage: Can also be used solely for defining the initial state x0
 % w0fun = initial displacement, function handle
 % wd0fun = initial velocity, function handle
